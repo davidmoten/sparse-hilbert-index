@@ -1,4 +1,4 @@
-package com.github.davidmoten.bigsorter.fixes;
+package com.github.davidmoten.shi;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.github.davidmoten.bigsorter.fixes;
+package com.github.davidmoten.shi;
 
 import static org.junit.Assert.assertEquals;
 
@@ -34,6 +34,9 @@ import org.davidmoten.hilbert.SmallHilbertCurve;
 import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.bigsorter.Serializer;
 import com.github.davidmoten.bigsorter.Sorter;
+import com.github.davidmoten.shi.Bounds;
+import com.github.davidmoten.shi.Index;
+import com.github.davidmoten.shi.PositionRange;
 
 public class FixesSortMain2 {
 
@@ -106,6 +109,7 @@ public class FixesSortMain2 {
             System.out.println("maxLon=" + maxLon);
             System.out.println("minTime=" + minTime);
             System.out.println("maxTime=" + maxTime);
+            System.out.println("count=" + count);
         }
         Bounds extremes = new Bounds(new double[] { minLat, minLon, minTime },
                 new double[] { maxLat, maxLon, maxTime });
@@ -144,7 +148,7 @@ public class FixesSortMain2 {
                 byte[] b = r.read();
                 int lastIndex = Integer.MIN_VALUE;
                 while (b != null) {
-                    Record rec = getRecord(b);
+                    Record rec = Record.read(b);
                     if (sb.contains(rec.toArray())) {
                         contains++;
                     }
@@ -250,7 +254,7 @@ public class FixesSortMain2 {
         int records = 0;
         long total = 0;
         while ((b = r.read()) != null) {
-            Record rec = FixesSortMain2.getRecord(b);
+            Record rec = Record.read(b);
             // System.out.println(rec);
             // check is in bounding box
             if (searchBounds.contains(rec.toArray())) {
@@ -357,37 +361,6 @@ public class FixesSortMain2 {
                 System.out.println(index);
             }
         }
-    }
-
-    static final class Record {
-        final float lat;
-        final float lon;
-        final long time;
-
-        Record(float lat, float lon, long time) {
-            this.lat = lat;
-            this.lon = lon;
-            this.time = time;
-        }
-
-        double[] toArray() {
-            return new double[] { lat, lon, time };
-        }
-
-        @Override
-        public String toString() {
-            return "Record [lat=" + lat + ", lon=" + lon + ", time=" + time + "]";
-        }
-    }
-
-    static Record getRecord(byte[] x) {
-        ByteBuffer bb = ByteBuffer.wrap(x);
-        // skip mmsi
-        bb.position(4);
-        float lat = bb.getFloat();
-        float lon = bb.getFloat();
-        long t = bb.getLong();
-        return new Record(lat, lon, t);
     }
 
     private static int getIndex(byte[] x, Bounds e, SmallHilbertCurve hc) {

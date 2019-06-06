@@ -1,4 +1,4 @@
-package com.github.davidmoten.bigsorter.fixes;
+package com.github.davidmoten.shi;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.TreeMap;
 
 import org.junit.Test;
+
+import com.github.davidmoten.shi.Index;
 
 public class IndexTest {
 
