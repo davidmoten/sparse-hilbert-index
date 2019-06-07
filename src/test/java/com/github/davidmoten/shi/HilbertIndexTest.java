@@ -12,11 +12,15 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import org.davidmoten.hilbert.HilbertCurve;
 import org.davidmoten.hilbert.Ranges;
+import org.davidmoten.hilbert.SmallHilbertCurve;
 import org.davidmoten.kool.Stream;
 import org.junit.Test;
 
@@ -39,9 +43,9 @@ public class HilbertIndexTest {
                 .stream(line.split(",")) //
                 .mapToDouble(x -> Double.parseDouble(x)) //
                 .toArray();
-        int bits = 5;
+        int bits = 2;
         int dimensions = 3;
-        int approxNumIndexEntries = 100;
+        int approxNumIndexEntries = 2;
         Index index = HilbertIndex.sortAndCreateIndex(input, ser, point, OUTPUT, bits, dimensions,
                 approxNumIndexEntries);
         assertArrayEquals(new double[] { 4, 2, 100 }, index.mins(), PRECISION);
@@ -49,6 +53,18 @@ public class HilbertIndexTest {
         assertEquals(3, index.count());
         System.out.println(index.indexPositions());
         System.out.println(new String(Files.readAllBytes(OUTPUT.toPath())));
+        SmallHilbertCurve hc = HilbertCurve.small().bits(bits).dimensions(dimensions);
+        // check hc calc of first item
+        int firstIndex = (int) hc.index(//
+                Math.round((4 - 4.0) / (10 - 4) * hc.maxOrdinate()), //
+                Math.round((5 - 2.0) / (7 - 2) * hc.maxOrdinate()), //
+                Math.round((600 - 100.0) / (600 - 100) * hc.maxOrdinate()));
+        assertEquals(17, firstIndex);
+        Map<Integer, Long> map = new HashMap<>();
+        map.put(17, 0L);
+        map.put(35, 8L);
+        map.put(56, 16L);
+        assertEquals(map, index.indexPositions());
     }
 
     @Test
