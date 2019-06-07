@@ -89,6 +89,7 @@ public class HilbertIndexTest {
                             if (sb.contains(rec.toArray())) {
                                 recs.add(rec);
                             }
+                            // TODO stop when hilbert index is greater than max for the positionRange
                         }
                         return Stream.from(recs);
                         // try (InputStream in = new
