@@ -7,7 +7,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -22,8 +25,31 @@ import com.github.davidmoten.bigsorter.Serializer;
 
 public class HilbertIndexTest {
 
+    private static final double PRECISION = 0.00001;
     private static final File OUTPUT = new File("target/output");
     private static final Serializer<byte[]> SERIALIZER = Serializer.fixedSizeRecord(35);
+
+    @Test
+    public void testSimple() throws IOException {
+        Serializer<String> ser = Serializer.linesUtf8();
+        String s = "10,2,300\n4,5,600\n8,7,100";
+        File input = new File("target/input");
+        Files.write(input.toPath(), s.getBytes(StandardCharsets.UTF_8));
+        Function<String, double[]> point = line -> Arrays //
+                .stream(line.split(",")) //
+                .mapToDouble(x -> Double.parseDouble(x)) //
+                .toArray();
+        int bits = 5;
+        int dimensions = 3;
+        int approxNumIndexEntries = 100;
+        Index index = HilbertIndex.sortAndCreateIndex(input, ser, point, OUTPUT, bits, dimensions,
+                approxNumIndexEntries);
+        assertArrayEquals(new double[] { 4, 2, 100 }, index.mins(), PRECISION);
+        assertArrayEquals(new double[] { 10, 7, 600 }, index.maxes(), PRECISION);
+        assertEquals(3, index.count());
+        System.out.println(index.indexPositions());
+        System.out.println(new String(Files.readAllBytes(OUTPUT.toPath())));
+    }
 
     @Test
     public void testCalculationOfIndex() throws FileNotFoundException, IOException {

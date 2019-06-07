@@ -22,6 +22,7 @@ import org.davidmoten.hilbert.Range;
 import org.davidmoten.hilbert.SmallHilbertCurve;
 
 import com.github.davidmoten.guavamini.Preconditions;
+import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
 public final class Index {
 
@@ -38,6 +39,11 @@ public final class Index {
         this.maxes = maxes;
         this.count = count;
         this.hc = HilbertCurve.small().bits(bits).dimensions(mins.length);
+    }
+
+    @VisibleForTesting
+    TreeMap<Integer, Long> indexPositions() {
+        return indexPositions;
     }
 
     /**

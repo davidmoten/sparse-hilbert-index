@@ -20,7 +20,7 @@ public class FixesSampler {
         
         final int recordSize = 35;
         File input = new File(System.getProperty("user.home") + "/Downloads/" + filename);
-        File sampled = new File("target/2019-05-15.binary-fixes-with-mmsi.sampled.every.400");
+        File sampled = new File("target/small-binary-fixes");
         
         Serializer<byte[]> ser = Serializer.fixedSizeRecord(recordSize);
         try (InputStream in = new BufferedInputStream(new GZIPInputStream(new FileInputStream(input)));
