@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.TreeMap;
 import java.util.function.Function;
 
 import org.davidmoten.hilbert.HilbertCurve;
@@ -13,6 +14,7 @@ import org.davidmoten.hilbert.SmallHilbertCurve;
 import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.bigsorter.Serializer;
 import com.github.davidmoten.bigsorter.Sorter;
+import com.github.davidmoten.bigsorter.Writer;
 import com.github.davidmoten.guavamini.Preconditions;
 
 public final class HilbertIndex {
@@ -22,7 +24,12 @@ public final class HilbertIndex {
             Serializer<T> serializer, //
             Function<? super T, double[]> point, //
             File output, //
-            File idx, int bits, int dimensions) throws FileNotFoundException, IOException {
+            File idx, //
+            int bits, //
+            int dimensions, //
+            int approximateNumIndexEntries) //
+            throws FileNotFoundException, IOException {
+
         Preconditions.checkArgument(bits * dimensions <= 31, "bits * dimensions must be at most 31");
 
         // scan once to get the mins, maxes, count
@@ -71,6 +78,35 @@ public final class HilbertIndex {
                 .sort();
 
         // TODO create Index
+        long chunk = Math.max(1, count / approximateNumIndexEntries);
+        TreeMap<Integer, Long> indexPositions = new TreeMap<>();
+        try (//
+                InputStream in = Util.bufferedInput(output); //
+                Reader<T> reader = serializer.createReader(in);
+                CountingOutputStream counter = new CountingOutputStream();
+                Writer<T> writer = serializer.createWriter(counter)) {
+            T t;
+            long position = 0;
+            T lastT = null;
+            while ((t = reader.read()) != null) {
+                position = counter.count();
+                if (position % chunk == 0) {
+                    double[] p = point.apply(t);
+                    int index = hilbertIndex(hc, p, mins, maxes);
+                    indexPositions.put(index, position);
+                }
+                writer.write(t);
+                lastT = t;
+            }
+            if (counter.count() % chunk != 0) {
+                // write the last record too so we know index of last position
+                double[] p = point.apply(lastT);
+                int index = hilbertIndex(hc, p, mins, maxes);
+                indexPositions.put(index, position);
+            }
+        }
+        indexPositions.forEach((index, pos) -> System.out.println(index + " : " + pos));
+        System.out.println(indexPositions.size());
     }
 
     private static int hilbertIndex(SmallHilbertCurve hc, double[] point, double[] mins, double[] maxes) {

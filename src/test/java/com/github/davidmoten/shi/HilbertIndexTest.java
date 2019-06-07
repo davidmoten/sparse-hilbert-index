@@ -23,7 +23,9 @@ public class HilbertIndexTest {
         };
         File output = new File("target/output");
         File idx = new File("target/output.idx");
-        HilbertIndex.sortAndCreateIndex(input, serializer, point, output, idx, bits, dimensions);
+        int approximateNumIndexEntries = 100;
+        HilbertIndex.sortAndCreateIndex(input, serializer, point, output, idx, bits, dimensions,
+                approximateNumIndexEntries);
     }
 
 }
