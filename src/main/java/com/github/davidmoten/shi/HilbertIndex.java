@@ -19,12 +19,11 @@ import com.github.davidmoten.guavamini.Preconditions;
 
 public final class HilbertIndex {
 
-    public static <T> void sortAndCreateIndex( //
+    public static <T> Index sortAndCreateIndex( //
             File input, //
             Serializer<T> serializer, //
             Function<? super T, double[]> point, //
             File output, //
-            File idx, //
             int bits, //
             int dimensions, //
             int approximateNumIndexEntries) //
@@ -77,8 +76,14 @@ public final class HilbertIndex {
                 .loggerStdOut() //
                 .sort();
 
-        // TODO create Index
         long chunk = Math.max(1, count / approximateNumIndexEntries);
+        TreeMap<Integer, Long> indexPositions = createIndexPositions(serializer, point, output, mins, maxes, hc, chunk);
+        return new Index(indexPositions, mins, maxes, bits, count);
+    }
+
+    private static <T> TreeMap<Integer, Long> createIndexPositions(Serializer<T> serializer,
+            Function<? super T, double[]> point, File output, final double[] mins, final double[] maxes,
+            SmallHilbertCurve hc, long chunk) throws IOException, FileNotFoundException {
         TreeMap<Integer, Long> indexPositions = new TreeMap<>();
         try (//
                 InputStream in = Util.bufferedInput(output); //
@@ -105,8 +110,7 @@ public final class HilbertIndex {
                 indexPositions.put(index, position);
             }
         }
-        indexPositions.forEach((index, pos) -> System.out.println(index + " : " + pos));
-        System.out.println(indexPositions.size());
+        return indexPositions;
     }
 
     private static int hilbertIndex(SmallHilbertCurve hc, double[] point, double[] mins, double[] maxes) {

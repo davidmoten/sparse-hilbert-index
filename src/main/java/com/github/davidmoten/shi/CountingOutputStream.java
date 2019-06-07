@@ -12,7 +12,7 @@ class CountingOutputStream extends OutputStream {
         count++;
     }
 
-    public long count() {
+    long count() {
         return count;
     }
 

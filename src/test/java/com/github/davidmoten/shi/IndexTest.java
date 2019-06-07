@@ -17,7 +17,7 @@ public class IndexTest {
         map.put(237, 0L);
         map.put(472177237, 4082820L);
         Index index = new Index(map, new double[] { -85.14174, -115.24912, 1557868858000L },
-                new double[] { 47.630283, 179.99948, 1557964800000L }, 10);
+                new double[] { 47.630283, 179.99948, 1557964800000L }, 10, 2);
         long[] o = index.ordinates(-84.23007,-115.24912, 1557964123000L);
         System.out.println(Arrays.toString(o));
         assertEquals(153391853, index.hilbertCurve().index(o));

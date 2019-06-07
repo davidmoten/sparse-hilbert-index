@@ -183,7 +183,7 @@ public class FixesSortMain2 {
         double[] mins = extremes.mins();
         double[] maxes = extremes.maxes();
 
-        Index ind = new Index(tree, mins, maxes, bits);
+        Index ind = new Index(tree, mins, maxes, bits, count);
         System.out.println("Index = " + ind);
 
         {
@@ -212,7 +212,7 @@ public class FixesSortMain2 {
 
             for (int i = 1; i < 10; i++) {
                 long t = System.currentTimeMillis();
-                InputStream in3 = getIndexInputStream(locationIdx);
+                DataInputStream in3 = new DataInputStream(getIndexInputStream(locationIdx));
                 ind = Index.read(in3);
                 System.out.println("read index in " + (System.currentTimeMillis() - t) + "ms");
                 URL u = new URL(location);
