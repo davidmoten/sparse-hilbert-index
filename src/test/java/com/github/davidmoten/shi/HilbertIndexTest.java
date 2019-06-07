@@ -6,9 +6,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -72,7 +70,7 @@ public class HilbertIndexTest {
 
         long[] o1 = ind.ordinates(sb.mins());
         long[] o2 = ind.ordinates(sb.maxes());
-        Ranges ranges = ind.hilbertCurve().query(o1, o2, 20);
+        Ranges ranges = ind.hilbertCurve().query(o1, o2);
         System.out.println(ranges.size() + ": " + ranges);
         List<PositionRange> positionRanges = ind.getPositionRanges(ranges);
         System.out.println("simplifiedPositionRanges:");
@@ -83,19 +81,29 @@ public class HilbertIndexTest {
                     .flatMap(pr -> {
                         System.out.println("floor=" + pr.floorPosition() + ",ceiling=" + pr.ceilingPosition());
                         raf.seek(pr.floorPosition());
-                        try (InputStream in = new LimitingInputStream(Channels.newInputStream(raf.getChannel()),
-                                pr.ceilingPosition() - pr.floorPosition());
-                                Reader<byte[]> r = SERIALIZER.createReader(in)) {
-                            List<Record> recs = new ArrayList<>();
-                            byte[] b;
-                            while ((b = r.read()) != null) {
-                                Record rec = Record.read(b);
-                                if (sb.contains(rec.toArray())) {
-                                    recs.add(rec);
-                                }
+                        List<Record> recs = new ArrayList<>();
+                        while (raf.getFilePointer() <= pr.ceilingPosition()) {
+                            byte[] b = new byte[35];
+                            raf.readFully(b);
+                            Record rec = Record.read(b);
+                            if (sb.contains(rec.toArray())) {
+                                recs.add(rec);
                             }
-                            return Stream.from(recs);
                         }
+                        return Stream.from(recs);
+                        // try (InputStream in = new
+                        // LimitingInputStream(Channels.newInputStream(raf.getChannel()),
+                        // pr.ceilingPosition() - pr.floorPosition());
+                        // Reader<byte[]> r = SERIALIZER.createReader(in)) {
+                        // byte[] b;
+                        // while ((b = r.read()) != null) {
+                        // Record rec = Record.read(b);
+                        // if (sb.contains(rec.toArray())) {
+                        // recs.add(rec);
+                        // }
+                        // }
+                        // return Stream.from(recs);
+                        // }
                     }) //
                     .toList() //
                     .get();
