@@ -6,15 +6,26 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.nio.channels.Channels;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import org.davidmoten.hilbert.Ranges;
+import org.davidmoten.kool.Stream;
 import org.junit.Test;
 
+import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.bigsorter.Serializer;
 
 public class HilbertIndexTest {
+
+    private static final File OUTPUT = new File("target/output");
+    private static final Serializer<byte[]> SERIALIZER = Serializer.fixedSizeRecord(35);
 
     @Test
     public void testCalculationOfIndex() throws FileNotFoundException, IOException {
@@ -27,7 +38,7 @@ public class HilbertIndexTest {
     }
 
     @Test
-    public void testIndexSerializationRoundTrip() throws FileNotFoundException, IOException {
+    public void testIndexSerializationRoundTrip() throws IOException {
         Index index = createIndex();
 
         File idx = new File("target/output.idx");
@@ -40,19 +51,63 @@ public class HilbertIndexTest {
         checkIndex(index);
     }
 
-    private static Index createIndex() throws FileNotFoundException, IOException {
+    @Test
+    public void testSydneyQuery() throws IOException {
+        Index ind = createIndex();
+        Bounds sb = createSydneyBounds(Math.round(ind.mins()[2]), Math.round(ind.maxes()[2]));
+        int expectedFound = 0;
+        {
+            Reader<byte[]> r = SERIALIZER.createReader(Util.bufferedInput(OUTPUT));
+            byte[] b;
+            while ((b = r.read()) != null) {
+                Record rec = Record.read(b);
+                if (sb.contains(rec.toArray())) {
+                    System.out.println("found " + rec);
+                    expectedFound++;
+                }
+            }
+        }
+
+        long[] o1 = ind.ordinates(sb.mins());
+        long[] o2 = ind.ordinates(sb.maxes());
+        Ranges ranges = ind.hilbertCurve().query(o1, o2);
+        List<PositionRange> positionRanges = ind.getPositionRanges(ranges);
+        try (RandomAccessFile raf = new RandomAccessFile(OUTPUT, "r")) {
+            List<Record> list = Stream //
+                    .from(positionRanges) //
+                    .flatMap(pr -> {
+                        raf.seek(pr.floorPosition());
+                        try (InputStream in = new LimitingInputStream(Channels.newInputStream(raf.getChannel()),
+                                pr.ceilingPosition() - pr.floorPosition())) {
+                            Reader<byte[]> r = SERIALIZER.createReader(in);
+                            List<Record> recs = new ArrayList<>();
+                            byte[] b;
+                            while ((b = r.read()) != null) {
+                                Record rec = Record.read(b);
+                                if (sb.contains(rec.toArray())) {
+                                    recs.add(rec);
+                                }
+                            }
+                            return Stream.from(recs);
+                        }
+                    }) //
+                    .toList() //
+                    .get();
+            assertEquals(expectedFound, list.size());
+        }
+
+    }
+
+    private static Index createIndex() throws IOException {
         int bits = 10;
         int dimensions = 3;
         File input = new File("src/test/resources/2019-05-15.binary-fixes-with-mmsi.sampled.every.400");
-        Serializer<byte[]> serializer = Serializer.fixedSizeRecord(35);
         Function<byte[], double[]> point = b -> {
             Record rec = Record.read(b);
             return new double[] { rec.lat, rec.lon, rec.time };
         };
-        File output = new File("target/output");
-
         int approximateNumIndexEntries = 100;
-        return HilbertIndex.sortAndCreateIndex(input, serializer, point, output, bits, dimensions,
+        return HilbertIndex.sortAndCreateIndex(input, SERIALIZER, point, OUTPUT, bits, dimensions,
                 approximateNumIndexEntries);
     }
 
@@ -65,11 +120,11 @@ public class HilbertIndexTest {
     }
 
     private static Bounds createSydneyBounds(long minTime, long maxTime) {
-        float lat1 = -33.806477f;
-        float lon1 = 151.181767f;
-        long t1 = Math.round(minTime + (maxTime - minTime) / 2);
-        float lat2 = -33.882896f;
-        float lon2 = 151.281330f;
+        float lat1 = -30.0f;
+        float lon1 = 100f;
+        long t1 = 1557892719000L - TimeUnit.MINUTES.toMillis(30);
+        float lat2 = -35;
+        float lon2 = 120f;
         long t2 = t1 + TimeUnit.HOURS.toMillis(1);
         return new Bounds(new double[] { lat1, lon1, t1 }, new double[] { lat2, lon2, t2 });
     }
