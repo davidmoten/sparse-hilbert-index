@@ -61,10 +61,12 @@ public final class Index {
             }
             list.add(new PositionRange(Collections.singletonList(range), startPosition, endPosition));
         }
+        list.forEach(System.out::println);
         return simplify(list);
     }
 
     private static List<PositionRange> simplify(List<PositionRange> positionRanges) {
+        // TODO conbine with calling method to minimize allocations
         LinkedList<PositionRange> list = new LinkedList<>();
         for (PositionRange p : positionRanges) {
             if (list.isEmpty()) {

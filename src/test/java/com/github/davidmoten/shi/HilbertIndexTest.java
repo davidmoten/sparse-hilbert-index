@@ -52,34 +52,40 @@ public class HilbertIndexTest {
     }
 
     @Test
-    public void testSydneyQuery() throws IOException {
+    public void testQuery() throws IOException {
         Index ind = createIndex();
-        Bounds sb = createSydneyBounds(Math.round(ind.mins()[2]), Math.round(ind.maxes()[2]));
+        Bounds sb = createQueryBounds(Math.round(ind.mins()[2]), Math.round(ind.maxes()[2]));
         int expectedFound = 0;
         {
             Reader<byte[]> r = SERIALIZER.createReader(Util.bufferedInput(OUTPUT));
             byte[] b;
+            long pos = 0;
             while ((b = r.read()) != null) {
                 Record rec = Record.read(b);
                 if (sb.contains(rec.toArray())) {
-                    System.out.println("found " + rec);
+                    System.out.println("found " + pos + ": " + rec);
                     expectedFound++;
                 }
+                pos += 35;
             }
         }
 
         long[] o1 = ind.ordinates(sb.mins());
         long[] o2 = ind.ordinates(sb.maxes());
-        Ranges ranges = ind.hilbertCurve().query(o1, o2);
+        Ranges ranges = ind.hilbertCurve().query(o1, o2, 20);
+        System.out.println(ranges.size() + ": " + ranges);
         List<PositionRange> positionRanges = ind.getPositionRanges(ranges);
+        System.out.println("simplifiedPositionRanges:");
+        positionRanges.forEach(System.out::println);
         try (RandomAccessFile raf = new RandomAccessFile(OUTPUT, "r")) {
             List<Record> list = Stream //
                     .from(positionRanges) //
                     .flatMap(pr -> {
+                        System.out.println("floor=" + pr.floorPosition() + ",ceiling=" + pr.ceilingPosition());
                         raf.seek(pr.floorPosition());
                         try (InputStream in = new LimitingInputStream(Channels.newInputStream(raf.getChannel()),
-                                pr.ceilingPosition() - pr.floorPosition())) {
-                            Reader<byte[]> r = SERIALIZER.createReader(in);
+                                pr.ceilingPosition() - pr.floorPosition());
+                                Reader<byte[]> r = SERIALIZER.createReader(in)) {
                             List<Record> recs = new ArrayList<>();
                             byte[] b;
                             while ((b = r.read()) != null) {
@@ -119,7 +125,7 @@ public class HilbertIndexTest {
         assertEquals(102, index.numEntries());
     }
 
-    private static Bounds createSydneyBounds(long minTime, long maxTime) {
+    private static Bounds createQueryBounds(long minTime, long maxTime) {
         float lat1 = -30.0f;
         float lon1 = 100f;
         long t1 = 1557892719000L - TimeUnit.MINUTES.toMillis(30);
