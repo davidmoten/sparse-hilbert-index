@@ -3,6 +3,7 @@ package com.github.davidmoten.shi;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,6 +36,10 @@ public class HilbertIndexTest {
     private static final double PRECISION = 0.00001;
     private static final File OUTPUT = new File("target/output");
     private static final Serializer<byte[]> SERIALIZER = Serializer.fixedSizeRecord(35);
+    private static final Function<byte[], double[]> POINT_FN = b -> {
+        Record rec = Record.read(b);
+        return new double[] { rec.lat, rec.lon, rec.time };
+    };
 
     @Test
     public void testSimple() throws IOException {
@@ -144,7 +149,8 @@ public class HilbertIndexTest {
         try (RandomAccessFile raf = new RandomAccessFile(OUTPUT, "r")) {
             List<Record> list = Stream //
                     .from(positionRanges) //
-                    .flatMap(pr -> stream(sb, raf, pr)) //
+                    .flatMap(pr -> stream(SERIALIZER, sb, raf, pr, POINT_FN)) //
+                    .map(b -> Record.read(b)) //
                     .toList() //
                     .get();
             assertEquals(expectedFound, list.size());
@@ -152,44 +158,48 @@ public class HilbertIndexTest {
 
     }
 
-    private StreamIterable<Record> stream(Bounds sb, RandomAccessFile raf, PositionRange pr)
+    private static <T> StreamIterable<T> stream(Serializer<T> serializer, Bounds queryBounds,
+            RandomAccessFile raf, PositionRange pr, Function<T, double[]> point)
             throws IOException {
-        raf.seek(pr.floorPosition());
         InputStream[] in = new InputStream[1];
-        final Reader<byte[]> r;
+        final Reader<T> r;
         try {
+            raf.seek(pr.floorPosition());
             in[0] = new LimitingInputStream(Channels.newInputStream(raf.getChannel()),
                     pr.ceilingPosition() - pr.floorPosition());
-            r = SERIALIZER.createReader(in[0]);
+            r = serializer.createReader(in[0]);
         } catch (Throwable t) {
-            if (in[0] != null) {
-                in[0].close();
-            }
+            closeSilently(in[0]);
             return Stream.error(t);
         }
-        return Stream.<Record>generate(emitter -> {
-            byte[] b;
+        return Stream.<T>generate(emitter -> {
+            T t;
             while (true) {
-                b = r.read();
-                if (b == null) {
+                t = r.read();
+                if (t == null) {
                     emitter.onComplete();
                     break;
                 }
-                Record rec = Record.read(b);
-                if (sb.contains(rec.toArray())) {
-                    emitter.onNext(rec);
+                if (queryBounds.contains(point.apply(t))) {
+                    emitter.onNext(t);
                     break;
                 }
             }
         }).doOnDispose(() -> {
-            try {
-                r.close();
-            } catch (Throwable t) {
-                // ignore
-            }
-            in[0].close();
+            closeSilently(r);
+            closeSilently(in[0]);
         });
 
+    }
+
+    private static void closeSilently(Closeable c) {
+        try {
+            if (c != null) {
+                c.close();
+            }
+        } catch (Throwable t) {
+            // do nothing
+        }
     }
 
     private static Index createIndex() throws IOException {
@@ -197,13 +207,9 @@ public class HilbertIndexTest {
         int dimensions = 3;
         File input = new File(
                 "src/test/resources/2019-05-15.binary-fixes-with-mmsi.sampled.every.400");
-        Function<byte[], double[]> point = b -> {
-            Record rec = Record.read(b);
-            return new double[] { rec.lat, rec.lon, rec.time };
-        };
         int approximateNumIndexEntries = 100;
-        return HilbertIndex.sortAndCreateIndex(input, SERIALIZER, point, OUTPUT, bits, dimensions,
-                approximateNumIndexEntries);
+        return HilbertIndex.sortAndCreateIndex(input, SERIALIZER, POINT_FN, OUTPUT, bits,
+                dimensions, approximateNumIndexEntries);
     }
 
     private void checkIndex(Index index) {
