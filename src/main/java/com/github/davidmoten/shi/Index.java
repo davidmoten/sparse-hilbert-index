@@ -61,24 +61,34 @@ public final class Index {
     @VisibleForTesting
     static List<PositionRange> getPositionRanges(TreeMap<Integer, Long> indexPositions,
             Iterable<Range> ranges) {
-        List<PositionRange> list = new ArrayList<>();
+        LinkedList<PositionRange> list = new LinkedList<>();
         for (Range range : ranges) {
             if (range.low() <= indexPositions.lastKey()
                     && range.high() >= indexPositions.firstKey()) {
                 Long startPosition = value(indexPositions.floorEntry((int) range.low()));
-                if (startPosition == null) {
+                if (startPosition == null) {;
                     startPosition = indexPositions.firstEntry().getValue();
                 }
                 Long endPosition = value(indexPositions.ceilingEntry((int) range.high()));
                 if (endPosition == null) {
                     endPosition = indexPositions.lastEntry().getValue();
                 }
-                list.add(new PositionRange(Collections.singletonList(range), startPosition,
-                        endPosition));
+                PositionRange p = new PositionRange(Collections.singletonList(range), startPosition,
+                        endPosition);
+                if (list.isEmpty()) {
+                    list.add(p);
+                } else {
+                    PositionRange last = list.getLast();
+                    if (last.overlapsPositionWith(p)) {
+                        list.pollLast();
+                        list.offer(last.join(p));
+                    } else {
+                        list.offer(p);
+                    }
+                }
             }
         }
-        list.forEach(System.out::println);
-        return simplify(list);
+        return list;
     }
 
     private static <T, R> R value(Entry<T, R> entry) {
@@ -87,25 +97,6 @@ public final class Index {
         } else {
             return entry.getValue();
         }
-    }
-
-    private static List<PositionRange> simplify(List<PositionRange> positionRanges) {
-        // TODO conbine with calling method to minimize allocations
-        LinkedList<PositionRange> list = new LinkedList<>();
-        for (PositionRange p : positionRanges) {
-            if (list.isEmpty()) {
-                list.add(p);
-            } else {
-                PositionRange last = list.getLast();
-                if (last.overlapsPositionWith(p)) {
-                    list.pollLast();
-                    list.offer(last.join(p));
-                } else {
-                    list.offer(p);
-                }
-            }
-        }
-        return list;
     }
 
     public double[] mins() {
