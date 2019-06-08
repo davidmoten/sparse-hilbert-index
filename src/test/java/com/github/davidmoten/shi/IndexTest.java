@@ -10,6 +10,8 @@ import java.util.TreeMap;
 import org.davidmoten.hilbert.Range;
 import org.junit.Test;
 
+import com.github.davidmoten.guavamini.Lists;
+
 public class IndexTest {
 
     @Test
@@ -66,5 +68,28 @@ public class IndexTest {
         PositionRange pr = ranges.get(0);
         assertEquals(0, pr.floorPosition());
         assertEquals(10, pr.ceilingPosition());
+    }
+
+    @Test
+    public void testGetPositionRanges2() {
+        TreeMap<Integer, Long> map = new TreeMap<>();
+        map.put(1, 0L);
+        map.put(8, 5L);
+        map.put(16, 10L);
+        map.put(20, 16L);
+        List<PositionRange> ranges = Index.getPositionRanges(map,
+                Lists.newArrayList(Range.create(2, 3), Range.create(18, 22)));
+        System.out.println(ranges);
+        assertEquals(2, ranges.size());
+        {
+            PositionRange pr = ranges.get(0);
+            assertEquals(0, pr.floorPosition());
+            assertEquals(5, pr.ceilingPosition());
+        }
+        {
+            PositionRange pr = ranges.get(1);
+            assertEquals(10, pr.floorPosition());
+            assertEquals(16, pr.ceilingPosition());
+        }
     }
 }

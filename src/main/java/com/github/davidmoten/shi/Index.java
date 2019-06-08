@@ -100,6 +100,8 @@ public final class Index {
                 if (last.overlapsPositionWith(p)) {
                     list.pollLast();
                     list.offer(last.join(p));
+                } else {
+                    list.offer(p);
                 }
             }
         }
@@ -127,7 +129,8 @@ public final class Index {
         Preconditions.checkArgument(d.length == mins.length);
         long[] x = new long[d.length];
         for (int i = 0; i < d.length; i++) {
-            x[i] = Math.round(((Math.min(d[i], maxes[i]) - mins[i]) / (maxes[i] - mins[i])) * hc.maxOrdinate());
+            x[i] = Math.round(((Math.min(d[i], maxes[i]) - mins[i]) / (maxes[i] - mins[i]))
+                    * hc.maxOrdinate());
         }
         return x;
     }
