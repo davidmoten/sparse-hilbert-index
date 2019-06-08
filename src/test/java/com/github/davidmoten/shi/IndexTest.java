@@ -51,4 +51,20 @@ public class IndexTest {
                 Collections.singletonList(Range.create(-3, -1)));
         assertTrue(ranges.isEmpty());
     }
+
+    @Test
+    public void testGetPositionRanges1() {
+        TreeMap<Integer, Long> map = new TreeMap<>();
+        map.put(1, 0L);
+        map.put(8, 5L);
+        map.put(16, 10L);
+        map.put(20, 16L);
+        List<PositionRange> ranges = Index.getPositionRanges(map,
+                Collections.singletonList(Range.create(5, 9)));
+        System.out.println(ranges);
+        assertEquals(1, ranges.size());
+        PositionRange pr = ranges.get(0);
+        assertEquals(0, pr.floorPosition());
+        assertEquals(10, pr.ceilingPosition());
+    }
 }
