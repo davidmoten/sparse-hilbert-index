@@ -2,6 +2,7 @@ package com.github.davidmoten.shi;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -9,18 +10,25 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.nio.channels.Channels;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.function.Function;
 
 import org.davidmoten.hilbert.HilbertCurve;
 import org.davidmoten.hilbert.Range;
 import org.davidmoten.hilbert.SmallHilbertCurve;
+import org.davidmoten.kool.Stream;
+import org.davidmoten.kool.StreamIterable;
 
+import com.github.davidmoten.bigsorter.Reader;
+import com.github.davidmoten.bigsorter.Serializer;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
@@ -66,7 +74,8 @@ public final class Index {
             if (range.low() <= indexPositions.lastKey()
                     && range.high() >= indexPositions.firstKey()) {
                 Long startPosition = value(indexPositions.floorEntry((int) range.low()));
-                if (startPosition == null) {;
+                if (startPosition == null) {
+                    ;
                     startPosition = indexPositions.firstEntry().getValue();
                 }
                 Long endPosition = value(indexPositions.ceilingEntry((int) range.high()));
@@ -188,6 +197,50 @@ public final class Index {
                 }
                 dos.writeInt(entry.getValue().intValue());
             }
+        }
+    }
+
+    public <T> StreamIterable<T> search(Serializer<T> serializer, Bounds queryBounds,
+            RandomAccessFile raf, PositionRange pr, Function<T, double[]> point)
+            throws IOException {
+        InputStream[] in = new InputStream[1];
+        final Reader<T> r;
+        try {
+            raf.seek(pr.floorPosition());
+            in[0] = new LimitingInputStream(Channels.newInputStream(raf.getChannel()),
+                    pr.ceilingPosition() - pr.floorPosition());
+            r = serializer.createReader(in[0]);
+        } catch (Throwable t) {
+            closeSilently(in[0]);
+            return Stream.error(t);
+        }
+        return Stream.<T>generate(emitter -> {
+            T t;
+            while (true) {
+                t = r.read();
+                if (t == null) {
+                    emitter.onComplete();
+                    break;
+                }
+                if (queryBounds.contains(point.apply(t))) {
+                    emitter.onNext(t);
+                    break;
+                }
+                // else keep reading till EOF or next record found within queryBounds
+            }
+        }).doOnDispose(() -> {
+            closeSilently(r);
+            closeSilently(in[0]);
+        }).takeUntil(rec -> hc.index(ordinates(point.apply(rec))) > pr.maxRangeHigh());
+    }
+
+    private static void closeSilently(Closeable c) {
+        try {
+            if (c != null) {
+                c.close();
+            }
+        } catch (Throwable t) {
+            // do nothing
         }
     }
 

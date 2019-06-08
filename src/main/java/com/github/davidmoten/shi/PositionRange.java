@@ -41,11 +41,13 @@ public final class PositionRange {
 
     public boolean overlapsPositionWith(PositionRange last) {
         return (floorPosition >= last.floorPosition && floorPosition <= last.ceilingPosition)
-                || (ceilingPosition <= last.ceilingPosition && ceilingPosition >= last.floorPosition);
+                || (ceilingPosition <= last.ceilingPosition
+                        && ceilingPosition >= last.floorPosition);
     }
 
     public PositionRange join(PositionRange other) {
-        Preconditions.checkArgument(other.ranges.get(0).low() >= this.ranges.get(ranges.size() - 1).high());
+        Preconditions.checkArgument(
+                other.ranges.get(0).low() >= this.ranges.get(ranges.size() - 1).high());
         List<Range> ranges = new ArrayList<>();
         ranges.addAll(this.ranges);
         ranges.addAll(other.ranges);
@@ -55,13 +57,17 @@ public final class PositionRange {
     }
 
     public long highIndex() {
-        return ranges.get(ranges.size() -1).high();
+        return ranges.get(ranges.size() - 1).high();
     }
 
     @Override
     public String toString() {
-        return "PositionRange [ranges=" + ranges + ", floorPosition=" + floorPosition + ", ceilingPosition="
-                + ceilingPosition + "]";
+        return "PositionRange [ranges=" + ranges + ", floorPosition=" + floorPosition
+                + ", ceilingPosition=" + ceilingPosition + "]";
+    }
+
+    public long maxRangeHigh() {
+        return ranges.get(ranges.size() - 1).high();
     }
 
 }

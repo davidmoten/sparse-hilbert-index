@@ -149,57 +149,13 @@ public class HilbertIndexTest {
         try (RandomAccessFile raf = new RandomAccessFile(OUTPUT, "r")) {
             List<Record> list = Stream //
                     .from(positionRanges) //
-                    .flatMap(pr -> stream(SERIALIZER, sb, raf, pr, POINT_FN)) //
+                    .flatMap(pr -> ind.search(SERIALIZER, sb, raf, pr, POINT_FN)) //
                     .map(b -> Record.read(b)) //
                     .toList() //
                     .get();
             assertEquals(expectedFound, list.size());
         }
 
-    }
-
-    private static <T> StreamIterable<T> stream(Serializer<T> serializer, Bounds queryBounds,
-            RandomAccessFile raf, PositionRange pr, Function<T, double[]> point)
-            throws IOException {
-        InputStream[] in = new InputStream[1];
-        final Reader<T> r;
-        try {
-            raf.seek(pr.floorPosition());
-            in[0] = new LimitingInputStream(Channels.newInputStream(raf.getChannel()),
-                    pr.ceilingPosition() - pr.floorPosition());
-            r = serializer.createReader(in[0]);
-        } catch (Throwable t) {
-            closeSilently(in[0]);
-            return Stream.error(t);
-        }
-        return Stream.<T>generate(emitter -> {
-            T t;
-            while (true) {
-                t = r.read();
-                if (t == null) {
-                    emitter.onComplete();
-                    break;
-                }
-                if (queryBounds.contains(point.apply(t))) {
-                    emitter.onNext(t);
-                    break;
-                }
-            }
-        }).doOnDispose(() -> {
-            closeSilently(r);
-            closeSilently(in[0]);
-        });
-
-    }
-
-    private static void closeSilently(Closeable c) {
-        try {
-            if (c != null) {
-                c.close();
-            }
-        } catch (Throwable t) {
-            // do nothing
-        }
     }
 
     private static Index createIndex() throws IOException {
