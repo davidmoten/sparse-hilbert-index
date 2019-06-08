@@ -33,7 +33,8 @@ public final class Index {
     private final SmallHilbertCurve hc;
     private final long count;
 
-    Index(TreeMap<Integer, Long> indexPositions, double[] mins, double[] maxes, int bits, long count) {
+    Index(TreeMap<Integer, Long> indexPositions, double[] mins, double[] maxes, int bits,
+            long count) {
         this.indexPositions = indexPositions;
         this.mins = mins;
         this.maxes = maxes;
@@ -50,22 +51,25 @@ public final class Index {
      * Fits the desired ranges to the effective querying ranges according to the
      * known index positions.
      * 
-     * @param ranges
-     *            list of ranges in ascending order
+     * @param ranges list of ranges in ascending order
      * @return querying ranges based on known index positions
      */
     public List<PositionRange> getPositionRanges(Iterable<Range> ranges) {
         List<PositionRange> list = new ArrayList<>();
         for (Range range : ranges) {
-            Long startPosition = value(indexPositions.floorEntry((int) range.low()));
-            if (startPosition == null) {
-                startPosition = indexPositions.firstEntry().getValue();
+            if (range.low() <= indexPositions.lastKey()
+                    && range.high() >= indexPositions.firstKey()) {
+                Long startPosition = value(indexPositions.floorEntry((int) range.low()));
+                if (startPosition == null) {
+                    startPosition = indexPositions.firstEntry().getValue();
+                }
+                Long endPosition = value(indexPositions.ceilingEntry((int) range.high()));
+                if (endPosition == null) {
+                    endPosition = indexPositions.lastEntry().getValue();
+                }
+                list.add(new PositionRange(Collections.singletonList(range), startPosition,
+                        endPosition));
             }
-            Long endPosition = value(indexPositions.ceilingEntry((int) range.high()));
-            if (endPosition == null) {
-                endPosition = indexPositions.lastEntry().getValue();
-            }
-            list.add(new PositionRange(Collections.singletonList(range), startPosition, endPosition));
         }
         list.forEach(System.out::println);
         return simplify(list);
@@ -127,7 +131,8 @@ public final class Index {
     }
 
     public static Index read(File file) throws FileNotFoundException, IOException {
-        try (DataInputStream dis = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
+        try (DataInputStream dis = new DataInputStream(
+                new BufferedInputStream(new FileInputStream(file)))) {
             return read(dis);
         }
     }
@@ -155,7 +160,8 @@ public final class Index {
     }
 
     public void write(File idx) throws FileNotFoundException, IOException {
-        try (DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(idx)))) {
+        try (DataOutputStream dos = new DataOutputStream(
+                new BufferedOutputStream(new FileOutputStream(idx)))) {
             dos.writeShort(VERSION);
             dos.writeInt(hc.bits());
             dos.writeInt(hc.dimensions());
@@ -177,7 +183,8 @@ public final class Index {
                 dos.writeInt(entry.getKey());
                 Long pos = entry.getValue();
                 if (pos > Integer.MAX_VALUE) {
-                    throw new RuntimeException("file size too big for integer positions in index entries");
+                    throw new RuntimeException(
+                            "file size too big for integer positions in index entries");
                 }
                 dos.writeInt(entry.getValue().intValue());
             }
