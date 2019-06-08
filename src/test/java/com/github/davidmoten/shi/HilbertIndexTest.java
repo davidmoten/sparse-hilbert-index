@@ -65,12 +65,31 @@ public class HilbertIndexTest {
         map.put(35, 8L);
         map.put(56, 16L);
         assertEquals(map, index.indexPositions());
-        long[] a = index.ordinates(7, 6, 50);
-        long[] b = index.ordinates(9, 8, 150);
-        Ranges ranges = index.hilbertCurve().query(a, b);
-        System.out.println(ranges);
-        List<PositionRange> prs = index.getPositionRanges(ranges);
-        System.out.println(prs);
+        {
+            // query to get 2nd record from sorted input 8,7,100
+            long[] a = index.ordinates(7, 6, 50);
+            long[] b = index.ordinates(9, 8, 150);
+            Ranges ranges = index.hilbertCurve().query(a, b);
+            System.out.println(ranges);
+            List<PositionRange> prs = index.getPositionRanges(ranges);
+            System.out.println(prs);
+            assertEquals(1, prs.size());
+            PositionRange pr = prs.get(0);
+            assertEquals(0, pr.floorPosition());
+            assertEquals(8, pr.ceilingPosition());
+        }
+        {
+            // query outside entire domain
+            long[] a = index.ordinates(3, 1, 50);
+            long[] b = index.ordinates(11, 8, 650);
+            Ranges ranges = index.hilbertCurve().query(a, b);
+            System.out.println(ranges);
+            List<PositionRange> prs = index.getPositionRanges(ranges);
+            System.out.println(prs);
+            PositionRange pr = prs.get(0);
+            assertEquals(0, pr.floorPosition());
+            assertEquals(16, pr.ceilingPosition());
+        }
     }
 
     @Test

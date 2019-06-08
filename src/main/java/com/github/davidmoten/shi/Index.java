@@ -55,6 +55,12 @@ public final class Index {
      * @return querying ranges based on known index positions
      */
     public List<PositionRange> getPositionRanges(Iterable<Range> ranges) {
+        return getPositionRanges(indexPositions, ranges);
+    }
+
+    @VisibleForTesting
+    static List<PositionRange> getPositionRanges(TreeMap<Integer, Long> indexPositions,
+            Iterable<Range> ranges) {
         List<PositionRange> list = new ArrayList<>();
         for (Range range : ranges) {
             if (range.low() <= indexPositions.lastKey()
@@ -121,7 +127,7 @@ public final class Index {
         Preconditions.checkArgument(d.length == mins.length);
         long[] x = new long[d.length];
         for (int i = 0; i < d.length; i++) {
-            x[i] = Math.round(((d[i] - mins[i]) / (maxes[i] - mins[i])) * hc.maxOrdinate());
+            x[i] = Math.round(((Math.min(d[i], maxes[i]) - mins[i]) / (maxes[i] - mins[i])) * hc.maxOrdinate());
         }
         return x;
     }
