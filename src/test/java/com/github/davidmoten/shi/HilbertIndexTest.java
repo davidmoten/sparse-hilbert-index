@@ -6,7 +6,9 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ import org.davidmoten.hilbert.HilbertCurve;
 import org.davidmoten.hilbert.Ranges;
 import org.davidmoten.hilbert.SmallHilbertCurve;
 import org.davidmoten.kool.Stream;
+import org.davidmoten.kool.StreamIterable;
 import org.junit.Test;
 
 import com.github.davidmoten.bigsorter.Reader;
@@ -128,7 +131,6 @@ public class HilbertIndexTest {
             while ((b = r.read()) != null) {
                 Record rec = Record.read(b);
                 if (sb.contains(rec.toArray())) {
-                    System.out.println("found " + pos + ": " + rec);
                     expectedFound++;
                 }
                 pos += 35;
@@ -138,47 +140,55 @@ public class HilbertIndexTest {
         long[] o1 = ind.ordinates(sb.mins());
         long[] o2 = ind.ordinates(sb.maxes());
         Ranges ranges = ind.hilbertCurve().query(o1, o2);
-        System.out.println(ranges.size() + ": " + ranges);
         List<PositionRange> positionRanges = ind.getPositionRanges(ranges);
-        System.out.println("simplifiedPositionRanges:");
-        positionRanges.forEach(System.out::println);
         try (RandomAccessFile raf = new RandomAccessFile(OUTPUT, "r")) {
             List<Record> list = Stream //
                     .from(positionRanges) //
-                    .flatMap(pr -> {
-                        System.out.println(
-                                "floor=" + pr.floorPosition() + ",ceiling=" + pr.ceilingPosition());
-                        raf.seek(pr.floorPosition());
-                        List<Record> recs = new ArrayList<>();
-                        while (raf.getFilePointer() <= pr.ceilingPosition()) {
-                            byte[] b = new byte[35];
-                            raf.readFully(b);
-                            Record rec = Record.read(b);
-                            if (sb.contains(rec.toArray())) {
-                                recs.add(rec);
-                            }
-                            // TODO stop when hilbert index is greater than max for the
-                            // positionRange
-                        }
-                        return Stream.from(recs);
-                        // try (InputStream in = new
-                        // LimitingInputStream(Channels.newInputStream(raf.getChannel()),
-                        // pr.ceilingPosition() - pr.floorPosition());
-                        // Reader<byte[]> r = SERIALIZER.createReader(in)) {
-                        // byte[] b;
-                        // while ((b = r.read()) != null) {
-                        // Record rec = Record.read(b);
-                        // if (sb.contains(rec.toArray())) {
-                        // recs.add(rec);
-                        // }
-                        // }
-                        // return Stream.from(recs);
-                        // }
-                    }) //
+                    .flatMap(pr -> stream(sb, raf, pr)) //
                     .toList() //
                     .get();
             assertEquals(expectedFound, list.size());
         }
+
+    }
+
+    private StreamIterable<Record> stream(Bounds sb, RandomAccessFile raf, PositionRange pr)
+            throws IOException {
+        raf.seek(pr.floorPosition());
+        InputStream[] in = new InputStream[1];
+        final Reader<byte[]> r;
+        try {
+            in[0] = new LimitingInputStream(Channels.newInputStream(raf.getChannel()),
+                    pr.ceilingPosition() - pr.floorPosition());
+            r = SERIALIZER.createReader(in[0]);
+        } catch (Throwable t) {
+            if (in[0] != null) {
+                in[0].close();
+            }
+            return Stream.error(t);
+        }
+        return Stream.<Record>generate(emitter -> {
+            byte[] b;
+            while (true) {
+                b = r.read();
+                if (b == null) {
+                    emitter.onComplete();
+                    break;
+                }
+                Record rec = Record.read(b);
+                if (sb.contains(rec.toArray())) {
+                    emitter.onNext(rec);
+                    break;
+                }
+            }
+        }).doOnDispose(() -> {
+            try {
+                r.close();
+            } catch (Throwable t) {
+                // ignore
+            }
+            in[0].close();
+        });
 
     }
 
