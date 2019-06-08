@@ -65,6 +65,12 @@ public class HilbertIndexTest {
         map.put(35, 8L);
         map.put(56, 16L);
         assertEquals(map, index.indexPositions());
+        long[] a = index.ordinates(7, 6, 50);
+        long[] b = index.ordinates(9, 8, 150);
+        Ranges ranges = index.hilbertCurve().query(a, b);
+        System.out.println(ranges);
+        List<PositionRange> prs = index.getPositionRanges(ranges);
+        System.out.println(prs);
     }
 
     @Test
@@ -121,7 +127,8 @@ public class HilbertIndexTest {
             List<Record> list = Stream //
                     .from(positionRanges) //
                     .flatMap(pr -> {
-                        System.out.println("floor=" + pr.floorPosition() + ",ceiling=" + pr.ceilingPosition());
+                        System.out.println(
+                                "floor=" + pr.floorPosition() + ",ceiling=" + pr.ceilingPosition());
                         raf.seek(pr.floorPosition());
                         List<Record> recs = new ArrayList<>();
                         while (raf.getFilePointer() <= pr.ceilingPosition()) {
@@ -131,7 +138,8 @@ public class HilbertIndexTest {
                             if (sb.contains(rec.toArray())) {
                                 recs.add(rec);
                             }
-                            // TODO stop when hilbert index is greater than max for the positionRange
+                            // TODO stop when hilbert index is greater than max for the
+                            // positionRange
                         }
                         return Stream.from(recs);
                         // try (InputStream in = new
@@ -158,7 +166,8 @@ public class HilbertIndexTest {
     private static Index createIndex() throws IOException {
         int bits = 10;
         int dimensions = 3;
-        File input = new File("src/test/resources/2019-05-15.binary-fixes-with-mmsi.sampled.every.400");
+        File input = new File(
+                "src/test/resources/2019-05-15.binary-fixes-with-mmsi.sampled.every.400");
         Function<byte[], double[]> point = b -> {
             Record rec = Record.read(b);
             return new double[] { rec.lat, rec.lon, rec.time };
@@ -170,9 +179,10 @@ public class HilbertIndexTest {
 
     private void checkIndex(Index index) {
         assertEquals(29163, index.count());
-        assertArrayEquals(new double[] { -54.669193267822266, 19.543855667114258, 1.557869714E12 }, index.mins(),
-                0.00001);
-        assertArrayEquals(new double[] { 45.95529556274414, 179.8942413330078, 1.5579648E12 }, index.maxes(), 0.00001);
+        assertArrayEquals(new double[] { -54.669193267822266, 19.543855667114258, 1.557869714E12 },
+                index.mins(), 0.00001);
+        assertArrayEquals(new double[] { 45.95529556274414, 179.8942413330078, 1.5579648E12 },
+                index.maxes(), 0.00001);
         assertEquals(102, index.numEntries());
     }
 

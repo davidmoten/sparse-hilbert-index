@@ -5,4 +5,4 @@ Supports
 * sorts input file based on hilbert index
 * creates sparse hilbert index in separate file
 * enables random access search of sorted input file using index file
-* S3 supports range headers so can do random access
+* S3 supports `Range` request header so can do random access

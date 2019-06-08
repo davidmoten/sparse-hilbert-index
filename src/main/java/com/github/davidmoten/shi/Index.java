@@ -57,11 +57,11 @@ public final class Index {
     public List<PositionRange> getPositionRanges(Iterable<Range> ranges) {
         List<PositionRange> list = new ArrayList<>();
         for (Range range : ranges) {
-            Long startPosition = indexPositions.floorEntry((int) range.low()).getValue();
+            Long startPosition = value(indexPositions.floorEntry((int) range.low()));
             if (startPosition == null) {
                 startPosition = indexPositions.firstEntry().getValue();
             }
-            Long endPosition = indexPositions.ceilingEntry((int) range.high()).getValue();
+            Long endPosition = value(indexPositions.ceilingEntry((int) range.high()));
             if (endPosition == null) {
                 endPosition = indexPositions.lastEntry().getValue();
             }
@@ -69,6 +69,14 @@ public final class Index {
         }
         list.forEach(System.out::println);
         return simplify(list);
+    }
+
+    private static <T, R> R value(Entry<T, R> entry) {
+        if (entry == null) {
+            return null;
+        } else {
+            return entry.getValue();
+        }
     }
 
     private static List<PositionRange> simplify(List<PositionRange> positionRanges) {
