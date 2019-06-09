@@ -249,13 +249,18 @@ public final class Index<T> {
         }
     }
 
+    public int numEntries() {
+        return indexPositions.size();
+    }
+
     @Override
     public String toString() {
         return "Index [mins=" + Arrays.toString(mins) + ", maxes=" + Arrays.toString(maxes) + "]";
     }
 
-    public int numEntries() {
-        return indexPositions.size();
+    public Stream<T> search(Bounds queryBounds, RandomAccessFile raf) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }
