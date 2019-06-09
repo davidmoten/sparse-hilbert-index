@@ -218,17 +218,19 @@ public final class Index {
                 if (t == null) {
                     emitter.onComplete();
                     break;
-                }
-                if (queryBounds.contains(point.apply(t))) {
+                } else {
                     emitter.onNext(t);
                     break;
                 }
                 // else keep reading till EOF or next record found within queryBounds
             }
-        }).doOnDispose(() -> {
-            closeSilently(r);
-            closeSilently(in[0]);
-        }).takeUntil(rec -> hc.index(ordinates(point.apply(rec))) > pr.maxHilbertIndex());
+        }) //
+                .takeUntil(rec -> hc.index(ordinates(point.apply(rec))) > pr.maxHilbertIndex()) //
+                .filter(t -> queryBounds.contains(point.apply(t))) //
+                .doOnDispose(() -> {
+                    closeSilently(r);
+                    closeSilently(in[0]);
+                });
     }
 
     private static void closeSilently(Closeable c) {
