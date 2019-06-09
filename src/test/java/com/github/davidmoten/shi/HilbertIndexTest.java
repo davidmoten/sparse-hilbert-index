@@ -95,7 +95,7 @@ public class HilbertIndexTest {
         }
         Bounds queryBounds = new Bounds(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
         RandomAccessFile raf = new RandomAccessFile(OUTPUT, "r");
-        assertEquals(3, index.search(queryBounds, raf));
+        assertEquals(3, index.search(queryBounds, raf).count().get().intValue());
     }
 
     @Test

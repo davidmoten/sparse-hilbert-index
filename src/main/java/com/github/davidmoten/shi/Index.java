@@ -22,9 +22,11 @@ import java.util.function.Function;
 
 import org.davidmoten.hilbert.HilbertCurve;
 import org.davidmoten.hilbert.Range;
+import org.davidmoten.hilbert.Ranges;
 import org.davidmoten.hilbert.SmallHilbertCurve;
 import org.davidmoten.kool.Stream;
 import org.davidmoten.kool.StreamIterable;
+import org.davidmoten.kool.function.BiFunction;
 
 import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.bigsorter.Serializer;
@@ -204,14 +206,24 @@ public final class Index<T> {
         }
     }
 
+    private static BiFunction<Long, Long, InputStream> rafInputStreamFactory(RandomAccessFile raf) {
+        return (first, last) -> {
+            raf.seek(first);
+            return new LimitingInputStream(Channels.newInputStream(raf.getChannel()), last - first);
+        };
+    }
+
     public StreamIterable<T> search(Bounds queryBounds, RandomAccessFile raf, PositionRange pr)
             throws IOException {
+        return search(queryBounds, rafInputStreamFactory(raf), pr);
+    }
+
+    public StreamIterable<T> search(Bounds queryBounds, BiFunction<Long, Long, InputStream> factory,
+            PositionRange pr) throws IOException {
         InputStream[] in = new InputStream[1];
         final Reader<T> r;
         try {
-            raf.seek(pr.floorPosition());
-            in[0] = new LimitingInputStream(Channels.newInputStream(raf.getChannel()),
-                    pr.ceilingPosition() - pr.floorPosition());
+            in[0] = factory.apply(pr.floorPosition(), pr.ceilingPosition());
             r = serializer.createReader(in[0]);
         } catch (Throwable t) {
             closeSilently(in[0]);
@@ -253,14 +265,21 @@ public final class Index<T> {
         return indexPositions.size();
     }
 
+    public Stream<T> search(Bounds queryBounds, RandomAccessFile raf) {
+        return search(queryBounds, rafInputStreamFactory(raf));
+    }
+
+    public Stream<T> search(Bounds queryBounds, BiFunction<Long, Long, InputStream> factory) {
+        long[] a = ordinates(queryBounds.mins());
+        long[] b = ordinates(queryBounds.maxes());
+        Ranges ranges = hc.query(a, b);
+        return Stream.from(getPositionRanges(ranges))
+                .flatMap(pr -> search(queryBounds, factory, pr));
+    }
+
     @Override
     public String toString() {
         return "Index [mins=" + Arrays.toString(mins) + ", maxes=" + Arrays.toString(maxes) + "]";
-    }
-
-    public Stream<T> search(Bounds queryBounds, RandomAccessFile raf) {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }
