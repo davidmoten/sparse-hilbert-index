@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.channels.Channels;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -81,13 +80,12 @@ public final class Index {
                 if (endPosition == null) {
                     endPosition = indexPositions.lastEntry().getValue();
                 }
-                PositionRange p = new PositionRange(Collections.singletonList(range), startPosition,
-                        endPosition);
+                PositionRange p = new PositionRange(range.high(), startPosition, endPosition);
                 if (list.isEmpty()) {
                     list.add(p);
                 } else {
                     PositionRange last = list.getLast();
-                    if (p.floorPosition() <= last.ceilingPosition())  {
+                    if (p.floorPosition() <= last.ceilingPosition()) {
                         list.pollLast();
                         list.offer(last.join(p));
                     } else {
@@ -230,7 +228,7 @@ public final class Index {
         }).doOnDispose(() -> {
             closeSilently(r);
             closeSilently(in[0]);
-        }).takeUntil(rec -> hc.index(ordinates(point.apply(rec))) > pr.maxRangeHigh());
+        }).takeUntil(rec -> hc.index(ordinates(point.apply(rec))) > pr.maxHilbertIndex());
     }
 
     private static void closeSilently(Closeable c) {

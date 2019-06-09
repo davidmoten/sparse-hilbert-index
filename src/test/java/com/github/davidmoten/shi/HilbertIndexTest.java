@@ -3,16 +3,12 @@ package com.github.davidmoten.shi;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,7 +21,6 @@ import org.davidmoten.hilbert.HilbertCurve;
 import org.davidmoten.hilbert.Ranges;
 import org.davidmoten.hilbert.SmallHilbertCurve;
 import org.davidmoten.kool.Stream;
-import org.davidmoten.kool.StreamIterable;
 import org.junit.Test;
 
 import com.github.davidmoten.bigsorter.Reader;
@@ -132,13 +127,11 @@ public class HilbertIndexTest {
         {
             Reader<byte[]> r = SERIALIZER.createReader(Util.bufferedInput(OUTPUT));
             byte[] b;
-            long pos = 0;
             while ((b = r.read()) != null) {
                 Record rec = Record.read(b);
                 if (sb.contains(rec.toArray())) {
                     expectedFound++;
                 }
-                pos += 35;
             }
         }
 

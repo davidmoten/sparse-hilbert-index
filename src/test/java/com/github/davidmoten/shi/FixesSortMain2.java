@@ -34,9 +34,6 @@ import org.davidmoten.hilbert.SmallHilbertCurve;
 import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.bigsorter.Serializer;
 import com.github.davidmoten.bigsorter.Sorter;
-import com.github.davidmoten.shi.Bounds;
-import com.github.davidmoten.shi.Index;
-import com.github.davidmoten.shi.PositionRange;
 
 public class FixesSortMain2 {
 
@@ -263,7 +260,7 @@ public class FixesSortMain2 {
             total++;
             long[] p = ind.ordinates(rec.lat, rec.lon, rec.time);
             long ix = ind.hilbertCurve().index(p);
-            if (ix > pr.highIndex()) {
+            if (ix > pr.maxHilbertIndex()) {
                 System.out.println("hit max index");
                 break;
             }
