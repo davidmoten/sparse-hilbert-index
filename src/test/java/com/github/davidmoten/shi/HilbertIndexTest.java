@@ -40,6 +40,7 @@ public class HilbertIndexTest {
     public void testSimple() throws IOException {
         Serializer<String> ser = Serializer.linesUtf8();
         String s = "10,2,300\n4,5,600\n8,7,100";
+        int numRows = 3;
         File input = new File("target/input");
         Files.write(input.toPath(), s.getBytes(StandardCharsets.UTF_8));
         Function<String, double[]> point = line -> Arrays //
@@ -79,7 +80,7 @@ public class HilbertIndexTest {
             assertEquals(1, prs.size());
             PositionRange pr = prs.get(0);
             assertEquals(0, pr.floorPosition());
-            assertEquals(8, pr.ceilingPosition());
+            assertEquals(16, pr.ceilingPosition());
         }
         {
             // query outside entire domain
@@ -95,7 +96,7 @@ public class HilbertIndexTest {
         }
         Bounds queryBounds = new Bounds(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
         RandomAccessFile raf = new RandomAccessFile(OUTPUT, "r");
-        assertEquals(3, index.search(queryBounds, raf).count().get().intValue());
+        assertEquals(numRows, index.search(queryBounds, raf).count().get().intValue());
     }
 
     @Test

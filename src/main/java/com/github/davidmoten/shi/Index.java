@@ -82,7 +82,7 @@ public final class Index<T> {
                 if (startPosition == null) {
                     startPosition = indexPositions.firstEntry().getValue();
                 }
-                Long endPosition = value(indexPositions.ceilingEntry((int) range.high()));
+                Long endPosition = value(indexPositions.higherEntry((int) range.high()));
                 if (endPosition == null) {
                     endPosition = indexPositions.lastEntry().getValue();
                 }
