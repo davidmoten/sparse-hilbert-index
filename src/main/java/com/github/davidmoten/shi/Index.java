@@ -67,12 +67,12 @@ public final class Index<T> {
      * @param ranges list of ranges in ascending order
      * @return querying ranges based on known index positions
      */
-    public List<PositionRange> getPositionRanges(Iterable<Range> ranges) {
-        return getPositionRanges(indexPositions, ranges);
+    public List<PositionRange> positionRanges(Iterable<Range> ranges) {
+        return positionRanges(indexPositions, ranges);
     }
 
     @VisibleForTesting
-    static List<PositionRange> getPositionRanges(TreeMap<Integer, Long> indexPositions,
+    static List<PositionRange> positionRanges(TreeMap<Integer, Long> indexPositions,
             Iterable<Range> ranges) {
         LinkedList<PositionRange> list = new LinkedList<>();
         for (Range range : ranges) {
@@ -273,10 +273,7 @@ public final class Index<T> {
         long[] a = ordinates(queryBounds.mins());
         long[] b = ordinates(queryBounds.maxes());
         Ranges ranges = hc.query(a, b);
-        System.out.println(ranges);
-        System.out.println(indexPositions);
-        return Stream.from(getPositionRanges(ranges)) //
-                .doOnNext(System.out::println) //
+        return Stream.from(positionRanges(ranges)) //
                 .flatMap(pr -> search(queryBounds, factory, pr));
     }
 

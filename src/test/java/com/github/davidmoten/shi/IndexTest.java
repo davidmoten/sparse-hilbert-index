@@ -33,7 +33,7 @@ public class IndexTest {
         TreeMap<Integer, Long> map = new TreeMap<>();
         map.put(1, 0L);
         map.put(8, 5L);
-        List<PositionRange> ranges = Index.getPositionRanges(map, Collections.emptyList());
+        List<PositionRange> ranges = Index.positionRanges(map, Collections.emptyList());
         assertTrue(ranges.isEmpty());
     }
 
@@ -42,7 +42,7 @@ public class IndexTest {
         TreeMap<Integer, Long> map = new TreeMap<>();
         map.put(1, 0L);
         map.put(8, 5L);
-        List<PositionRange> ranges = Index.getPositionRanges(map,
+        List<PositionRange> ranges = Index.positionRanges(map,
                 Collections.singletonList(Range.create(10, 12)));
         assertTrue(ranges.isEmpty());
     }
@@ -52,7 +52,7 @@ public class IndexTest {
         TreeMap<Integer, Long> map = new TreeMap<>();
         map.put(1, 0L);
         map.put(8, 5L);
-        List<PositionRange> ranges = Index.getPositionRanges(map,
+        List<PositionRange> ranges = Index.positionRanges(map,
                 Collections.singletonList(Range.create(-3, -1)));
         assertTrue(ranges.isEmpty());
     }
@@ -64,7 +64,7 @@ public class IndexTest {
         map.put(8, 5L);
         map.put(16, 10L);
         map.put(20, 16L);
-        List<PositionRange> ranges = Index.getPositionRanges(map,
+        List<PositionRange> ranges = Index.positionRanges(map,
                 Collections.singletonList(Range.create(5, 9)));
         System.out.println(ranges);
         assertEquals(1, ranges.size());
@@ -80,7 +80,7 @@ public class IndexTest {
         map.put(8, 5L);
         map.put(16, 10L);
         map.put(20, 16L);
-        List<PositionRange> ranges = Index.getPositionRanges(map,
+        List<PositionRange> ranges = Index.positionRanges(map,
                 Lists.newArrayList(Range.create(2, 3), Range.create(18, 22)));
         System.out.println(ranges);
         assertEquals(2, ranges.size());

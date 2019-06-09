@@ -63,7 +63,7 @@ public class HilbertIndexTest {
             long[] b = index.ordinates(9, 8, 150);
             Ranges ranges = index.hilbertCurve().query(a, b);
             System.out.println(ranges);
-            List<PositionRange> prs = index.getPositionRanges(ranges);
+            List<PositionRange> prs = index.positionRanges(ranges);
             System.out.println(prs);
             assertEquals(1, prs.size());
             PositionRange pr = prs.get(0);
@@ -76,7 +76,7 @@ public class HilbertIndexTest {
             long[] b = index.ordinates(11, 8, 650);
             Ranges ranges = index.hilbertCurve().query(a, b);
             System.out.println(ranges);
-            List<PositionRange> prs = index.getPositionRanges(ranges);
+            List<PositionRange> prs = index.positionRanges(ranges);
             System.out.println(prs);
             PositionRange pr = prs.get(0);
             assertEquals(0, pr.floorPosition());
@@ -152,7 +152,7 @@ public class HilbertIndexTest {
         long[] o1 = ind.ordinates(sb.mins());
         long[] o2 = ind.ordinates(sb.maxes());
         Ranges ranges = ind.hilbertCurve().query(o1, o2);
-        List<PositionRange> positionRanges = ind.getPositionRanges(ranges);
+        List<PositionRange> positionRanges = ind.positionRanges(ranges);
         try (RandomAccessFile raf = new RandomAccessFile(OUTPUT, "r")) {
             List<Record> list = Stream //
                     .from(positionRanges) //

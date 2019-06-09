@@ -189,7 +189,7 @@ public class FixesSortMain2 {
             long[] o1 = ind.ordinates(sb.mins());
             long[] o2 = ind.ordinates(sb.maxes());
             Ranges ranges = ind.hilbertCurve().query(o1, o2);
-            List<PositionRange> positionRanges = ind.getPositionRanges(ranges);
+            List<PositionRange> positionRanges = ind.positionRanges(ranges);
             positionRanges.stream().forEach(System.out::println);
             PositionRange pr = positionRanges.get(0);
             // final InputStream in2;
