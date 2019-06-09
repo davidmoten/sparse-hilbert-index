@@ -31,7 +31,7 @@ import com.github.davidmoten.bigsorter.Serializer;
 import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
-public final class Index {
+public final class Index<T> {
 
     private static final short VERSION = 1;
     private final TreeMap<Integer, Long> indexPositions;
@@ -39,13 +39,17 @@ public final class Index {
     private final double[] maxes;
     private final SmallHilbertCurve hc;
     private final long count;
+    private final Serializer<T> serializer;
+    private final Function<? super T, double[]> point;
 
     Index(TreeMap<Integer, Long> indexPositions, double[] mins, double[] maxes, int bits,
-            long count) {
+            long count, Serializer<T> serializer, Function<? super T, double[]> point) {
         this.indexPositions = indexPositions;
         this.mins = mins;
         this.maxes = maxes;
         this.count = count;
+        this.serializer = serializer;
+        this.point = point;
         this.hc = HilbertCurve.small().bits(bits).dimensions(mins.length);
     }
 
@@ -136,15 +140,18 @@ public final class Index {
         return hc;
     }
 
-    public static Index read(File file) throws FileNotFoundException, IOException {
+    public static <T> Index<T> read(File file, Serializer<T> serializer,
+            Function<? super T, double[]> point) throws FileNotFoundException, IOException {
         try (DataInputStream dis = new DataInputStream(
                 new BufferedInputStream(new FileInputStream(file)))) {
-            return read(dis);
+            return read(dis, serializer, point);
         }
     }
 
-    public static Index read(DataInputStream dis) throws IOException {
-        short version = dis.readShort();
+    public static <T> Index<T> read(DataInputStream dis, Serializer<T> serializer,
+            Function<? super T, double[]> point) throws IOException {
+        // read version
+        dis.readShort();
         int bits = dis.readInt();
         int dimensions = dis.readInt();
         double[] mins = new double[dimensions];
@@ -162,7 +169,7 @@ public final class Index {
             int index = dis.readInt();
             indexPositions.put(index, (long) pos);
         }
-        return new Index(indexPositions, mins, maxes, bits, count);
+        return new Index<T>(indexPositions, mins, maxes, bits, count, serializer, point);
     }
 
     public void write(File idx) throws FileNotFoundException, IOException {
@@ -197,8 +204,7 @@ public final class Index {
         }
     }
 
-    public <T> StreamIterable<T> search(Serializer<T> serializer, Bounds queryBounds,
-            RandomAccessFile raf, PositionRange pr, Function<T, double[]> point)
+    public StreamIterable<T> search(Bounds queryBounds, RandomAccessFile raf, PositionRange pr)
             throws IOException {
         InputStream[] in = new InputStream[1];
         final Reader<T> r;

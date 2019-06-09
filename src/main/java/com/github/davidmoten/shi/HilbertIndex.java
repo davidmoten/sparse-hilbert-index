@@ -19,7 +19,7 @@ import com.github.davidmoten.guavamini.Preconditions;
 
 public final class HilbertIndex {
 
-    public static <T> Index sortAndCreateIndex( //
+    public static <T> Index<T> sortAndCreateIndex( //
             File input, //
             Serializer<T> serializer, //
             Function<? super T, double[]> point, //
@@ -29,7 +29,8 @@ public final class HilbertIndex {
             int approximateNumIndexEntries) //
             throws FileNotFoundException, IOException {
 
-        Preconditions.checkArgument(bits * dimensions <= 31, "bits * dimensions must be at most 31");
+        Preconditions.checkArgument(bits * dimensions <= 31,
+                "bits * dimensions must be at most 31");
 
         // scan once to get the mins, maxes, count
         final double[] mins = new double[dimensions];
@@ -76,13 +77,15 @@ public final class HilbertIndex {
                 .sort();
 
         long chunk = Math.max(1, count / approximateNumIndexEntries);
-        TreeMap<Integer, Long> indexPositions = createIndexPositions(serializer, point, output, mins, maxes, hc, chunk);
-        return new Index(indexPositions, mins, maxes, bits, count);
+        TreeMap<Integer, Long> indexPositions = createIndexPositions(serializer, point, output,
+                mins, maxes, hc, chunk);
+        return new Index<T>(indexPositions, mins, maxes, bits, count, serializer, point);
     }
 
     private static <T> TreeMap<Integer, Long> createIndexPositions(Serializer<T> serializer,
-            Function<? super T, double[]> point, File output, final double[] mins, final double[] maxes,
-            SmallHilbertCurve hc, long chunk) throws IOException, FileNotFoundException {
+            Function<? super T, double[]> point, File output, final double[] mins,
+            final double[] maxes, SmallHilbertCurve hc, long chunk)
+            throws IOException, FileNotFoundException {
         TreeMap<Integer, Long> indexPositions = new TreeMap<>();
         try (//
                 InputStream in = Util.bufferedInput(output); //
@@ -116,10 +119,12 @@ public final class HilbertIndex {
         return indexPositions;
     }
 
-    private static int hilbertIndex(SmallHilbertCurve hc, double[] point, double[] mins, double[] maxes) {
+    private static int hilbertIndex(SmallHilbertCurve hc, double[] point, double[] mins,
+            double[] maxes) {
         long[] ordinates = new long[point.length];
         for (int i = 0; i < ordinates.length; i++) {
-            ordinates[i] = Math.round((point[i] - mins[i]) / (maxes[i] - mins[i]) * hc.maxOrdinate());
+            ordinates[i] = Math
+                    .round((point[i] - mins[i]) / (maxes[i] - mins[i]) * hc.maxOrdinate());
         }
         // can do this because bits * dimensions <= 31
         return (int) hc.index(ordinates);

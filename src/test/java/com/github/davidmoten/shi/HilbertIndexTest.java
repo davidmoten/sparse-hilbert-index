@@ -49,8 +49,8 @@ public class HilbertIndexTest {
         int bits = 2;
         int dimensions = 3;
         int approxNumIndexEntries = 2;
-        Index index = HilbertIndex.sortAndCreateIndex(input, ser, point, OUTPUT, bits, dimensions,
-                approxNumIndexEntries);
+        Index<String> index = HilbertIndex.sortAndCreateIndex(input, ser, point, OUTPUT, bits,
+                dimensions, approxNumIndexEntries);
         assertArrayEquals(new double[] { 4, 2, 100 }, index.mins(), PRECISION);
         assertArrayEquals(new double[] { 10, 7, 600 }, index.maxes(), PRECISION);
         assertEquals(3, index.count());
@@ -97,7 +97,7 @@ public class HilbertIndexTest {
 
     @Test
     public void testCalculationOfIndex() throws FileNotFoundException, IOException {
-        Index index = createIndex();
+        Index<byte[]> index = createIndex();
 
         System.out.println(index);
         System.out.println(new Date(Math.round(index.mins()[2])));
@@ -107,7 +107,7 @@ public class HilbertIndexTest {
 
     @Test
     public void testIndexSerializationRoundTrip() throws IOException {
-        Index index = createIndex();
+        Index<byte[]> index = createIndex();
 
         File idx = new File("target/output.idx");
 
@@ -115,13 +115,13 @@ public class HilbertIndexTest {
         index.write(idx);
 
         // reread index
-        index = Index.read(idx);
+        index = Index.read(idx, SERIALIZER, POINT_FN);
         checkIndex(index);
     }
 
     @Test
     public void testQuery() throws IOException {
-        Index ind = createIndex();
+        Index<byte[]> ind = createIndex();
         Bounds sb = createQueryBounds(Math.round(ind.mins()[2]), Math.round(ind.maxes()[2]));
         int expectedFound = 0;
         {
@@ -142,7 +142,7 @@ public class HilbertIndexTest {
         try (RandomAccessFile raf = new RandomAccessFile(OUTPUT, "r")) {
             List<Record> list = Stream //
                     .from(positionRanges) //
-                    .flatMap(pr -> ind.search(SERIALIZER, sb, raf, pr, POINT_FN)) //
+                    .flatMap(pr -> ind.search(sb, raf, pr)) //
                     .map(b -> Record.read(b)) //
                     .toList() //
                     .get();
@@ -151,7 +151,7 @@ public class HilbertIndexTest {
 
     }
 
-    private static Index createIndex() throws IOException {
+    private static Index<byte[]> createIndex() throws IOException {
         int bits = 10;
         int dimensions = 3;
         File input = new File(
@@ -161,7 +161,7 @@ public class HilbertIndexTest {
                 dimensions, approximateNumIndexEntries);
     }
 
-    private void checkIndex(Index index) {
+    private void checkIndex(Index<?> index) {
         assertEquals(29163, index.count());
         assertArrayEquals(new double[] { -54.669193267822266, 19.543855667114258, 1.557869714E12 },
                 index.mins(), 0.00001);
