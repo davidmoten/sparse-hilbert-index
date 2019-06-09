@@ -39,12 +39,6 @@ public final class PositionRange {
         return ceilingPosition;
     }
 
-    public boolean overlapsPositionWith(PositionRange last) {
-        return (floorPosition >= last.floorPosition && floorPosition <= last.ceilingPosition)
-                || (ceilingPosition <= last.ceilingPosition
-                        && ceilingPosition >= last.floorPosition);
-    }
-
     public PositionRange join(PositionRange other) {
         Preconditions.checkArgument(
                 other.ranges.get(0).low() >= this.ranges.get(ranges.size() - 1).high());

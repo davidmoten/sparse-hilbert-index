@@ -75,7 +75,6 @@ public final class Index {
                     && range.high() >= indexPositions.firstKey()) {
                 Long startPosition = value(indexPositions.floorEntry((int) range.low()));
                 if (startPosition == null) {
-                    ;
                     startPosition = indexPositions.firstEntry().getValue();
                 }
                 Long endPosition = value(indexPositions.ceilingEntry((int) range.high()));
@@ -88,7 +87,7 @@ public final class Index {
                     list.add(p);
                 } else {
                     PositionRange last = list.getLast();
-                    if (last.overlapsPositionWith(p)) {
+                    if (p.floorPosition() <= last.ceilingPosition())  {
                         list.pollLast();
                         list.offer(last.join(p));
                     } else {
