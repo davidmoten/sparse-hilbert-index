@@ -92,7 +92,7 @@ public class IndexTest {
         {
             PositionRange pr = ranges.get(1);
             assertEquals(10, pr.floorPosition());
-            assertEquals(16, pr.ceilingPosition());
+            assertEquals(Long.MAX_VALUE, pr.ceilingPosition());
         }
     }
 }

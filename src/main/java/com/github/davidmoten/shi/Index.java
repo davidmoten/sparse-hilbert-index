@@ -84,7 +84,7 @@ public final class Index<T> {
                 }
                 Long endPosition = value(indexPositions.higherEntry((int) range.high()));
                 if (endPosition == null) {
-                    endPosition = indexPositions.lastEntry().getValue();
+                    endPosition = Long.MAX_VALUE;
                 }
                 PositionRange p = new PositionRange(range.high(), startPosition, endPosition);
                 if (list.isEmpty()) {
@@ -273,7 +273,10 @@ public final class Index<T> {
         long[] a = ordinates(queryBounds.mins());
         long[] b = ordinates(queryBounds.maxes());
         Ranges ranges = hc.query(a, b);
-        return Stream.from(getPositionRanges(ranges))
+        System.out.println(ranges);
+        System.out.println(indexPositions);
+        return Stream.from(getPositionRanges(ranges)) //
+                .doOnNext(System.out::println) //
                 .flatMap(pr -> search(queryBounds, factory, pr));
     }
 

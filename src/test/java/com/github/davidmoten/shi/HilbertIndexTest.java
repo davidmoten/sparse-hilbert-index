@@ -28,6 +28,7 @@ import com.github.davidmoten.bigsorter.Serializer;
 
 public class HilbertIndexTest {
 
+    private static final int NUM_SIMPLE_ROWS = 3;
     private static final double PRECISION = 0.00001;
     private static final File OUTPUT = new File("target/output");
     private static final Serializer<byte[]> SERIALIZER = Serializer.fixedSizeRecord(35);
@@ -38,26 +39,13 @@ public class HilbertIndexTest {
 
     @Test
     public void testSimple() throws IOException {
-        Serializer<String> ser = Serializer.linesUtf8();
-        String s = "10,2,300\n4,5,600\n8,7,100";
-        int numRows = 3;
-        File input = new File("target/input");
-        Files.write(input.toPath(), s.getBytes(StandardCharsets.UTF_8));
-        Function<String, double[]> point = line -> Arrays //
-                .stream(line.split(",")) //
-                .mapToDouble(x -> Double.parseDouble(x)) //
-                .toArray();
-        int bits = 2;
-        int dimensions = 3;
-        int approxNumIndexEntries = 2;
-        Index<String> index = HilbertIndex.sortAndCreateIndex(input, ser, point, OUTPUT, bits,
-                dimensions, approxNumIndexEntries);
+        Index<String> index = createSimpleIndex();
         assertArrayEquals(new double[] { 4, 2, 100 }, index.mins(), PRECISION);
         assertArrayEquals(new double[] { 10, 7, 600 }, index.maxes(), PRECISION);
         assertEquals(3, index.count());
         System.out.println(index.indexPositions());
         System.out.println(new String(Files.readAllBytes(OUTPUT.toPath())));
-        SmallHilbertCurve hc = HilbertCurve.small().bits(bits).dimensions(dimensions);
+        SmallHilbertCurve hc = index.hilbertCurve();
         // check hc calc of first item
         int firstIndex = (int) hc.index(//
                 Math.round((4 - 4.0) / (10 - 4) * hc.maxOrdinate()), //
@@ -92,11 +80,33 @@ public class HilbertIndexTest {
             System.out.println(prs);
             PositionRange pr = prs.get(0);
             assertEquals(0, pr.floorPosition());
-            assertEquals(16, pr.ceilingPosition());
+            assertEquals(Long.MAX_VALUE, pr.ceilingPosition());
         }
+    }
+
+    @Test
+    public void testSimpleSearchWholeDomain() throws FileNotFoundException, IOException {
+        Index<String> index = createSimpleIndex();
         Bounds queryBounds = new Bounds(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
         RandomAccessFile raf = new RandomAccessFile(OUTPUT, "r");
-        assertEquals(numRows, index.search(queryBounds, raf).count().get().intValue());
+        assertEquals(NUM_SIMPLE_ROWS, index.search(queryBounds, raf).count().get().intValue());
+    }
+
+    private static Index<String> createSimpleIndex() throws IOException, FileNotFoundException {
+        Serializer<String> ser = Serializer.linesUtf8();
+        String s = "10,2,300\n4,5,600\n8,7,100";
+        File input = new File("target/input");
+        Files.write(input.toPath(), s.getBytes(StandardCharsets.UTF_8));
+        Function<String, double[]> point = line -> Arrays //
+                .stream(line.split(",")) //
+                .mapToDouble(x -> Double.parseDouble(x)) //
+                .toArray();
+        int bits = 2;
+        int dimensions = 3;
+        int approxNumIndexEntries = 2;
+        Index<String> index = HilbertIndex.sortAndCreateIndex(input, ser, point, OUTPUT, bits,
+                dimensions, approxNumIndexEntries);
+        return index;
     }
 
     @Test
