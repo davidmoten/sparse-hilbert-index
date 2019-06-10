@@ -32,24 +32,29 @@ public class FixesSearchMain {
         System.out.println(index);
         double minTime = 1.557868858E12;
         double maxTime = 1.5579648E12;
-        double t1 = minTime + TimeUnit.HOURS.toMillis(4);
-        double t2 = t1 + TimeUnit.MINUTES.toMillis(15);
+        double t1 = minTime + TimeUnit.HOURS.toMillis(0);
+        double t2 = t1 + TimeUnit.MINUTES.toMillis(30);
         // sydney region
-        double[] a = new double[] { -33.68, 150.86, t1 };
-        double[] b = new double[] { -34.06, 151.34, t2 };
-//        double[] a = new double[] { 0, 100, minTime };
-//        double[] b = new double[] { -60, 175, maxTime };
+        // double[] a = new double[] { -33.68, 150.86, t1 };
+        // double[] b = new double[] { -34.06, 151.34, t2 };
+        double[] a = new double[] { -10.6, 109, minTime };
+        double[] b = new double[] { -50, 179, maxTime };
         Bounds bounds = Bounds.create(a, b);
-        long t = System.currentTimeMillis();
-        long count = index.search(bounds, output).count().get();
-        System.out.println(count + " found in " + (System.currentTimeMillis() - t) + "ms");
+        long t;
+        if (true) {
+            System.out.println("queryBounds=" + bounds);
+            t = System.currentTimeMillis();
+            long count = index.search(bounds, output, 100).count().get();
+            System.out.println(count + " found in " + (System.currentTimeMillis() - t) + "ms using file search");
+        }
 
         t = System.currentTimeMillis();
         long c = searchRaw(bounds);
-        System.out.println(c + " found in " + (System.currentTimeMillis() - t) + "ms");
+        System.out.println(c + " found in " + (System.currentTimeMillis() - t) + "ms using file scan");
 
-        String location = new String(Base64.getDecoder().decode(
-                "aHR0cHM6Ly9tb3Rlbi1maXhlcy5zMy1hcC1zb3V0aGVhc3QtMi5hbWF6b25hd3MuY29tL291dHB1dC1zb3J0ZWQK"),
+        String location = new String(
+                Base64.getDecoder().decode(
+                        "aHR0cHM6Ly9tb3Rlbi1maXhlcy5zMy1hcC1zb3V0aGVhc3QtMi5hbWF6b25hd3MuY29tL291dHB1dC1zb3J0ZWQK"),
                 StandardCharsets.UTF_8);
 
         String locationIdx = new String(Base64.getDecoder().decode(
@@ -74,8 +79,9 @@ public class FixesSearchMain {
             con.addRequestProperty("Range", bytesRange);
             return con.getInputStream();
         };
-        long records = index.search(bounds, factory).count().get();
-        System.out.println("found " + records + " in " + (System.currentTimeMillis() - t) + "ms");
+        long records = index.search(bounds, factory, 0).count().get();
+        System.out.println(
+                "found " + records + " in " + (System.currentTimeMillis() - t) + "ms using search over https (s3)");
     }
 
     private static InputStream getIndexInputStream(String indexUrl) throws IOException {
