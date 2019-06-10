@@ -41,11 +41,11 @@ public final class Index<T> {
     private final double[] maxes;
     private final SmallHilbertCurve hc;
     private final long count;
-    private final Serializer<T> serializer;
+    private final Serializer<? extends T> serializer;
     private final Function<? super T, double[]> point;
 
     Index(TreeMap<Integer, Long> indexPositions, double[] mins, double[] maxes, int bits,
-            long count, Serializer<T> serializer, Function<? super T, double[]> point) {
+            long count, Serializer<? extends T> serializer, Function<? super T, double[]> point) {
         this.indexPositions = indexPositions;
         this.mins = mins;
         this.maxes = maxes;
@@ -221,7 +221,7 @@ public final class Index<T> {
     public StreamIterable<T> search(Bounds queryBounds, BiFunction<Long, Long, InputStream> factory,
             PositionRange pr) throws IOException {
         InputStream[] in = new InputStream[1];
-        final Reader<T> r;
+        final Reader<? extends T> r;
         try {
             in[0] = factory.apply(pr.floorPosition(), pr.ceilingPosition());
             r = serializer.createReader(in[0]);

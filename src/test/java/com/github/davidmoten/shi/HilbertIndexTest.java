@@ -103,9 +103,15 @@ public class HilbertIndexTest {
         int bits = 2;
         int dimensions = 3;
         int approxNumIndexEntries = 2;
-        Index<String> index = HilbertIndex.sortAndCreateIndex(input, ser, point, OUTPUT, bits,
-                dimensions, approxNumIndexEntries);
-        return index;
+        return HilbertIndex //
+                .serializer(ser) //
+                .point(point) //
+                .input(input) //
+                .output(OUTPUT) //
+                .bits(bits) //
+                .dimensions(dimensions) //
+                .numIndexEntriesApproximate(approxNumIndexEntries) //
+                .createIndex();
     }
 
     @Test
@@ -161,7 +167,6 @@ public class HilbertIndexTest {
                     .get();
             assertEquals(expectedFound, list.size());
         }
-
     }
 
     private static Index<byte[]> createIndex() throws IOException {
@@ -170,8 +175,15 @@ public class HilbertIndexTest {
         File input = new File(
                 "src/test/resources/2019-05-15.binary-fixes-with-mmsi.sampled.every.400");
         int approximateNumIndexEntries = 100;
-        return HilbertIndex.sortAndCreateIndex(input, SERIALIZER, POINT_FN, OUTPUT, bits,
-                dimensions, approximateNumIndexEntries);
+        return HilbertIndex //
+                .serializer(SERIALIZER) //
+                .point(POINT_FN) //
+                .input(input) //
+                .output(OUTPUT) //
+                .bits(bits) //
+                .dimensions(dimensions) //
+                .numIndexEntriesApproximate(approximateNumIndexEntries) //
+                .createIndex();
     }
 
     private void checkIndex(Index<?> index) {
