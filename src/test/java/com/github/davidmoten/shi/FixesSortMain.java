@@ -44,7 +44,7 @@ public class FixesSortMain {
         double minTime = 1.557868858E12;
         double maxTime = 1.5579648E12;
         double t = minTime + TimeUnit.HOURS.toMillis(12);
-        double[] a = new double[] { -33.68, 151.02, minTime };
+        double[] a = new double[] { -33.68, 150.86, minTime };
         double[] b = new double[] { -34.06, 151.34, maxTime };
         Bounds bounds = Bounds.create(a, b);
         long count = index.search(bounds, output).count().get();
