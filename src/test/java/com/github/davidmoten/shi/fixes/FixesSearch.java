@@ -19,7 +19,7 @@ import com.github.davidmoten.shi.Index;
 public class FixesSearch {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        Index<byte[]> index = Index.read(idx, ser, point);
+        Index<byte[]> index = Index.serializer(ser).pointMapper(point).read(idx);
         System.out.println(index);
         double minTime = 1.557868858E12;
         double maxTime = 1.5579648E12;
@@ -31,9 +31,16 @@ public class FixesSearch {
 //        double[] a = new double[] { 0, 100, minTime };
 //        double[] b = new double[] { -60, 175, maxTime };
         Bounds bounds = Bounds.create(a, b);
+        long t = System.currentTimeMillis();
         long count = index.search(bounds, output).count().get();
-        System.out.println(count);
+        System.out.println(count + " found in " + (System.currentTimeMillis() - t) + "ms");
 
+        t = System.currentTimeMillis();
+        long c = searchRaw(bounds);
+        System.out.println(c + " found in " + (System.currentTimeMillis() - t) + "ms");
+    }
+
+    private static long searchRaw(Bounds bounds) throws IOException, FileNotFoundException {
         long c = 0;
         try (InputStream in = new BufferedInputStream(new FileInputStream(output))) {
             Reader<byte[]> r = ser.createReader(in);
@@ -45,7 +52,7 @@ public class FixesSearch {
                 }
             }
         }
-        System.out.println("found " + c);
+        return c;
     }
 
 }

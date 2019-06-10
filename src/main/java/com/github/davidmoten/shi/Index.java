@@ -117,6 +117,18 @@ public final class Index<T> {
             return new Builder3<T>(b);
         }
 
+        public Index<T> read(DataInputStream in) {
+            return Index.read(in, b.serializer, b.pointMapper);
+        }
+
+        public Index<T> read(File file) {
+            try (DataInputStream in = new DataInputStream(
+                    new BufferedInputStream(new FileInputStream(file)))) {
+                return read(in);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
     }
 
     public static final class Builder3<T> {
@@ -174,7 +186,7 @@ public final class Index<T> {
          * depend on where the chunking falls so can vary by a few from the desired
          * value.
          * 
-         * @param numIndexEntries
+         * @param numIndexEntries approximate number of index entries
          * @return builder
          */
         public Builder6<T> numIndexEntries(int numIndexEntries) {
@@ -279,7 +291,7 @@ public final class Index<T> {
         return hc;
     }
 
-    public static <T> Index<T> read(File file, Serializer<T> serializer,
+    public static <T> Index<T> read(File file, Serializer<? extends T> serializer,
             Function<? super T, double[]> point) throws FileNotFoundException, IOException {
         try (DataInputStream dis = new DataInputStream(
                 new BufferedInputStream(new FileInputStream(file)))) {
@@ -287,28 +299,32 @@ public final class Index<T> {
         }
     }
 
-    public static <T> Index<T> read(DataInputStream dis, Serializer<T> serializer,
-            Function<? super T, double[]> point) throws IOException {
-        // read version
-        dis.readShort();
-        int bits = dis.readInt();
-        int dimensions = dis.readInt();
-        double[] mins = new double[dimensions];
-        double[] maxes = new double[dimensions];
-        for (int i = 0; i < dimensions; i++) {
-            mins[i] = dis.readDouble();
-            maxes[i] = dis.readDouble();
+    public static <T> Index<T> read(DataInputStream dis, Serializer<? extends T> serializer,
+            Function<? super T, double[]> point) {
+        try {
+            // read version
+            dis.readShort();
+            int bits = dis.readInt();
+            int dimensions = dis.readInt();
+            double[] mins = new double[dimensions];
+            double[] maxes = new double[dimensions];
+            for (int i = 0; i < dimensions; i++) {
+                mins[i] = dis.readDouble();
+                maxes[i] = dis.readDouble();
+            }
+            long count = dis.readLong();
+            int numEntries = dis.readInt();
+            dis.readInt();
+            TreeMap<Integer, Long> indexPositions = new TreeMap<Integer, Long>();
+            for (int i = 0; i < numEntries; i++) {
+                int index = dis.readInt();
+                int pos = dis.readInt();
+                indexPositions.put(index, (long) pos);
+            }
+            return new Index<T>(indexPositions, mins, maxes, bits, count, serializer, point);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
-        long count = dis.readLong();
-        int numEntries = dis.readInt();
-        dis.readInt();
-        TreeMap<Integer, Long> indexPositions = new TreeMap<Integer, Long>();
-        for (int i = 0; i < numEntries; i++) {
-            int index = dis.readInt();
-            int pos = dis.readInt();
-            indexPositions.put(index, (long) pos);
-        }
-        return new Index<T>(indexPositions, mins, maxes, bits, count, serializer, point);
     }
 
     public Index<T> write(File idx) {
@@ -436,13 +452,15 @@ public final class Index<T> {
         long[] a = ordinates(queryBounds.mins());
         long[] b = ordinates(queryBounds.maxes());
         Ranges ranges = hc.query(a, b);
+        System.out.println("ranges=" + ranges.size());
         return Stream.from(positionRanges(ranges)) //
                 .flatMap(pr -> search(queryBounds, factory, pr));
     }
 
     @Override
     public String toString() {
-        return "Index [mins=" + Arrays.toString(mins) + ", maxes=" + Arrays.toString(maxes) + "]";
+        return "Index [mins=" + Arrays.toString(mins) + ", maxes=" + Arrays.toString(maxes)
+                + ", numEntries=" + indexPositions.size() + "]";
     }
 
 }
