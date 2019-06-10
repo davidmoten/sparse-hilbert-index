@@ -61,20 +61,20 @@ public final class Index<T> {
     }
 
     public static final class Builder1<T> {
-        private File input;
-        public File output;
-        public int bits;
-        public int dimensions;
-        public int numIndexEntriesApproximate;
-        public Function<? super T, double[]> point;
-        private Serializer<? extends T> serializer;
+        private final Serializer<? extends T> serializer;
+        Function<? super T, double[]> pointMapper;
+        File input;
+        File output;
+        int bits;
+        int dimensions;
+        int numIndexEntriesApproximate = 10000;
 
         Builder1(Serializer<? extends T> serializer) {
             this.serializer = serializer;
         }
 
-        Builder2<T> point(Function<? super T, double[]> point) {
-            this.point = point;
+        Builder2<T> pointMapper(Function<? super T, double[]> pointMapper) {
+            this.pointMapper = pointMapper;
             return new Builder2<T>(this);
         }
     }
@@ -143,15 +143,15 @@ public final class Index<T> {
             this.b = b;
         }
 
-        Builder6<T> numIndexEntriesApproximate(int value) {
+        Builder6<T> numIndexEntries(int value) {
             b.numIndexEntriesApproximate = value;
             return this;
         }
 
         Index<T> createIndex() {
             try {
-                return HilbertIndex.<T>createIndex(b.input, b.serializer, b.point, b.output, b.bits,
-                        b.dimensions, b.numIndexEntriesApproximate);
+                return HilbertIndex.<T>createIndex(b.input, b.serializer, b.pointMapper, b.output,
+                        b.bits, b.dimensions, b.numIndexEntriesApproximate);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }

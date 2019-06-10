@@ -27,7 +27,7 @@ final class HilbertIndex {
             File output, //
             int bits, //
             int dimensions, //
-            int approximateNumIndexEntries) //
+            int numIndexEntriesApproximate) //
             throws IOException {
 
         Preconditions.checkArgument(bits * dimensions <= 31,
@@ -77,7 +77,7 @@ final class HilbertIndex {
                 .loggerStdOut() //
                 .sort();
 
-        long chunk = Math.max(1, count / approximateNumIndexEntries);
+        long chunk = Math.max(1, count / numIndexEntriesApproximate);
         TreeMap<Integer, Long> indexPositions = createIndexPositions(serializer, point, output,
                 mins, maxes, hc, chunk);
         return new Index<T>(indexPositions, mins, maxes, bits, count, serializer, point);

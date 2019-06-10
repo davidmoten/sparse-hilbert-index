@@ -105,12 +105,12 @@ public class HilbertIndexTest {
         int approxNumIndexEntries = 2;
         return Index //
                 .serializer(ser) //
-                .point(point) //
+                .pointMapper(point) //
                 .input(input) //
                 .output(OUTPUT) //
                 .bits(bits) //
                 .dimensions(dimensions) //
-                .numIndexEntriesApproximate(approxNumIndexEntries) //
+                .numIndexEntries(approxNumIndexEntries) //
                 .createIndex();
     }
 
@@ -177,12 +177,12 @@ public class HilbertIndexTest {
         int approximateNumIndexEntries = 100;
         return Index //
                 .serializer(SERIALIZER) //
-                .point(POINT_FN) //
+                .pointMapper(POINT_FN) //
                 .input(input) //
                 .output(OUTPUT) //
                 .bits(bits) //
                 .dimensions(dimensions) //
-                .numIndexEntriesApproximate(approximateNumIndexEntries) //
+                .numIndexEntries(approximateNumIndexEntries) //
                 .createIndex();
     }
 
