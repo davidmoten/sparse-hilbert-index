@@ -22,6 +22,10 @@ public final class Bounds {
         this.maxes = maxes;
     }
 
+    public static Bounds create(double[] a, double[] b) {
+        return new Bounds(a, b);
+    }
+
     public boolean contains(double[] d) {
         Preconditions.checkArgument(mins.length == d.length);
         for (int i = 0; i < mins.length; i++) {
