@@ -43,17 +43,26 @@ public final class Index<T> {
     private final SmallHilbertCurve hc;
     private final long count;
     private final Serializer<? extends T> serializer;
-    private final Function<? super T, double[]> point;
+    private final Function<? super T, double[]> pointMapper;
 
     Index(TreeMap<Integer, Long> indexPositions, double[] mins, double[] maxes, int bits,
-            long count, Serializer<? extends T> serializer, Function<? super T, double[]> point) {
+            long count, Serializer<? extends T> serializer,
+            Function<? super T, double[]> pointMapper) {
         this.indexPositions = indexPositions;
         this.mins = mins;
         this.maxes = maxes;
         this.count = count;
         this.serializer = serializer;
-        this.point = point;
+        this.pointMapper = pointMapper;
         this.hc = HilbertCurve.small().bits(bits).dimensions(mins.length);
+    }
+
+    public Serializer<? extends T> serializer() {
+        return serializer;
+    }
+
+    public Function<? super T, double[]> pointMapper() {
+        return pointMapper;
     }
 
     public static <T> Builder1<T> serializer(Serializer<? extends T> serializer) {
@@ -346,8 +355,9 @@ public final class Index<T> {
                 // else keep reading till EOF or next record found within queryBounds
             }
         }) //
-                .takeUntil(rec -> hc.index(ordinates(point.apply(rec))) > pr.maxHilbertIndex()) //
-                .filter(t -> queryBounds.contains(point.apply(t))) //
+                .takeUntil(
+                        rec -> hc.index(ordinates(pointMapper.apply(rec))) > pr.maxHilbertIndex()) //
+                .filter(t -> queryBounds.contains(pointMapper.apply(t))) //
                 .doOnDispose(() -> {
                     closeSilently(r);
                     closeSilently(in[0]);
@@ -366,6 +376,14 @@ public final class Index<T> {
 
     public int numEntries() {
         return indexPositions.size();
+    }
+
+    public Stream<T> search(Bounds queryBounds, File file) {
+        try {
+            return search(queryBounds, new RandomAccessFile(file, "r"));
+        } catch (FileNotFoundException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     public Stream<T> search(Bounds queryBounds, RandomAccessFile raf) {

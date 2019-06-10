@@ -87,8 +87,7 @@ public class HilbertIndexTest {
     public void testSimpleSearchWholeDomain() throws FileNotFoundException, IOException {
         Index<String> index = createSimpleIndex();
         Bounds queryBounds = new Bounds(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
-        RandomAccessFile raf = new RandomAccessFile(OUTPUT, "r");
-        assertEquals(NUM_SIMPLE_ROWS, index.search(queryBounds, raf).count().get().intValue());
+        assertEquals(NUM_SIMPLE_ROWS, index.search(queryBounds, OUTPUT).count().get().intValue());
     }
 
     private static Index<String> createSimpleIndex() throws IOException, FileNotFoundException {
