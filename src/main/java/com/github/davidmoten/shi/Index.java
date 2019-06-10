@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
 import java.nio.channels.Channels;
@@ -286,9 +287,15 @@ public final class Index<T> {
         return new Index<T>(indexPositions, mins, maxes, bits, count, serializer, point);
     }
 
-    public void write(File idx) throws FileNotFoundException, IOException {
-        try (DataOutputStream dos = new DataOutputStream(
-                new BufferedOutputStream(new FileOutputStream(idx)))) {
+    public Index<T> write(File idx) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(idx)) {
+            write(fos);
+        }
+        return this;
+    }
+
+    public Index<T> write(OutputStream out) throws IOException {
+        try (DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(out))) {
             dos.writeShort(VERSION);
             dos.writeInt(hc.bits());
             dos.writeInt(hc.dimensions());
@@ -316,6 +323,7 @@ public final class Index<T> {
                 dos.writeInt(entry.getValue().intValue());
             }
         }
+        return this;
     }
 
     private static BiFunction<Long, Long, InputStream> rafInputStreamFactory(RandomAccessFile raf) {
