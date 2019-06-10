@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.function.Function;
 
@@ -334,10 +335,12 @@ public final class Index<T> {
         return this;
     }
 
-    private static BiFunction<Long, Long, InputStream> rafInputStreamFactory(RandomAccessFile raf) {
+    private static BiFunction<Long, Optional<Long>, InputStream> rafInputStreamFactory(
+            RandomAccessFile raf) {
         return (first, last) -> {
             raf.seek(first);
-            return new LimitingInputStream(Channels.newInputStream(raf.getChannel()), last - first);
+            return new LimitingInputStream(Channels.newInputStream(raf.getChannel()),
+                    last.orElse(Long.MAX_VALUE) - first);
         };
     }
 
@@ -346,12 +349,15 @@ public final class Index<T> {
         return search(queryBounds, rafInputStreamFactory(raf), pr);
     }
 
-    public StreamIterable<T> search(Bounds queryBounds, BiFunction<Long, Long, InputStream> factory,
-            PositionRange pr) throws IOException {
+    public StreamIterable<T> search(Bounds queryBounds,
+            BiFunction<Long, Optional<Long>, InputStream> factory, PositionRange pr)
+            throws IOException {
         InputStream[] in = new InputStream[1];
         final Reader<? extends T> r;
         try {
-            in[0] = factory.apply(pr.floorPosition(), pr.ceilingPosition());
+            Optional<Long> ceiling = pr.ceilingPosition() == Long.MAX_VALUE ? Optional.empty()
+                    : Optional.of(pr.ceilingPosition());
+            in[0] = factory.apply(pr.floorPosition(), ceiling);
             r = serializer.createReader(in[0]);
         } catch (Throwable t) {
             closeSilently(in[0]);
@@ -406,7 +412,8 @@ public final class Index<T> {
         return search(queryBounds, rafInputStreamFactory(raf));
     }
 
-    public Stream<T> search(Bounds queryBounds, BiFunction<Long, Long, InputStream> factory) {
+    public Stream<T> search(Bounds queryBounds,
+            BiFunction<Long, Optional<Long>, InputStream> factory) {
         long[] a = ordinates(queryBounds.mins());
         long[] b = ordinates(queryBounds.maxes());
         Ranges ranges = hc.query(a, b);
