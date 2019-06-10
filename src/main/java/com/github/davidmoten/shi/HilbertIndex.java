@@ -26,8 +26,7 @@ final class HilbertIndex {
             File output, //
             int bits, //
             int dimensions, //
-            int numIndexEntriesApproximate, //
-            boolean gzipped) //
+            int numIndexEntriesApproximate) //
             throws IOException {
 
         Preconditions.checkArgument(bits * dimensions <= 31,
@@ -37,7 +36,7 @@ final class HilbertIndex {
         final double[] mins = new double[dimensions];
         final double[] maxes = new double[dimensions];
         long count = 0;
-        try (InputStream in = Util.bufferedInput(input, gzipped); //
+        try (InputStream in = Util.bufferedInput(input); //
                 Reader<? extends T> reader = serializer.createReader(in)) {
             Arrays.setAll(mins, i -> Double.MAX_VALUE);
             Arrays.setAll(maxes, i -> Double.MIN_VALUE);

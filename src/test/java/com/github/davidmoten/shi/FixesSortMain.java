@@ -16,7 +16,7 @@ public class FixesSortMain {
 
     public static void main(String[] args) throws IOException {
         File input = new File(System.getProperty("user.home")
-                + "/Downloads/2019-05-15.binary-fixes-with-mmsi.gz");
+                + "/Downloads/2019-05-15.binary-fixes-with-mmsi");
         File output = new File("target/sorted");
         File idx = new File("target/sorted.idx");
         int recordSize = 35;
@@ -32,7 +32,7 @@ public class FixesSortMain {
         Index<byte[]> index = Index//
                 .serializer(ser) //
                 .pointMapper(point) //
-                .inputGzipped(input) //
+                .input(input) //
                 .output(output) //
                 .bits(10) //
                 .dimensions(3) //

@@ -26,6 +26,6 @@ class Util {
     }
 
     static InputStream bufferedInput(File file) throws IOException {
-        return bufferedInput(file, true);
+        return bufferedInput(file, false);
     }
 }

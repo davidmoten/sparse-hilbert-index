@@ -93,7 +93,6 @@ public final class Index<T> {
         int bits;
         int dimensions;
         int numIndexEntriesApproximate = 10000;
-        public boolean gzipped;
 
         Builder1(Serializer<? extends T> serializer) {
             this.serializer = serializer;
@@ -118,11 +117,6 @@ public final class Index<T> {
             return new Builder3<T>(b);
         }
 
-        Builder3<T> inputGzipped(File input) {
-            b.input = input;
-            b.gzipped = true;
-            return new Builder3<T>(b);
-        }
     }
 
     public static final class Builder3<T> {
@@ -191,7 +185,7 @@ public final class Index<T> {
         Index<T> createIndex() {
             try {
                 return HilbertIndex.<T>createIndex(b.input, b.serializer, b.pointMapper, b.output,
-                        b.bits, b.dimensions, b.numIndexEntriesApproximate, b.gzipped);
+                        b.bits, b.dimensions, b.numIndexEntriesApproximate);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
