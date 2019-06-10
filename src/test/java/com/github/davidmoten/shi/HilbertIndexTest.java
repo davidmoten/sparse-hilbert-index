@@ -28,6 +28,11 @@ import com.github.davidmoten.shi.fixes.Record;
 
 public class HilbertIndexTest {
 
+    private static final Serializer<String> SIMPLE_SERIALIZER = Serializer.linesUtf8();
+    private static final Function<String, double[]> SIMPLE_POINT_MAPPER = line -> Arrays //
+            .stream(line.split(",")) //
+            .mapToDouble(x -> Double.parseDouble(x)) //
+            .toArray();
     private static final int NUM_SIMPLE_ROWS = 3;
     private static final double PRECISION = 0.00001;
     private static final File OUTPUT = new File("target/output");
@@ -89,23 +94,23 @@ public class HilbertIndexTest {
         Index<String> index = createSimpleIndex();
         Bounds queryBounds = new Bounds(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
         assertEquals(NUM_SIMPLE_ROWS, index.search(queryBounds, OUTPUT).count().get().intValue());
+        File idx2 = new File("target/idx2");
+        index.write(idx2);
+        Index<String> index2 = Index.read(idx2, SIMPLE_SERIALIZER, SIMPLE_POINT_MAPPER);
+        assertEquals(NUM_SIMPLE_ROWS, index2.search(queryBounds, OUTPUT).count().get().intValue());
     }
 
     private static Index<String> createSimpleIndex() throws IOException, FileNotFoundException {
-        Serializer<String> ser = Serializer.linesUtf8();
         String s = "10,2,300\n4,5,600\n8,7,100";
         File input = new File("target/input");
         Files.write(input.toPath(), s.getBytes(StandardCharsets.UTF_8));
-        Function<String, double[]> point = line -> Arrays //
-                .stream(line.split(",")) //
-                .mapToDouble(x -> Double.parseDouble(x)) //
-                .toArray();
+
         int bits = 2;
         int dimensions = 3;
         int approxNumIndexEntries = 2;
         return Index //
-                .serializer(ser) //
-                .pointMapper(point) //
+                .serializer(SIMPLE_SERIALIZER) //
+                .pointMapper(SIMPLE_POINT_MAPPER) //
                 .input(input) //
                 .output(OUTPUT) //
                 .bits(bits) //

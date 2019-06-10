@@ -304,8 +304,8 @@ public final class Index<T> {
         dis.readInt();
         TreeMap<Integer, Long> indexPositions = new TreeMap<Integer, Long>();
         for (int i = 0; i < numEntries; i++) {
-            int pos = dis.readInt();
             int index = dis.readInt();
+            int pos = dis.readInt();
             indexPositions.put(index, (long) pos);
         }
         return new Index<T>(indexPositions, mins, maxes, bits, count, serializer, point);
