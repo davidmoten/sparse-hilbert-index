@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.io.UncheckedIOException;
 import java.nio.channels.Channels;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -53,6 +54,108 @@ public final class Index<T> {
         this.serializer = serializer;
         this.point = point;
         this.hc = HilbertCurve.small().bits(bits).dimensions(mins.length);
+    }
+
+    public static <T> Builder1<T> serializer(Serializer<? extends T> serializer) {
+        return new Builder1<T>(serializer);
+    }
+
+    public static final class Builder1<T> {
+        private File input;
+        public File output;
+        public int bits;
+        public int dimensions;
+        public int numIndexEntriesApproximate;
+        public Function<? super T, double[]> point;
+        private Serializer<? extends T> serializer;
+
+        Builder1(Serializer<? extends T> serializer) {
+            this.serializer = serializer;
+        }
+
+        Builder2<T> point(Function<? super T, double[]> point) {
+            this.point = point;
+            return new Builder2<T>(this);
+        }
+    }
+
+    public static final class Builder2<T> {
+
+        private final Builder1<T> b;
+
+        Builder2(Builder1<T> b) {
+            this.b = b;
+        }
+
+        Builder3<T> input(File input) {
+            b.input = input;
+            return new Builder3<T>(b);
+        }
+    }
+
+    public static final class Builder3<T> {
+        private final Builder1<T> b;
+
+        Builder3(Builder1<T> b) {
+            this.b = b;
+        }
+
+        Builder4<T> output(File output) {
+            b.output = output;
+            return new Builder4<T>(b);
+        }
+    }
+
+    public static final class Builder4<T> {
+
+        private final Builder1<T> b;
+
+        Builder4(Builder1<T> b) {
+            this.b = b;
+        }
+
+        Builder5<T> bits(int bits) {
+            b.bits = bits;
+            return new Builder5<T>(b);
+        }
+
+    }
+
+    public static final class Builder5<T> {
+
+        private final Builder1<T> b;
+
+        Builder5(Builder1<T> b) {
+            this.b = b;
+        }
+
+        Builder6<T> dimensions(int dimensions) {
+            b.dimensions = dimensions;
+            return new Builder6<T>(b);
+        }
+    }
+
+    public static final class Builder6<T> {
+
+        private final Builder1<T> b;
+
+        Builder6(Builder1<T> b) {
+            this.b = b;
+        }
+
+        Builder6<T> numIndexEntriesApproximate(int value) {
+            b.numIndexEntriesApproximate = value;
+            return this;
+        }
+
+        Index<T> createIndex() {
+            try {
+                return HilbertIndex.<T>createIndex(b.input, b.serializer, b.point, b.output, b.bits,
+                        b.dimensions, b.numIndexEntriesApproximate);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
     }
 
     @VisibleForTesting

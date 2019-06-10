@@ -103,7 +103,7 @@ public class HilbertIndexTest {
         int bits = 2;
         int dimensions = 3;
         int approxNumIndexEntries = 2;
-        return HilbertIndex //
+        return Index //
                 .serializer(ser) //
                 .point(point) //
                 .input(input) //
@@ -175,7 +175,7 @@ public class HilbertIndexTest {
         File input = new File(
                 "src/test/resources/2019-05-15.binary-fixes-with-mmsi.sampled.every.400");
         int approximateNumIndexEntries = 100;
-        return HilbertIndex //
+        return Index //
                 .serializer(SERIALIZER) //
                 .point(POINT_FN) //
                 .input(input) //
