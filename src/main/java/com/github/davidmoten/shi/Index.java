@@ -153,8 +153,16 @@ public final class Index<T> {
             this.b = b;
         }
 
-        Builder6<T> numIndexEntries(int value) {
-            b.numIndexEntriesApproximate = value;
+        /**
+         * Sets the <i>approximate</i> number of index entries. The number required will
+         * depend on where the chunking falls so can vary by a few from the desired
+         * value.
+         * 
+         * @param numIndexEntries
+         * @return builder
+         */
+        Builder6<T> numIndexEntries(int numIndexEntries) {
+            b.numIndexEntriesApproximate = numIndexEntries;
             return this;
         }
 
