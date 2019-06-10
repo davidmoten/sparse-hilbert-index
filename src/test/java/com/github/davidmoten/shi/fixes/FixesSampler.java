@@ -1,4 +1,4 @@
-package com.github.davidmoten.shi;
+package com.github.davidmoten.shi.fixes;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

@@ -1,12 +1,14 @@
-package com.github.davidmoten.shi;
+package com.github.davidmoten.shi.fixes;
 
-import static com.github.davidmoten.shi.Fixes.idx;
-import static com.github.davidmoten.shi.Fixes.input;
-import static com.github.davidmoten.shi.Fixes.output;
-import static com.github.davidmoten.shi.Fixes.point;
-import static com.github.davidmoten.shi.Fixes.ser;
+import static com.github.davidmoten.shi.fixes.Fixes.idx;
+import static com.github.davidmoten.shi.fixes.Fixes.input;
+import static com.github.davidmoten.shi.fixes.Fixes.output;
+import static com.github.davidmoten.shi.fixes.Fixes.point;
+import static com.github.davidmoten.shi.fixes.Fixes.ser;
 
 import java.io.IOException;
+
+import com.github.davidmoten.shi.Index;
 
 public class FixesCreateIndex {
 

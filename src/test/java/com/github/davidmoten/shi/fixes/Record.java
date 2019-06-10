@@ -1,11 +1,11 @@
-package com.github.davidmoten.shi;
+package com.github.davidmoten.shi.fixes;
 
 import java.nio.ByteBuffer;
 
 public final class Record {
-    final float lat;
-    final float lon;
-    final long time;
+    public final float lat;
+    public final float lon;
+    public final long time;
 
     Record(float lat, float lon, long time) {
         this.lat = lat;
@@ -13,7 +13,7 @@ public final class Record {
         this.time = time;
     }
 
-    double[] toArray() {
+    public double[] toArray() {
         return new double[] { lat, lon, time };
     }
 
@@ -22,7 +22,7 @@ public final class Record {
         return "Record [lat=" + lat + ", lon=" + lon + ", time=" + time + "]";
     }
 
-    static Record read(byte[] x) {
+    public static Record read(byte[] x) {
         ByteBuffer bb = ByteBuffer.wrap(x);
         // skip mmsi
         bb.position(4);

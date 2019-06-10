@@ -1,9 +1,9 @@
-package com.github.davidmoten.shi;
+package com.github.davidmoten.shi.fixes;
 
-import static com.github.davidmoten.shi.Fixes.idx;
-import static com.github.davidmoten.shi.Fixes.output;
-import static com.github.davidmoten.shi.Fixes.point;
-import static com.github.davidmoten.shi.Fixes.ser;
+import static com.github.davidmoten.shi.fixes.Fixes.idx;
+import static com.github.davidmoten.shi.fixes.Fixes.output;
+import static com.github.davidmoten.shi.fixes.Fixes.point;
+import static com.github.davidmoten.shi.fixes.Fixes.ser;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -13,6 +13,8 @@ import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 import com.github.davidmoten.bigsorter.Reader;
+import com.github.davidmoten.shi.Bounds;
+import com.github.davidmoten.shi.Index;
 
 public class FixesSearch {
 

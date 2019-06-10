@@ -98,7 +98,7 @@ public final class Index<T> {
             this.serializer = serializer;
         }
 
-        Builder2<T> pointMapper(Function<? super T, double[]> pointMapper) {
+        public Builder2<T> pointMapper(Function<? super T, double[]> pointMapper) {
             this.pointMapper = pointMapper;
             return new Builder2<T>(this);
         }
@@ -112,7 +112,7 @@ public final class Index<T> {
             this.b = b;
         }
 
-        Builder3<T> input(File input) {
+        public Builder3<T> input(File input) {
             b.input = input;
             return new Builder3<T>(b);
         }
@@ -126,7 +126,7 @@ public final class Index<T> {
             this.b = b;
         }
 
-        Builder4<T> output(File output) {
+        public Builder4<T> output(File output) {
             b.output = output;
             return new Builder4<T>(b);
         }
@@ -140,7 +140,7 @@ public final class Index<T> {
             this.b = b;
         }
 
-        Builder5<T> bits(int bits) {
+        public Builder5<T> bits(int bits) {
             b.bits = bits;
             return new Builder5<T>(b);
         }
@@ -155,7 +155,7 @@ public final class Index<T> {
             this.b = b;
         }
 
-        Builder6<T> dimensions(int dimensions) {
+        public Builder6<T> dimensions(int dimensions) {
             b.dimensions = dimensions;
             return new Builder6<T>(b);
         }
@@ -177,12 +177,12 @@ public final class Index<T> {
          * @param numIndexEntries
          * @return builder
          */
-        Builder6<T> numIndexEntries(int numIndexEntries) {
+        public Builder6<T> numIndexEntries(int numIndexEntries) {
             b.numIndexEntriesApproximate = numIndexEntries;
             return this;
         }
 
-        Index<T> createIndex() {
+        public Index<T> createIndex() {
             try {
                 return HilbertIndex.<T>createIndex(b.input, b.serializer, b.pointMapper, b.output,
                         b.bits, b.dimensions, b.numIndexEntriesApproximate);
