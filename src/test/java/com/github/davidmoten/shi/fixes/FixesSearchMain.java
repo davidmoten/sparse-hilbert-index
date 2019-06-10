@@ -25,7 +25,7 @@ import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.shi.Bounds;
 import com.github.davidmoten.shi.Index;
 
-public class FixesSearch {
+public class FixesSearchMain {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
         Index<byte[]> index = Index.serializer(ser).pointMapper(point).read(idx);

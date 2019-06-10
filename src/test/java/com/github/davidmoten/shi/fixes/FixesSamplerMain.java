@@ -13,7 +13,7 @@ import java.util.zip.GZIPInputStream;
 import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.bigsorter.Serializer;
 
-public class FixesSampler {
+public class FixesSamplerMain {
 
     public static void main(String[] args) throws IOException {
         String filename = "2019-05-15.binary-fixes-with-mmsi.gz";

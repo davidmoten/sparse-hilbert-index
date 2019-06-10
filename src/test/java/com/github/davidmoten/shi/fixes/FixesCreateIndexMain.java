@@ -10,7 +10,7 @@ import java.io.IOException;
 
 import com.github.davidmoten.shi.Index;
 
-public class FixesCreateIndex {
+public class FixesCreateIndexMain {
 
     public static void main(String[] args) throws IOException {
 
