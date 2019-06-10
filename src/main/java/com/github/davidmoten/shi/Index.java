@@ -444,14 +444,19 @@ public final class Index<T> {
     }
 
     public Stream<T> search(Bounds queryBounds, RandomAccessFile raf) {
-        return search(queryBounds, rafInputStreamFactory(raf));
+        return search(queryBounds, rafInputStreamFactory(raf), 0);
     }
 
     public Stream<T> search(Bounds queryBounds,
             BiFunction<Long, Optional<Long>, InputStream> factory) {
+        return search(queryBounds, factory, 0);
+    }
+
+    public Stream<T> search(Bounds queryBounds,
+            BiFunction<Long, Optional<Long>, InputStream> factory, int maxRanges) {
         long[] a = ordinates(queryBounds.mins());
         long[] b = ordinates(queryBounds.maxes());
-        Ranges ranges = hc.query(a, b);
+        Ranges ranges = hc.query(a, b, maxRanges);
         System.out.println("ranges=" + ranges.size());
         return Stream.from(positionRanges(ranges)) //
                 .flatMap(pr -> search(queryBounds, factory, pr));
