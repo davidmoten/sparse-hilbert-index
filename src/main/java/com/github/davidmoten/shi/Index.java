@@ -71,6 +71,20 @@ public final class Index<T> {
         return new Builder1<T>(serializer);
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+        Builder() {
+            // prevent instantiation externally
+        }
+
+        public <T> Builder1<T> serializer(Serializer<? extends T> serializer) {
+            return new Builder1<T>(serializer);
+        }
+    }
+
     public static final class Builder1<T> {
         private final Serializer<? extends T> serializer;
         Function<? super T, double[]> pointMapper;
@@ -79,6 +93,7 @@ public final class Index<T> {
         int bits;
         int dimensions;
         int numIndexEntriesApproximate = 10000;
+        public boolean gzipped;
 
         Builder1(Serializer<? extends T> serializer) {
             this.serializer = serializer;
@@ -100,6 +115,12 @@ public final class Index<T> {
 
         Builder3<T> input(File input) {
             b.input = input;
+            return new Builder3<T>(b);
+        }
+
+        Builder3<T> inputGzipped(File input) {
+            b.input = input;
+            b.gzipped = true;
             return new Builder3<T>(b);
         }
     }
@@ -170,7 +191,7 @@ public final class Index<T> {
         Index<T> createIndex() {
             try {
                 return HilbertIndex.<T>createIndex(b.input, b.serializer, b.pointMapper, b.output,
-                        b.bits, b.dimensions, b.numIndexEntriesApproximate);
+                        b.bits, b.dimensions, b.numIndexEntriesApproximate, b.gzipped);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -296,9 +317,11 @@ public final class Index<T> {
         return new Index<T>(indexPositions, mins, maxes, bits, count, serializer, point);
     }
 
-    public Index<T> write(File idx) throws IOException {
+    public Index<T> write(File idx) {
         try (FileOutputStream fos = new FileOutputStream(idx)) {
             write(fos);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
         return this;
     }
@@ -331,6 +354,8 @@ public final class Index<T> {
                 }
                 dos.writeInt(entry.getValue().intValue());
             }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
         return this;
     }

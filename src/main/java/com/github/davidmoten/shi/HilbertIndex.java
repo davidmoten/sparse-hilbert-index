@@ -26,7 +26,8 @@ final class HilbertIndex {
             File output, //
             int bits, //
             int dimensions, //
-            int numIndexEntriesApproximate) //
+            int numIndexEntriesApproximate, //
+            boolean gzipped) //
             throws IOException {
 
         Preconditions.checkArgument(bits * dimensions <= 31,
@@ -36,7 +37,7 @@ final class HilbertIndex {
         final double[] mins = new double[dimensions];
         final double[] maxes = new double[dimensions];
         long count = 0;
-        try (InputStream in = Util.bufferedInput(input); //
+        try (InputStream in = Util.bufferedInput(input, gzipped); //
                 Reader<? extends T> reader = serializer.createReader(in)) {
             Arrays.setAll(mins, i -> Double.MAX_VALUE);
             Arrays.setAll(maxes, i -> Double.MIN_VALUE);
@@ -88,7 +89,7 @@ final class HilbertIndex {
             throws IOException, FileNotFoundException {
         TreeMap<Integer, Long> indexPositions = new TreeMap<>();
         try (//
-                InputStream in = Util.bufferedInput(output); //
+                InputStream in = Util.bufferedInput(output, false); //
                 Reader<T> reader = serializer.createReader(in);
                 CountingOutputStream counter = new CountingOutputStream();
                 Writer<T> writer = serializer.createWriter(counter)) {
