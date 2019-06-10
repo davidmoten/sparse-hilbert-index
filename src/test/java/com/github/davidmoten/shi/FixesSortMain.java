@@ -3,7 +3,6 @@ package com.github.davidmoten.shi;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
@@ -44,8 +43,11 @@ public class FixesSortMain {
         double minTime = 1.557868858E12;
         double maxTime = 1.5579648E12;
         double t = minTime + TimeUnit.HOURS.toMillis(12);
-        double[] a = new double[] { -33.68, 150.86, minTime };
-        double[] b = new double[] { -34.06, 151.34, maxTime };
+        // sydney region
+//        double[] a = new double[] { -33.68, 150.86, minTime };
+//        double[] b = new double[] { -34.06, 151.34, maxTime };
+        double[] a = new double[] { 0, 100, minTime };
+        double[] b = new double[] { -60, 175, maxTime };
         Bounds bounds = Bounds.create(a, b);
         long count = index.search(bounds, output).count().get();
         System.out.println(count);
