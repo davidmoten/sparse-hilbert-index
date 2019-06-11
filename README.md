@@ -42,6 +42,8 @@ Index<byte[]> index = Index
 Righto, now you have the `output` and `idx` files that you can deploy to an S3 bucket (or a local filesystem if you want). Let's do a search on the data and we'll reread the Index from the idx file.
 
 ```java
+// stream the index file from S3
+InputStream inputStream = ...
 Index<byte[]> index = 
   Index
     .serializer(serializer)
