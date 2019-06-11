@@ -66,14 +66,12 @@ Here are some sample runtimes for three scenarios:
 * Time to First Byte (TTFB) though to be 150-210ms
 * all calls made serially (no concurrency)
 
-Sydney region, 1 hour: 1667 found in **326ms**
+| Region | Time Window (hours) |Found |  Elapsed Time (ms) |
+| :---         |     ---:      |  --: |         ---: |
+| Sydney   | 1     |  1667  | 326|
+| Sydney     | 24      | 35337      | 2517 |
+| Brisbane     | 1      | 38319      | 875 |
+| Queensland     | 1      | 166229      | 3258 |
+| Tasmania     | 1      | 6255      | 609 |
+| Tasmania     | 6      | 60562      | 3245 |
 
-Sydney region, 24 hours: 35337 found in **2517ms*
-
-Brisbane region, 1 hour: 38319 found in **875ms**
-
-Queensland region, 1 hour: 166229 found in **3258ms**
-
-Tasmanian region, 1 hour: 6255 found in **609ms**
-
-Tasmanian region, 6 hours: 60562 found in **3245ms**
