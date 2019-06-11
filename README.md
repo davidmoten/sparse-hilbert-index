@@ -38,7 +38,7 @@ Index<byte[]> index = Index
     .createIndex() 
     .write(idx);
 ```
-
+### Step 2: Search the remote data file using the index
 Righto, now you have the `output` and `idx` files that you can deploy to an S3 bucket (or a local filesystem if you want). Let's do a search on the data and we'll reread the Index from the idx file.
 
 ```java
@@ -59,9 +59,9 @@ Here are some sample runtimes for three scenarios:
 * full scan of a local file (SSD)
 * search a remote file (S3)
 
+```
 1667 found in 59ms using local file search
 1667 found in 932ms using local file scan
 read index in 483ms
 1667 found in 326ms using search over https (s3), index already loaded
-
-
+```
