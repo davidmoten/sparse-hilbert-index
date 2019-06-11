@@ -34,7 +34,7 @@ public final class PositionRange {
         return ceilingPosition;
     }
 
-     PositionRange join(PositionRange other) {
+    PositionRange join(PositionRange other) {
         return new PositionRange(Math.max(maxHilbertIndex, other.maxHilbertIndex), //
                 Math.min(floorPosition, other.floorPosition), //
                 Math.max(ceilingPosition, other.ceilingPosition));
