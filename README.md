@@ -9,7 +9,7 @@ Features
 
 ## Example
 
-Suppose we have a 400MB binary input file with 11.4m fixed size records (35 bytes each) and lat, long and time are in those records (stored as float, float, long). I'm going to use a hilbert curve with 10 bits per dimension and 3 dimensions to make a hilbert curve index for this file, store the sorted file and its index and test the speed that I can do spatio-temporal queries on this data.
+Suppose we have a 400MB binary input file with 11.4m ship position fixed-size records (35 bytes each) around Australia for one day and lat, long and time are in those records (stored as float, float, long). I'm going to use a hilbert curve with 10 bits per dimension and 3 dimensions to make a hilbert curve index for this file, store the sorted file and its index and test the speed that I can do spatio-temporal queries on this data.
 
 ### Step 1: Prepare the sorted file and the index for deployment to S3
 
@@ -66,9 +66,31 @@ Here are some sample runtimes for three scenarios:
 * Time to First Byte (TTFB) though to be 150-210ms
 * all calls made serially (no concurrency)
 
+Sydney region, 1 hour:
 ```
 1667 found in 59ms using local file search
 1667 found in 932ms using local file scan
 read index in 483ms
 1667 found in 326ms using search over https (s3), index already loaded
+```
+Brisbane region, 1 hour:
+```
+38319 found in 120ms using local file search
+38319 found in 1012ms using local file scan
+read index in 489ms
+38319 found in 875ms using search over https (s3), index already loaded
+```
+Queensland region, 1 hour
+```
+166229 found in 270ms using local file search
+166229 found in 1040ms using local file scan
+read index in 516ms
+166229 found in 3258ms using search over https (s3), index already loaded
+```
+Tasmanian region, 1 hour
+```
+6255 found in 95ms using local file search
+6255 found in 939ms using local file scan
+read index in 508ms
+6255 found in 609ms using search over https (s3), index already loaded
 ```
