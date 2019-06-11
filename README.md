@@ -98,6 +98,7 @@ The default index size is 10k entries which produces a file of about 80K.
 * all calls made serially (no concurrency)
 
 **Search speed**
+
 | Region | Time Window (hours) |Found |  Elapsed Time (ms) |
 | :---         |     ---:      |  --: |         ---: |
 | Sydney   | 1     |  1667  | 326|
