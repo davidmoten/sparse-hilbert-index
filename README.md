@@ -66,12 +66,19 @@ Here are some sample runtimes for three scenarios:
 * Time to First Byte (TTFB) though to be 150-210ms
 * all calls made serially (no concurrency)
 
-Sydney region, 1 hour:
+Sydney region, 1 hour
 ```
 1667 found in 59ms using local file search
 1667 found in 932ms using local file scan
 read index in 483ms
 1667 found in 326ms using search over https (s3), index already loaded
+```
+Sydney region, 24 hours
+```
+35337 found in 150ms using local file search
+35337 found in 939ms using local file scan
+read index in 1102ms
+35337 found in 2517ms using search over https (s3), index already loaded
 ```
 Brisbane region, 1 hour:
 ```
