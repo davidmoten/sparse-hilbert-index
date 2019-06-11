@@ -38,8 +38,11 @@ Index<byte[]> index = Index
     .createIndex() 
     .write(idx);
 ```
-### Step 2: Search the remote data file using the index
-Righto, now you have the `output` and `idx` files that you can deploy to an S3 bucket (or a local filesystem if you want). Let's do a search on the data and we'll reread the Index from the idx file.
+### Step 2: Upload the sorted data and the index file 
+Righto, now you have the `output` and `idx` files that you can deploy to an S3 bucket (or a local filesystem if you want). For convenience you might use a public S3 bucket to test some non-sensitive data without authentication.
+
+### Step 3: Search the remote data file using the index
+Let's do a search on the data and for demonstration purposes we'll reread the Index from the idx file.
 
 ```java
 // stream the index file from S3
