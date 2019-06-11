@@ -368,7 +368,7 @@ public final class Index<T> {
     private static BiFunction<Long, Optional<Long>, InputStream> rafInputStreamFactory(RandomAccessFile raf) {
         return (first, last) -> {
             raf.seek(first);
-            return new LimitingInputStream(Channels.newInputStream(raf.getChannel()),
+            return new LimitingInputStream(new BufferedInputStream(Channels.newInputStream(raf.getChannel())),
                     last.orElse(Long.MAX_VALUE) - first);
         };
     }
