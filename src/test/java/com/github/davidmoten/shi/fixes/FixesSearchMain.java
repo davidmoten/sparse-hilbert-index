@@ -77,7 +77,7 @@ public class FixesSearchMain {
             }
             System.out.println(bytesRange);
             con.addRequestProperty("Range", bytesRange);
-            return con.getInputStream();
+            return new BufferedInputStream(con.getInputStream());
         };
         long records = index.search(bounds, factory, 0).count().get();
         System.out.println(
