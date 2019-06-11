@@ -2,7 +2,8 @@
 Java library to create and search random access files (including in S3) using the space-filling hilbert index (sparse). More sensationally described as *Turn Amazon S3 into a spatio-temporal database!*.
 
 Features
-* sorts input file based on hilbert index
+* sorts input file based on hilbert index (sorts arbitrarily large files using [big-sorter](https://github.com/davidmoten/big-sorter))
+
 * creates sparse hilbert index in separate file
 * enables random access search of sorted input file using index file
 * S3 supports `Range` request header so can do random access
