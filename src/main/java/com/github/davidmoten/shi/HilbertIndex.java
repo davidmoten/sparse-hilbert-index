@@ -26,7 +26,9 @@ final class HilbertIndex {
             File output, //
             int bits, //
             int dimensions, //
-            int numIndexEntriesApproximate) //
+            int numIndexEntriesApproximate, //
+            int sortMaxFiles, //
+            int sortMaxItemsPerFile) //
             throws IOException {
 
         Preconditions.checkArgument(bits * dimensions <= 31,
@@ -73,6 +75,8 @@ final class HilbertIndex {
                 }) //
                 .input(input) //
                 .output(output) //
+                .maxFilesPerMerge(sortMaxFiles) //
+                .maxItemsPerFile(sortMaxItemsPerFile) //
                 .loggerStdOut() //
                 .sort();
 

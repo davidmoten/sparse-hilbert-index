@@ -94,6 +94,8 @@ public final class Index<T> {
         int bits;
         int dimensions;
         int numIndexEntriesApproximate = 10000;
+        int sortMaxFilesPerMerge = 100;
+        int sortMaxItemsPerFile = 100000;
 
         Builder1(Serializer<? extends T> serializer) {
             this.serializer = serializer;
@@ -195,10 +197,20 @@ public final class Index<T> {
             return this;
         }
 
+        public Builder6<T> sortMaxFilesPerMerge(int sortMaxFilesPerMerge) {
+            b.sortMaxFilesPerMerge = sortMaxFilesPerMerge;
+            return this;
+        }
+
+        public Builder6<T> sortMaxItemsPerFile(int sortMaxItemsPerFile) {
+            b.sortMaxItemsPerFile = sortMaxItemsPerFile;
+            return this;
+        }
+
         public Index<T> createIndex() {
             try {
                 return HilbertIndex.<T>createIndex(b.input, b.serializer, b.pointMapper, b.output, b.bits, b.dimensions,
-                        b.numIndexEntriesApproximate);
+                        b.numIndexEntriesApproximate, b.sortMaxFilesPerMerge, b.sortMaxItemsPerFile);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -459,15 +471,15 @@ public final class Index<T> {
         return Stream.from(positionRanges(ranges)) //
                 .flatMap(pr -> search(queryBounds, factory, pr));
     }
-    
+
     public Stream<T> search(Bounds queryBounds, URL url, int maxRanges) {
         return search(queryBounds, inputStreamForRange(url), maxRanges);
     }
-    
+
     public Stream<T> search(Bounds queryBounds, URL url) {
         return search(queryBounds, url, 0);
     }
-    
+
     private static BiFunction<Long, Optional<Long>, InputStream> inputStreamForRange(URL u) {
         BiFunction<Long, Optional<Long>, InputStream> factory = (start, end) -> {
             URLConnection con = u.openConnection();
