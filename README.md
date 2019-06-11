@@ -61,6 +61,11 @@ Here are some sample runtimes for three scenarios:
 * full scan of a local file (SSD)
 * search a remote file (S3)
 
+**Test environment**
+* Bandwidth to S3 is 4.6MB/s for the test
+* Time to First Byte (TTFB) though to be 150-210ms
+* all calls made serially (no concurrency)
+
 ```
 1667 found in 59ms using local file search
 1667 found in 932ms using local file scan
