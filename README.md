@@ -97,6 +97,7 @@ The default index size is 10k entries which produces a file of about 80K.
 * Time to First Byte (TTFB) thought to be 150-210ms
 * all calls made serially (no concurrency)
 
+**Search speed**
 | Region | Time Window (hours) |Found |  Elapsed Time (ms) |
 | :---         |     ---:      |  --: |         ---: |
 | Sydney   | 1     |  1667  | 326|
@@ -105,5 +106,7 @@ The default index size is 10k entries which produces a file of about 80K.
 | Queensland     | 1      | 166229      | 3258 |
 | Tasmania     | 1      | 6255      | 609 |
 | Tasmania     | 6      | 60562      | 3245 |
+
+In short if your search window is reasonably limited in time and space (so that you are not returning some large proportion of the total dataset) then performance is good (326ms for the Sydney area search would provide a good user experience in a UI for example). Interestingly I found that if one dimension is unconstrained (like time) then search performance is still good. When two dimensions are unconstrained (searching a large geographic area for a small time window) then search performance is more on a par with a full file scan.
 
 ## Streaming
