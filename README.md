@@ -38,6 +38,22 @@ Index<byte[]> index = Index
     .createIndex() 
     .write(idx);
 ```
+Output:
+```
+2019-06-11 22:01:57.7+1000 starting sort
+2019-06-11 22:01:58.4+1000 total=100000, sorted 100000 records to file big-sorter693675191372766305 in 0.641s
+2019-06-11 22:01:58.9+1000 total=200000, sorted 100000 records to file big-sorter3205436568395107978 in 0.557s
+2019-06-11 22:01:59.4+1000 total=300000, sorted 100000 records to file big-sorter3777831275849039312 in 0.486s
+...
+2019-06-11 22:03:14.6+1000 total=11500000, sorted 100000 records to file big-sorter6542117355878068811 in 0.556s
+2019-06-11 22:03:15.3+1000 total=11600000, sorted 100000 records to file big-sorter2584017367351262913 in 0.688s
+2019-06-11 22:03:15.8+1000 total=11665226, sorted 65226 records to file big-sorter6344821858069260750 in 0.430s
+2019-06-11 22:03:15.8+1000 completed inital split and sort, starting merge
+2019-06-11 22:03:15.9+1000 merging 100 files
+2019-06-11 22:04:16.2+1000 merging 17 files
+2019-06-11 22:04:22.3+1000 merging 2 files
+2019-06-11 22:04:30.3+1000 sort of 11665226 records completed in 152.635s
+```
 ### Step 2: Upload the sorted data and the index file 
 Righto, now you have the `output` and `idx` files that you can deploy to an S3 bucket (or a local filesystem if you want). For convenience you might use a public S3 bucket to test some non-sensitive data without authentication.
 
