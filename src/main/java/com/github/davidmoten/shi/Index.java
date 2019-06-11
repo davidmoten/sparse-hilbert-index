@@ -14,6 +14,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.channels.Channels;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -454,9 +456,26 @@ public final class Index<T> {
         long[] a = ordinates(queryBounds.mins());
         long[] b = ordinates(queryBounds.maxes());
         Ranges ranges = hc.query(a, b, maxRanges);
-        System.out.println("ranges=" + ranges.size());
         return Stream.from(positionRanges(ranges)) //
                 .flatMap(pr -> search(queryBounds, factory, pr));
+    }
+    
+    public Stream<T> search(Bounds queryBounds, URL url, int maxRanges) {
+        return search(queryBounds, inputStreamForRange(url), maxRanges);
+    }
+    
+    public Stream<T> search(Bounds queryBounds, URL url) {
+        return search(queryBounds, url, 0);
+    }
+    
+    private static BiFunction<Long, Optional<Long>, InputStream> inputStreamForRange(URL u) {
+        BiFunction<Long, Optional<Long>, InputStream> factory = (start, end) -> {
+            URLConnection con = u.openConnection();
+            String bytesRange = "bytes=" + start + end.map(x -> "-" + x).orElse("");
+            con.addRequestProperty("Range", bytesRange);
+            return new BufferedInputStream(con.getInputStream());
+        };
+        return factory;
     }
 
     @Override

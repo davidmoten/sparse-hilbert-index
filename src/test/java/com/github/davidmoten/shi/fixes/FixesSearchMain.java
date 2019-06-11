@@ -14,12 +14,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.HttpsURLConnection;
-
-import org.davidmoten.kool.function.BiFunction;
 
 import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.shi.Bounds;
@@ -32,25 +29,28 @@ public class FixesSearchMain {
         System.out.println(index);
         double minTime = 1.557868858E12;
         double maxTime = 1.5579648E12;
-        double t1 = minTime + TimeUnit.HOURS.toMillis(0);
+        double t1 = minTime + TimeUnit.HOURS.toMillis(22);
         double t2 = t1 + TimeUnit.MINUTES.toMillis(30);
         // sydney region
         // double[] a = new double[] { -33.68, 150.86, t1 };
         // double[] b = new double[] { -34.06, 151.34, t2 };
-        double[] a = new double[] { -10.6, 109, minTime };
-        double[] b = new double[] { -50, 179, maxTime };
+
+        // brisbane region
+        double[] a = new double[] { -24.9, 150, t1 };
+        double[] b = new double[] { -29.5, 158, t2 };
+        // larger region
+        // double[] a = new double[] { -10.6, 170, minTime };
+        // double[] b = new double[] { -50, 179, maxTime };
         Bounds bounds = Bounds.create(a, b);
-        long t;
-        if (true) {
-            System.out.println("queryBounds=" + bounds);
-            t = System.currentTimeMillis();
-            long count = index.search(bounds, output, 100).count().get();
-            System.out.println(count + " found in " + (System.currentTimeMillis() - t) + "ms using file search");
-        }
+        System.out.println("queryBounds=" + bounds);
+
+        long t = System.currentTimeMillis();
+        long count = index.search(bounds, output, 100).count().get();
+        System.out.println(count + " found in " + (System.currentTimeMillis() - t) + "ms using local file search");
 
         t = System.currentTimeMillis();
         long c = searchRaw(bounds);
-        System.out.println(c + " found in " + (System.currentTimeMillis() - t) + "ms using file scan");
+        System.out.println(c + " found in " + (System.currentTimeMillis() - t) + "ms using local file scan");
 
         String location = new String(
                 Base64.getDecoder().decode(
@@ -62,26 +62,14 @@ public class FixesSearchMain {
                 StandardCharsets.UTF_8);
 
         t = System.currentTimeMillis();
-        DataInputStream in3 = new DataInputStream(getIndexInputStream(locationIdx));
-        Index<byte[]> ind = Index.read(in3, ser, point);
+        // reread index
+        index = Index.read(new DataInputStream(getIndexInputStream(locationIdx)), ser, point);
         System.out.println("read index in " + (System.currentTimeMillis() - t) + "ms");
         URL u = new URL(location);
-        System.out.println("opening connection to " + u);
-        BiFunction<Long, Optional<Long>, InputStream> factory = (start, end) -> {
-            HttpsURLConnection con = (HttpsURLConnection) u.openConnection();
-            String bytesRange;
-            if (end.isPresent()) {
-                bytesRange = "bytes=" + start + "-" + end.get();
-            } else {
-                bytesRange = "bytes=" + start;
-            }
-            System.out.println(bytesRange);
-            con.addRequestProperty("Range", bytesRange);
-            return new BufferedInputStream(con.getInputStream());
-        };
-        long records = index.search(bounds, factory, 0).count().get();
-        System.out.println(
-                "found " + records + " in " + (System.currentTimeMillis() - t) + "ms using search over https (s3)");
+        t = System.currentTimeMillis();
+        long records = index.search(bounds, u, 0).count().get();
+        System.out.println(records + " found in " + (System.currentTimeMillis() - t)
+                + "ms using search over https (s3), index already loaded");
     }
 
     private static InputStream getIndexInputStream(String indexUrl) throws IOException {
