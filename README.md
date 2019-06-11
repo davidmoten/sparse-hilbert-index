@@ -94,3 +94,11 @@ Tasmanian region, 1 hour
 read index in 508ms
 6255 found in 609ms using search over https (s3), index already loaded
 ```
+
+Tasmanian region, 6 hours
+```
+60562 found in 300ms using local file search
+60562 found in 895ms using local file scan
+read index in 626ms
+60562 found in 3245ms using search over https (s3), index already loaded
+```
