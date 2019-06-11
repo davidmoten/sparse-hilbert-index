@@ -3,10 +3,15 @@ Java library to create and search random access files (including in S3) using th
 
 Features
 * sorts input file based on hilbert index (sorts arbitrarily large files using [big-sorter](https://github.com/davidmoten/big-sorter))
-
 * creates sparse hilbert index in separate file
 * enables random access search of sorted input file using index file
 * S3 supports `Range` request header so can do random access
+* streaming search api for efficiency
+
+## Getting started
+TODO
+
+## Algorithm
 
 ## Example
 
@@ -74,16 +79,20 @@ double[] a = new double[] { -33.68, 150.86, t1 };
 double[] b = new double[] { -34.06, 151.34, t2 };
 Bounds bounds = Bounds.create(a, b);
 long count = index.search(bounds, url).count().get();
-
 ```
-Here are some sample runtimes for three scenarios:
-* search a local file (SSD)
-* full scan of a local file (SSD)
-* search a remote file (S3)
+
+The default index size is 10k entries which produces a file of about 80K.
+
+Here are some sample runtimes for three scenarios when we search the Sydney region for 1 hour:
+* search a local file (SSD): 59ms
+* full scan of a local file (SSD): 932ms 
+* search a remote file (S3): 326ms + 483ms to load index file = 809ms
+
+The default index size is 10k entries which produces a file of about 80K.
 
 **Test environment**
 * Bandwidth to S3 is 4.6MB/s for the test
-* Time to First Byte (TTFB) though to be 150-210ms
+* Time to First Byte (TTFB) thought to be 150-210ms
 * all calls made serially (no concurrency)
 
 | Region | Time Window (hours) |Found |  Elapsed Time (ms) |
@@ -95,3 +104,4 @@ Here are some sample runtimes for three scenarios:
 | Tasmania     | 1      | 6255      | 609 |
 | Tasmania     | 6      | 60562      | 3245 |
 
+## Streaming
