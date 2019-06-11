@@ -174,7 +174,7 @@ public class IndexTest {
     @Test
     public void testSimpleSearchWholeDomain() throws FileNotFoundException, IOException {
         Index<String> index = createSimpleIndex();
-        Bounds queryBounds = new Bounds(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
+        Bounds queryBounds = Bounds.create(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
         assertEquals(NUM_SIMPLE_ROWS, index.search(queryBounds, OUTPUT).count().get().intValue());
         File idx2 = new File("target/idx2");
         index.write(idx2);
@@ -287,7 +287,7 @@ public class IndexTest {
         float lat2 = -35;
         float lon2 = 120f;
         long t2 = t1 + TimeUnit.HOURS.toMillis(1);
-        return new Bounds(new double[] { lat1, lon1, t1 }, new double[] { lat2, lon2, t2 });
+        return Bounds.create(new double[] { lat1, lon1, t1 }, new double[] { lat2, lon2, t2 });
     }
 
 }

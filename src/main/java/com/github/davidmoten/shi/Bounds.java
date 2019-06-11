@@ -9,7 +9,7 @@ public final class Bounds {
     private final double[] mins;
     private final double[] maxes;
 
-    public Bounds(double[] a, double[] b) {
+    private Bounds(double[] a, double[] b) {
         Preconditions.checkArgument(a.length > 0);
         Preconditions.checkArgument(a.length == b.length);
         double[] mins = new double[a.length];

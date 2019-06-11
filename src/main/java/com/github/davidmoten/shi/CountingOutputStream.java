@@ -12,6 +12,16 @@ class CountingOutputStream extends OutputStream {
         count++;
     }
 
+    @Override
+    public void write(byte[] b) throws IOException {
+        count += b.length;
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        count += len;
+    }
+
     long count() {
         return count;
     }

@@ -15,7 +15,7 @@ public final class PositionRange {
     // highest known position if nothing higher
     private final long ceilingPosition;
 
-    public PositionRange(long maxHilbertIndex, long floorPosition, long ceilingPosition) {
+    PositionRange(long maxHilbertIndex, long floorPosition, long ceilingPosition) {
         Preconditions.checkArgument(maxHilbertIndex >= 0);
         this.maxHilbertIndex = maxHilbertIndex;
         this.floorPosition = floorPosition;
@@ -34,8 +34,7 @@ public final class PositionRange {
         return ceilingPosition;
     }
 
-    public PositionRange join(PositionRange other) {
-
+     PositionRange join(PositionRange other) {
         return new PositionRange(Math.max(maxHilbertIndex, other.maxHilbertIndex), //
                 Math.min(floorPosition, other.floorPosition), //
                 Math.max(ceilingPosition, other.ceilingPosition));
@@ -43,8 +42,8 @@ public final class PositionRange {
 
     @Override
     public String toString() {
-        return "PositionRange [maxHilbertIndex=" + maxHilbertIndex + ", floorPosition="
-                + floorPosition + ", ceilingPosition=" + ceilingPosition + "]";
+        return "PositionRange [maxHilbertIndex=" + maxHilbertIndex + ", floorPosition=" + floorPosition
+                + ", ceilingPosition=" + ceilingPosition + "]";
     }
 
 }
