@@ -8,7 +8,7 @@ Java library to create and search random access files (including in S3) using th
 * S3 supports `Range` request header so can do random access
 * streaming search api for efficiency
 
-Status: *in development*
+**Status**: *in development*
 
 ## Getting started
 TODO
