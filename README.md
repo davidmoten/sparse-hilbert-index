@@ -1,5 +1,5 @@
 # sparse-hilbert-index
-Java library to create and search random access files (including in S3) using the space-filling hilbert index (sparse) 
+Java library to create and search random access files (including in S3) using the space-filling hilbert index (sparse). More sensationally described as *Turn Amazon S3 into a spatio-temporal database!*.
 
 Features
 * sorts input file based on hilbert index
