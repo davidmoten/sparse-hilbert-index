@@ -212,7 +212,7 @@ public class IndexTest {
         assertEquals(NUM_SIMPLE_ROWS, index.search(queryBounds).file(OUTPUT).count().get().intValue());
         File idx2 = new File("target/idx2");
         index.write(idx2);
-        Index<String> index2 = Index.read(idx2, SIMPLE_SERIALIZER, SIMPLE_POINT_MAPPER);
+        Index<String> index2 = Index.serializer(SIMPLE_SERIALIZER).pointMapper(SIMPLE_POINT_MAPPER).read(idx2);
         assertEquals(NUM_SIMPLE_ROWS, index2.search(queryBounds).file(OUTPUT).count().get().intValue());
     }
 
@@ -312,7 +312,7 @@ public class IndexTest {
         index.write(idx);
 
         // reread index
-        index = Index.read(idx, SERIALIZER, POINT_FN);
+        index = Index.serializer(SERIALIZER).pointMapper(POINT_FN).read(idx);
         checkIndex(index);
 
         index = Index.serializer(SERIALIZER).pointMapper(POINT_FN).read(idx);

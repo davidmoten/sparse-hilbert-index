@@ -309,14 +309,7 @@ public final class Index<T> {
         return hc;
     }
 
-    public static <T> Index<T> read(File file, Serializer<? extends T> serializer, Function<? super T, double[]> point)
-            throws FileNotFoundException, IOException {
-        try (DataInputStream dis = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
-            return read(dis, serializer, point);
-        }
-    }
-
-    public static <T> Index<T> read(DataInputStream dis, Serializer<? extends T> serializer,
+    private static <T> Index<T> read(DataInputStream dis, Serializer<? extends T> serializer,
             Function<? super T, double[]> point) {
         try {
             // read version
