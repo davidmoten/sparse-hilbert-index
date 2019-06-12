@@ -17,8 +17,10 @@ public class FixesCsv {
         return new double[] { lat, lon, time };
     };
 
-    public static final Serializer<CSVRecord> serializer() {
-        return Serializer.csv(CSVFormat.DEFAULT.withFirstRecordAsHeader().withRecordSeparator("\n"), StandardCharsets.UTF_8);
-    }
+    public static final Serializer<CSVRecord> serializer = Serializer.csv( //
+            CSVFormat.DEFAULT //
+                    .withFirstRecordAsHeader() //
+                    .withRecordSeparator("\n"),
+            StandardCharsets.UTF_8);
 
 }

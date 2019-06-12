@@ -43,7 +43,7 @@ public class FixesCreateCsvMain {
             }
         }
         Index //
-                .serializer(FixesCsv.serializer()) //
+                .serializer(FixesCsv.serializer) //
                 .pointMapper(FixesCsv.pointMapper) //
                 .input(new File("target/input.csv")) //
                 .output(new File("target/sorted.csv")) //
