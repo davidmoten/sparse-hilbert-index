@@ -11,7 +11,9 @@ import com.github.davidmoten.bigsorter.Serializer;
 public class FixesCsv {
 
     public static final Function<CSVRecord, double[]> pointMapper = rec -> {
-        double lat = Double.parseDouble(rec.get("lat"));
+        // random access means the csv reader doesn't read the header so we have to use
+        // index positions
+        double lat = Double.parseDouble(rec.get(1));
         double lon = Double.parseDouble(rec.get(2));
         double time = Long.parseLong(rec.get(3));
         return new double[] { lat, lon, time };
