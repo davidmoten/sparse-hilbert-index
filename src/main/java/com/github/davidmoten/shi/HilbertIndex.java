@@ -90,6 +90,7 @@ final class HilbertIndex {
             Function<? super T, double[]> point, File output, final double[] mins,
             final double[] maxes, SmallHilbertCurve hc, long chunk)
             throws IOException, FileNotFoundException {
+        System.out.println("creating index positions with chunk size = " + chunk);
         TreeMap<Integer, Long> indexPositions = new TreeMap<>();
         try (//
                 InputStream in = Util.bufferedInput(output, false); //
