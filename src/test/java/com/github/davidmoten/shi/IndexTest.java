@@ -4,6 +4,8 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -317,6 +319,12 @@ public class IndexTest {
 
         index = Index.serializer(SERIALIZER).pointMapper(POINT_FN).read(idx);
         checkIndex(index);
+    }
+    
+    @Test(expected=UncheckedIOException.class)
+    public void testIndexReadFromEmptyFileThrows() {
+        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(new byte[0]));
+        Index.serializer(SIMPLE_SERIALIZER).pointMapper(SIMPLE_POINT_MAPPER).read(dis);
     }
 
     @Test

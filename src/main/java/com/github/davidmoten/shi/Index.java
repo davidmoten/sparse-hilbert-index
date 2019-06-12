@@ -338,16 +338,16 @@ public final class Index<T> {
     }
 
     public Index<T> write(File idx) {
-        try (FileOutputStream fos = new FileOutputStream(idx)) {
-            write(fos);
+        try (DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(idx)))) {
+            write(dos);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
         return this;
     }
 
-    public Index<T> write(OutputStream out) throws IOException {
-        try (DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(out))) {
+    public Index<T> write(DataOutputStream dos) throws IOException {
+        try {
             dos.writeShort(VERSION);
             dos.writeInt(hc.bits());
             dos.writeInt(hc.dimensions());
