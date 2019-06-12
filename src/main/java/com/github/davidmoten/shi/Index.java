@@ -366,16 +366,22 @@ public final class Index<T> {
 
             for (Entry<Integer, Long> entry : indexPositions.entrySet()) {
                 dos.writeInt(entry.getKey());
-                Long pos = entry.getValue();
-                if (pos > Integer.MAX_VALUE) {
-                    throw new RuntimeException("file size too big for integer positions in index entries");
-                }
+                long pos = entry.getValue();
+                checkIndexPosition(pos);
+                
                 dos.writeInt(entry.getValue().intValue());
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
         return this;
+    }
+
+    @VisibleForTesting
+    static void checkIndexPosition(long pos) {
+        if (pos > Integer.MAX_VALUE) {
+            throw new RuntimeException("file size too big for integer positions in index entries");
+        }
     }
 
     private static BiFunction<Long, Optional<Long>, InputStream> rafInputStreamFactory(RandomAccessFile raf) {
@@ -425,7 +431,8 @@ public final class Index<T> {
                 });
     }
 
-    private static void closeSilently(Closeable c) {
+    @VisibleForTesting
+    static void closeSilently(Closeable c) {
         try {
             if (c != null) {
                 c.close();
@@ -500,13 +507,17 @@ public final class Index<T> {
     }
 
     private static BiFunction<Long, Optional<Long>, InputStream> inputStreamForRange(URL u) {
-        BiFunction<Long, Optional<Long>, InputStream> factory = (start, end) -> {
+        return (start, end) -> {
             URLConnection con = u.openConnection();
-            String bytesRange = "bytes=" + start + end.map(x -> "-" + x).orElse("");
+            String bytesRange = getRangeHeaderValue(start, end);
             con.addRequestProperty("Range", bytesRange);
             return new BufferedInputStream(con.getInputStream());
         };
-        return factory;
+    }
+
+    @VisibleForTesting
+    static String getRangeHeaderValue(long start, Optional<Long> end) {
+        return "bytes=" + start + end.map(x -> "-" + x).orElse("");
     }
 
     private static <T> Index<T> createIndex( //

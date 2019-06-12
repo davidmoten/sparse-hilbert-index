@@ -2,13 +2,17 @@ package com.github.davidmoten.shi;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
 import java.net.URL;
@@ -20,6 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -28,6 +33,7 @@ import org.davidmoten.hilbert.Range;
 import org.davidmoten.hilbert.Ranges;
 import org.davidmoten.hilbert.SmallHilbertCurve;
 import org.davidmoten.kool.Stream;
+import org.davidmoten.kool.exceptions.UncheckedException;
 import org.junit.Test;
 
 import com.github.davidmoten.bigsorter.Reader;
@@ -320,11 +326,121 @@ public class IndexTest {
         index = Index.serializer(SERIALIZER).pointMapper(POINT_FN).read(idx);
         checkIndex(index);
     }
-    
-    @Test(expected=UncheckedIOException.class)
+
+    @Test(expected = UncheckedIOException.class)
     public void testIndexReadFromEmptyFileThrows() {
         DataInputStream dis = new DataInputStream(new ByteArrayInputStream(new byte[0]));
         Index.serializer(SIMPLE_SERIALIZER).pointMapper(SIMPLE_POINT_MAPPER).read(dis);
+    }
+
+    @Test
+    public void testClose() {
+        final boolean[] b = new boolean[1];
+        Closeable c = new Closeable() {
+
+            @Override
+            public void close() throws IOException {
+                b[0] = true;
+            }
+        };
+        assertFalse(b[0]);
+        Index.closeSilently(c);
+        assertTrue(b[0]);
+    }
+
+    @Test
+    public void testCloseThrowsIgnoredByCloseSilently() {
+        Closeable c = new Closeable() {
+
+            @Override
+            public void close() throws IOException {
+                throw new IOException("boo");
+            }
+        };
+        Index.closeSilently(c);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testTooManyBits() {
+        int bits = 64;
+        int dimensions = 3;
+        File input = new File("src/test/resources/2019-05-15.binary-fixes-with-mmsi.sampled.every.400");
+        int approximateNumIndexEntries = 100;
+        Index //
+                .serializer(SERIALIZER) //
+                .pointMapper(POINT_FN) //
+                .input(input) //
+                .output(OUTPUT) //
+                .bits(bits) //
+                .dimensions(dimensions) //
+                .numIndexEntries(approximateNumIndexEntries) //
+                .createIndex();
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testCheckPosiiont() {
+        Index.checkIndexPosition(Integer.MAX_VALUE + 1L);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testOrdinatesLength() throws FileNotFoundException, IOException {
+        Index<String> index = createSimpleIndex();
+        index.ordinates(new double[1]);
+    }
+
+    @Test
+    public void testCloseNull() {
+        Index.closeSilently(null);
+    }
+
+    @Test
+    public void testGetRangeHeaderValueWithEnd() {
+        assertEquals("bytes=3-10", Index.getRangeHeaderValue(3L, Optional.of(10L)));
+    }
+    
+    @Test
+    public void testGetRangeHeaderValueWithoutEnd() {
+        assertEquals("bytes=3", Index.getRangeHeaderValue(3L, Optional.empty()));
+    }
+
+    @Test(expected = UncheckedException.class)
+    public void testInputStreamFactoryThrows() throws FileNotFoundException, IOException {
+        Index<String> idx = createSimpleIndex();
+        idx //
+                .search(new double[3], new double[3]) //
+                .inputStreamFactory((x, y) -> {
+                    throw new IOException("boo");
+                }).count().get();
+    }
+
+    @Test(expected = UncheckedIOException.class)
+    public void testSearchFileDoesNotExist() throws FileNotFoundException, IOException {
+        Index<String> idx = createSimpleIndex();
+        idx //
+                .search(new double[3], new double[3]) //
+                .file(new File("target/doesnotexist")) //
+                .count().get();
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testSearchMalformedUrl() throws FileNotFoundException, IOException {
+        Index<String> idx = createSimpleIndex();
+        idx //
+                .search(new double[3], new double[3]) //
+                .url("hithere") //
+                .count().get();
+    }
+
+    @Test(expected = UncheckedIOException.class)
+    public void testIndexWriteToDataOutputStreamThrows() throws FileNotFoundException, IOException {
+        DataOutputStream dos = new DataOutputStream(new OutputStream() {
+
+            @Override
+            public void write(int b) throws IOException {
+                throw new IOException("boo");
+            }
+        });
+        createSimpleIndex().write(dos);
     }
 
     @Test
