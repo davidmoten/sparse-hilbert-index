@@ -5,13 +5,17 @@ import static com.github.davidmoten.shi.fixes.Fixes.ser;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
+import java.util.function.Function;
 
 import com.github.davidmoten.bigsorter.Reader;
+import com.github.davidmoten.bigsorter.Serializer;
+import com.github.davidmoten.shi.Index;
 
 public class FixesCreateCsvInput {
 
@@ -36,6 +40,22 @@ public class FixesCreateCsvInput {
                 }
             }
         }
+        Function<String, double[]> pointMapper = line -> {
+            String[] items = line.split(",");
+            double lat = Double.parseDouble(items[1]);
+            double lon = Double.parseDouble(items[2]);
+            double time = Long.parseLong(items[3]);
+            return new double[] { lat, lon, time };
+        };
+        Index //
+                .serializer(Serializer.linesUtf8()) //
+                .pointMapper(pointMapper) //
+                .input(new File("target/input.csv")) //
+                .output(new File("target/sorted.csv")) //
+                .bits(10) //
+                .dimensions(3) //
+                .numIndexEntries(10000) //
+                .createIndex(new File("target/sorted.csv.idx"));
     }
 
 }

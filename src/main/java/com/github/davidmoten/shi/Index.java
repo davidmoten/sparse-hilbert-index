@@ -208,6 +208,10 @@ public final class Index<T> {
             b.sortMaxItemsPerFile = sortMaxItemsPerFile;
             return this;
         }
+        
+        public Index<T> createIndex(File file) {
+            return createIndex().write(file);
+        }
 
         public Index<T> createIndex() {
             try {
