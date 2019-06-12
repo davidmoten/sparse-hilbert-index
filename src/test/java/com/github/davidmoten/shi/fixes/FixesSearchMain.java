@@ -75,7 +75,7 @@ public class FixesSearchMain {
         // 6255 found in 939ms using local file scan
         // read index in 508ms
         // 6255 found in 609ms using search over https (s3), index already loaded
-                
+
         // larger region
         // double[] a = new double[] { -10.6, 170, minTime };
         // double[] b = new double[] { -50, 179, maxTime };
@@ -83,7 +83,7 @@ public class FixesSearchMain {
         System.out.println("queryBounds=" + bounds);
 
         long t = System.currentTimeMillis();
-        long count = index.search(bounds, output, 100).count().get();
+        long count = index.search(bounds).maxRanges(100).file(output).count().get();
         System.out.println(count + " found in " + (System.currentTimeMillis() - t) + "ms using local file search");
 
         t = System.currentTimeMillis();
@@ -103,9 +103,8 @@ public class FixesSearchMain {
         // reread index
         index = Index.read(new DataInputStream(getIndexInputStream(locationIdx)), ser, point);
         System.out.println("read index in " + (System.currentTimeMillis() - t) + "ms");
-        URL u = new URL(location);
         t = System.currentTimeMillis();
-        long records = index.search(bounds, u, 0).count().get();
+        long records = index.search(bounds).maxRanges(0).url(location).count().get();
         System.out.println(records + " found in " + (System.currentTimeMillis() - t)
                 + "ms using search over https (s3), index already loaded");
 
@@ -133,7 +132,7 @@ public class FixesSearchMain {
                     bounds = Bounds.create(new double[] { lat1, lon1, minTime },
                             new double[] { lat2, lon2, minTime + hours });
                     t = System.currentTimeMillis();
-                    records = index.search(bounds, u).count().get();
+                    records = index.search(bounds).url(u).count().get();
                     System.out.println(records + " found in " + (System.currentTimeMillis() - t)
                             + "ms using search over https (s3), index already loaded");
 
@@ -148,7 +147,7 @@ public class FixesSearchMain {
                     bounds = Bounds.create(new double[] { lat1, lon1, minTime },
                             new double[] { lat2, lon2, minTime + hours });
                     t = System.currentTimeMillis();
-                    records = index.search(bounds, u).count().get();
+                    records = index.search(bounds).url(u).count().get();
                     System.out.println(records + " found in " + (System.currentTimeMillis() - t)
                             + "ms using search over https (s3), index already loaded");
                 }

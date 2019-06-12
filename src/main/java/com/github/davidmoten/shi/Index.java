@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.Channels;
@@ -440,44 +441,64 @@ public final class Index<T> {
         return indexPositions.size();
     }
 
-    public Stream<T> search(Bounds queryBounds, File file) {
-        return search(queryBounds, file, 0);
+    public SearchBuilder search(double[] a, double[] b) {
+        return search(Bounds.create(a, b));
     }
 
-    public Stream<T> search(Bounds queryBounds, File file, int maxRanges) {
-        try {
-            return search(queryBounds, new RandomAccessFile(file, "r"), maxRanges);
-        } catch (FileNotFoundException e) {
-            throw new UncheckedIOException(e);
+    public SearchBuilder search(Bounds bounds) {
+        return new SearchBuilder(bounds);
+    }
+
+    public final class SearchBuilder {
+
+        private final Bounds bounds;
+        private int maxRanges;
+
+        SearchBuilder(Bounds bounds) {
+            this.bounds = bounds;
         }
+
+        public SearchBuilder maxRanges(int maxRanges) {
+            this.maxRanges = maxRanges;
+            return this;
+        }
+
+        public Stream<T> file(File file) {
+            try {
+                return file(new RandomAccessFile(file, "r"));
+            } catch (FileNotFoundException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
+        public Stream<T> file(RandomAccessFile raf) {
+            return inputStreamFactory(rafInputStreamFactory(raf));
+        }
+
+        public Stream<T> inputStreamFactory(BiFunction<Long, Optional<Long>, InputStream> inputStreamFactory) {
+            return search(bounds, inputStreamFactory, maxRanges);
+        }
+
+        public Stream<T> url(String url) {
+            try {
+                return url(new URL(url));
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public Stream<T> url(URL url) {
+            return inputStreamFactory(inputStreamForRange(url));
+        }
+
     }
 
-    public Stream<T> search(Bounds queryBounds, RandomAccessFile raf) {
-        return search(queryBounds, raf, 0);
-    }
-
-    public Stream<T> search(Bounds queryBounds, RandomAccessFile raf, int maxRanges) {
-        return search(queryBounds, rafInputStreamFactory(raf), 0);
-    }
-
-    public Stream<T> search(Bounds queryBounds, BiFunction<Long, Optional<Long>, InputStream> factory) {
-        return search(queryBounds, factory, 0);
-    }
-
-    public Stream<T> search(Bounds queryBounds, BiFunction<Long, Optional<Long>, InputStream> factory, int maxRanges) {
+    private Stream<T> search(Bounds queryBounds, BiFunction<Long, Optional<Long>, InputStream> factory, int maxRanges) {
         long[] a = ordinates(queryBounds.mins());
         long[] b = ordinates(queryBounds.maxes());
         Ranges ranges = hc.query(a, b, maxRanges);
         return Stream.from(positionRanges(ranges)) //
                 .flatMap(pr -> search(queryBounds, factory, pr));
-    }
-
-    public Stream<T> search(Bounds queryBounds, URL url, int maxRanges) {
-        return search(queryBounds, inputStreamForRange(url), maxRanges);
-    }
-
-    public Stream<T> search(Bounds queryBounds, URL url) {
-        return search(queryBounds, url, 0);
     }
 
     private static BiFunction<Long, Optional<Long>, InputStream> inputStreamForRange(URL u) {

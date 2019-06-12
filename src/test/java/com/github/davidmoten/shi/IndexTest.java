@@ -175,11 +175,11 @@ public class IndexTest {
     public void testSimpleSearchWholeDomain() throws FileNotFoundException, IOException {
         Index<String> index = createSimpleIndex();
         Bounds queryBounds = Bounds.create(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
-        assertEquals(NUM_SIMPLE_ROWS, index.search(queryBounds, OUTPUT).count().get().intValue());
+        assertEquals(NUM_SIMPLE_ROWS, index.search(queryBounds).file(OUTPUT).count().get().intValue());
         File idx2 = new File("target/idx2");
         index.write(idx2);
         Index<String> index2 = Index.read(idx2, SIMPLE_SERIALIZER, SIMPLE_POINT_MAPPER);
-        assertEquals(NUM_SIMPLE_ROWS, index2.search(queryBounds, OUTPUT).count().get().intValue());
+        assertEquals(NUM_SIMPLE_ROWS, index2.search(queryBounds).file(OUTPUT).count().get().intValue());
     }
 
     private static Index<String> createSimpleIndex() throws IOException, FileNotFoundException {
