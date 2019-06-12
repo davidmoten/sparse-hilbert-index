@@ -395,11 +395,13 @@ public class IndexTest {
 
     @Test
     public void testGetRangeHeaderValueWithEnd() {
+        // see rfc7233
         assertEquals("bytes=3-10", Index.getRangeHeaderValue(3L, Optional.of(10L)));
     }
-    
+
     @Test
     public void testGetRangeHeaderValueWithoutEnd() {
+        // see rfc7233
         assertEquals("bytes=3", Index.getRangeHeaderValue(3L, Optional.empty()));
     }
 
