@@ -11,7 +11,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 
 import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.bigsorter.Serializer;
@@ -21,6 +25,7 @@ public class FixesCreateCsvInput {
 
     public static void main(String[] args) throws IOException {
         try (PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream("target/input.csv")))) {
+            out.format("mmsi,lat,lon,time,speedKnots,cog,heading\n");
             Reader<byte[]> r = ser.createReader(new BufferedInputStream(new FileInputStream(input)));
             while (true) {
                 byte[] b = r.read();
@@ -40,15 +45,14 @@ public class FixesCreateCsvInput {
                 }
             }
         }
-        Function<String, double[]> pointMapper = line -> {
-            String[] items = line.split(",");
-            double lat = Double.parseDouble(items[1]);
-            double lon = Double.parseDouble(items[2]);
-            double time = Long.parseLong(items[3]);
+        Function<CSVRecord, double[]> pointMapper = rec -> {
+            double lat = Double.parseDouble(rec.get("lat"));
+            double lon = Double.parseDouble(rec.get("lon"));
+            double time = Long.parseLong(rec.get("time"));
             return new double[] { lat, lon, time };
         };
         Index //
-                .serializer(Serializer.linesUtf8()) //
+                .serializer(Serializer.csv(CSVFormat.DEFAULT.withFirstRecordAsHeader(), StandardCharsets.UTF_8)) //
                 .pointMapper(pointMapper) //
                 .input(new File("target/input.csv")) //
                 .output(new File("target/sorted.csv")) //
