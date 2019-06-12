@@ -3,7 +3,7 @@ package com.github.davidmoten.shi;
 import java.io.IOException;
 import java.io.InputStream;
 
-class LimitingInputStream extends InputStream {
+final class LimitingInputStream extends InputStream {
 
     private final InputStream in;
     private final long limit;
