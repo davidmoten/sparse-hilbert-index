@@ -182,6 +182,28 @@ public class IndexTest {
         assertEquals(NUM_SIMPLE_ROWS, index2.search(queryBounds).file(OUTPUT).count().get().intValue());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testPointMapperDoesntMatchDimensions() throws IOException {
+        String s = "10,2,300\n4,5,600\n8,7,100";
+        File input = new File("target/input");
+        Files.write(input.toPath(), s.getBytes(StandardCharsets.UTF_8));
+
+        int bits = 2;
+        int dimensions = 3;
+        int approxNumIndexEntries = 2;
+
+        Function<String, double[]> pointMapper = x -> new double[1];
+        Index //
+                .serializer(SIMPLE_SERIALIZER) //
+                .pointMapper(pointMapper) //
+                .input(input) //
+                .output(OUTPUT) //
+                .bits(bits) //
+                .dimensions(dimensions) //
+                .numIndexEntries(approxNumIndexEntries) //
+                .createIndex();
+    }
+
     private static Index<String> createSimpleIndex() throws IOException, FileNotFoundException {
         String s = "10,2,300\n4,5,600\n8,7,100";
         File input = new File("target/input");
