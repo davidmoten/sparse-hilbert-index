@@ -21,12 +21,14 @@ import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.bigsorter.Serializer;
 import com.github.davidmoten.shi.Index;
 
-public class FixesCreateCsvInput {
+public class FixesCreateCsvMain {
 
     public static void main(String[] args) throws IOException {
-        try (PrintStream out = new PrintStream(new BufferedOutputStream(new FileOutputStream("target/input.csv")))) {
+        try (PrintStream out = new PrintStream(
+                new BufferedOutputStream(new FileOutputStream("target/input.csv")))) {
             out.format("mmsi,lat,lon,time,speedKnots,cog,heading\n");
-            Reader<byte[]> r = ser.createReader(new BufferedInputStream(new FileInputStream(input)));
+            Reader<byte[]> r = ser
+                    .createReader(new BufferedInputStream(new FileInputStream(input)));
             while (true) {
                 byte[] b = r.read();
                 if (b == null) {
@@ -41,19 +43,14 @@ public class FixesCreateCsvInput {
                     float speedKnots = bb.getShort() / 10.0f;
                     float cog = bb.getShort() / 10.0f;
                     float heading = bb.getShort() / 10.0f;
-                    out.format("%s,%s,%s,%s,%s,%s,%s\n", mmsi, lat, lon, time, speedKnots, cog, heading);
+                    out.format("%s,%s,%s,%s,%s,%s,%s\n", mmsi, lat, lon, time, speedKnots, cog,
+                            heading);
                 }
             }
         }
-        Function<CSVRecord, double[]> pointMapper = rec -> {
-            double lat = Double.parseDouble(rec.get("lat"));
-            double lon = Double.parseDouble(rec.get("lon"));
-            double time = Long.parseLong(rec.get("time"));
-            return new double[] { lat, lon, time };
-        };
         Index //
-                .serializer(Serializer.csv(CSVFormat.DEFAULT.withFirstRecordAsHeader(), StandardCharsets.UTF_8)) //
-                .pointMapper(pointMapper) //
+                .serializer(FixesCsv.serializer) //
+                .pointMapper(FixesCsv.pointMapper) //
                 .input(new File("target/input.csv")) //
                 .output(new File("target/sorted.csv")) //
                 .bits(10) //

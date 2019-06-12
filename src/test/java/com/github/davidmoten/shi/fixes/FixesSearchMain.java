@@ -34,11 +34,11 @@ public class FixesSearchMain {
         System.out.println(index);
         double minTime = 1.557868858E12;
         // double maxTime = 1.5579648E12;
-        double t1 = minTime + TimeUnit.HOURS.toMillis(0);
-        double t2 = t1 + TimeUnit.MINUTES.toMillis(6000);
+        double t1 = minTime + TimeUnit.HOURS.toMillis(12);
+        double t2 = t1 + TimeUnit.MINUTES.toMillis(30);
         // sydney region
-        // double[] a = new double[] { -33.68, 150.86, t1 };
-        // double[] b = new double[] { -34.06, 151.34, t2 };
+        double[] a = new double[] { -33.68, 150.86, t1 };
+        double[] b = new double[] { -34.06, 151.34, t2 };
         // queryBounds=Bounds [mins=[-34.06, 150.86, 1.557948058E12], maxes=[-33.68,
         // 151.34, 1.557951658E12]]
         // 1667 found in 59ms using local file search
@@ -67,8 +67,8 @@ public class FixesSearchMain {
         // 166229 found in 3258ms using search over https (s3), index already loaded
 
         // TAS region
-        double[] a = new double[] { -39.389, 143.491, t1 };
-        double[] b = new double[] { -44, 149.5, t2 };
+//        double[] a = new double[] { -39.389, 143.491, t1 };
+//        double[] b = new double[] { -44, 149.5, t2 };
         // queryBounds=Bounds [mins=[-44.0, 143.491, 1.557948058E12], maxes=[-39.389,
         // 149.5, 1.557951658E12]]
         // 6255 found in 95ms using local file search
@@ -84,15 +84,16 @@ public class FixesSearchMain {
 
         long t = System.currentTimeMillis();
         long count = index.search(bounds).maxRanges(100).file(output).count().get();
-        System.out.println(count + " found in " + (System.currentTimeMillis() - t) + "ms using local file search");
+        System.out.println(count + " found in " + (System.currentTimeMillis() - t)
+                + "ms using local file search");
 
         t = System.currentTimeMillis();
         long c = searchRaw(bounds);
-        System.out.println(c + " found in " + (System.currentTimeMillis() - t) + "ms using local file scan");
+        System.out.println(
+                c + " found in " + (System.currentTimeMillis() - t) + "ms using local file scan");
 
-        String location = new String(
-                Base64.getDecoder().decode(
-                        "aHR0cHM6Ly9tb3Rlbi1maXhlcy5zMy1hcC1zb3V0aGVhc3QtMi5hbWF6b25hd3MuY29tL291dHB1dC1zb3J0ZWQK"),
+        String location = new String(Base64.getDecoder().decode(
+                "aHR0cHM6Ly9tb3Rlbi1maXhlcy5zMy1hcC1zb3V0aGVhc3QtMi5hbWF6b25hd3MuY29tL291dHB1dC1zb3J0ZWQK"),
                 StandardCharsets.UTF_8);
 
         String locationIdx = new String(Base64.getDecoder().decode(
@@ -113,11 +114,13 @@ public class FixesSearchMain {
         // runHistoricalSearches(index, minTime, u);
     }
 
-    private static void runHistoricalSearches(Index<byte[]> index, double minTime, URL u) throws IOException {
+    private static void runHistoricalSearches(Index<byte[]> index, double minTime, URL u)
+            throws IOException {
         Bounds bounds;
         long t;
         long records;
-        for (String line : Files.readAllLines(new File("src/test/resources/searches.txt").toPath())) {
+        for (String line : Files
+                .readAllLines(new File("src/test/resources/searches.txt").toPath())) {
             if (line.trim().length() > 0) {
                 String[] elems = line.split("\t");
                 double hours = Double.parseDouble(elems[0]);
