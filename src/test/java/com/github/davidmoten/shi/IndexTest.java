@@ -226,8 +226,8 @@ public class IndexTest {
                 .numIndexEntries(approxNumIndexEntries) //
                 .createIndex();
         System.out.println(idx);
-        assertEquals(3, idx.search(new double[] { 9, 1, 100 }, new double[] { 11, 3, 400 }).file(OUTPUT).count().get()
-                .intValue());
+        assertEquals(3, idx.search(new double[] { 9, 1, 100 }, new double[] { 11, 3, 400 }).maxRanges(0).file(OUTPUT)
+                .count().get().intValue());
     }
 
     @Test
@@ -237,7 +237,7 @@ public class IndexTest {
         URL url = OUTPUT.toURI().toURL();
         // Note that Range request header will be ignored making a connection to a
         // file:// url so we read the whole file every time
-        assertEquals(NUM_SIMPLE_ROWS, index.search(queryBounds).url(url).count().get().intValue());
+        assertEquals(NUM_SIMPLE_ROWS, index.search(queryBounds).url(url.toString()).count().get().intValue());
     }
 
     private static Index<String> createSimpleIndex() throws IOException, FileNotFoundException {
