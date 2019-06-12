@@ -296,7 +296,11 @@ public final class Index<T> {
         Preconditions.checkArgument(d.length == mins.length);
         long[] x = new long[d.length];
         for (int i = 0; i < d.length; i++) {
-            x[i] = Math.round(((Math.min(d[i], maxes[i]) - mins[i]) / (maxes[i] - mins[i])) * hc.maxOrdinate());
+            if (mins[i] == maxes[i]) {
+                x[i] = 0;
+            } else {
+                x[i] = Math.round(((Math.min(d[i], maxes[i]) - mins[i]) / (maxes[i] - mins[i])) * hc.maxOrdinate());
+            }
         }
         return x;
     }
@@ -626,7 +630,7 @@ public final class Index<T> {
         // can do this because bits * dimensions <= 31
         return (int) hc.index(ordinates);
     }
-    
+
     @Override
     public String toString() {
         return "Index [mins=" + Arrays.toString(mins) + ", maxes=" + Arrays.toString(maxes) + ", numEntries="

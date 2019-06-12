@@ -204,6 +204,30 @@ public class IndexTest {
                 .createIndex();
     }
 
+    @Test
+    public void testSearchWorksEvenIfChunksDontHaveDifferentHilbertIndexes() throws IOException {
+        String s = "10,2,300\n10,2,300\n10,2,300";
+        File input = new File("target/input");
+        Files.write(input.toPath(), s.getBytes(StandardCharsets.UTF_8));
+
+        int bits = 2;
+        int dimensions = 3;
+        int approxNumIndexEntries = 5;
+
+        Index<String> idx = Index //
+                .serializer(SIMPLE_SERIALIZER) //
+                .pointMapper(SIMPLE_POINT_MAPPER) //
+                .input(input) //
+                .output(OUTPUT) //
+                .bits(bits) //
+                .dimensions(dimensions) //
+                .numIndexEntries(approxNumIndexEntries) //
+                .createIndex();
+        System.out.println(idx);
+        assertEquals(3, idx.search(new double[] { 9, 1, 100 }, new double[] { 11, 3, 400 }).file(OUTPUT).count().get()
+                .intValue());
+    }
+
     private static Index<String> createSimpleIndex() throws IOException, FileNotFoundException {
         String s = "10,2,300\n4,5,600\n8,7,100";
         File input = new File("target/input");
