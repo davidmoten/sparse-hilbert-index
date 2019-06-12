@@ -8,7 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.net.MalformedURLException;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -127,6 +127,13 @@ public class IndexTest {
     }
 
     @Test
+    public void testSimpleGetters() throws FileNotFoundException, IOException {
+        Index<String> index = createSimpleIndex();
+        assertTrue(SIMPLE_SERIALIZER == index.serializer());
+        assertTrue(SIMPLE_POINT_MAPPER == index.pointMapper());
+    }
+
+    @Test
     public void testSimple() throws IOException {
         Index<String> index = createSimpleIndex();
         assertArrayEquals(new double[] { 4, 2, 100 }, index.mins(), PRECISION);
@@ -171,6 +178,31 @@ public class IndexTest {
             assertEquals(0, pr.floorPosition());
             assertEquals(Long.MAX_VALUE, pr.ceilingPosition());
         }
+    }
+
+    @Test(expected = UncheckedIOException.class)
+    public void testIndexReadFileDoesNotExist() {
+        Index //
+                .serializer(SIMPLE_SERIALIZER) //
+                .pointMapper(SIMPLE_POINT_MAPPER) //
+                .read(new File("target/doesnotexist"));
+    }
+
+    @Test(expected = UncheckedIOException.class)
+    public void testIndexCreationFileDoesNotExist() {
+        Index //
+                .serializer(SIMPLE_SERIALIZER) //
+                .pointMapper(SIMPLE_POINT_MAPPER) //
+                .input(new File("target/doesnotexist")) //
+                .output(OUTPUT).bits(10) //
+                .dimensions(3) //
+                .createIndex();
+    }
+
+    @Test(expected = UncheckedIOException.class)
+    public void testIndexWriteFileCannotBeCreated() throws FileNotFoundException, IOException {
+        Index<String> index = createSimpleIndex();
+        index.write(new File("target/doesnotexist/doesnotexist"));
     }
 
     @Test
@@ -249,6 +281,7 @@ public class IndexTest {
         int dimensions = 3;
         int approxNumIndexEntries = 2;
         return Index //
+                .builder() //
                 .serializer(SIMPLE_SERIALIZER) //
                 .pointMapper(SIMPLE_POINT_MAPPER) //
                 .input(input) //
@@ -280,6 +313,9 @@ public class IndexTest {
 
         // reread index
         index = Index.read(idx, SERIALIZER, POINT_FN);
+        checkIndex(index);
+
+        index = Index.serializer(SERIALIZER).pointMapper(POINT_FN).read(idx);
         checkIndex(index);
     }
 

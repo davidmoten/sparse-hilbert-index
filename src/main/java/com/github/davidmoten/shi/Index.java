@@ -585,10 +585,9 @@ public final class Index<T> {
     private static <T> TreeMap<Integer, Long> createIndexPositions(Serializer<T> serializer,
             Function<? super T, double[]> point, File output, final double[] mins, final double[] maxes,
             SmallHilbertCurve hc, long chunk) throws IOException, FileNotFoundException {
-        System.out.println("creating index positions with chunk size = " + chunk);
         TreeMap<Integer, Long> indexPositions = new TreeMap<>();
         try (//
-                InputStream in = Util.bufferedInput(output, false); //
+                InputStream in = Util.bufferedInput(output); //
                 Reader<T> reader = serializer.createReader(in);
                 CountingOutputStream counter = new CountingOutputStream();
                 Writer<T> writer = serializer.createWriter(counter)) {
