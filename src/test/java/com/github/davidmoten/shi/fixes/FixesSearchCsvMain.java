@@ -11,7 +11,7 @@ public class FixesSearchCsvMain {
 
     public static void main(String[] args) {
         Index<CSVRecord> index = Index //
-                .serializer(FixesCsv.serializer) //
+                .serializer(FixesCsv.serializer()) //
                 .pointMapper(FixesCsv.pointMapper) //
                 .read(new File("target/sorted.csv.idx"));
         double minTime = 1.557868858E12;

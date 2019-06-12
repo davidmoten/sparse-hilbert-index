@@ -11,14 +11,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.function.Function;
-
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVRecord;
 
 import com.github.davidmoten.bigsorter.Reader;
-import com.github.davidmoten.bigsorter.Serializer;
 import com.github.davidmoten.shi.Index;
 
 public class FixesCreateCsvMain {
@@ -49,7 +43,7 @@ public class FixesCreateCsvMain {
             }
         }
         Index //
-                .serializer(FixesCsv.serializer) //
+                .serializer(FixesCsv.serializer()) //
                 .pointMapper(FixesCsv.pointMapper) //
                 .input(new File("target/input.csv")) //
                 .output(new File("target/sorted.csv")) //
