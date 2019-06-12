@@ -103,6 +103,7 @@ final class HilbertIndex {
                     double[] p = point.apply(t);
                     int index = hilbertIndex(hc, p, mins, maxes);
                     if (!indexPositions.containsKey(index)) {
+                        // don't overwrite an earlier start position for the index
                         indexPositions.put(index, position);
                     }
                 }
