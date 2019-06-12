@@ -79,8 +79,7 @@ Index<byte[]> index =
 // corners of the query box for an hour in the Sydney region
 double[] a = new double[] { -33.68, 150.86, t1 };
 double[] b = new double[] { -34.06, 151.34, t2 };
-Bounds bounds = Bounds.create(a, b);
-long count = index.search(bounds).url(url).count().get();
+long count = index.search(a, b).url(url).count().get();
 ```
 
 The default index size is 10k entries which produces a file of about 80K.
