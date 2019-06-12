@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -226,6 +228,16 @@ public class IndexTest {
         System.out.println(idx);
         assertEquals(3, idx.search(new double[] { 9, 1, 100 }, new double[] { 11, 3, 400 }).file(OUTPUT).count().get()
                 .intValue());
+    }
+
+    @Test
+    public void searchSimpleUsingFileUrl() throws FileNotFoundException, IOException {
+        Index<String> index = createSimpleIndex();
+        Bounds queryBounds = Bounds.create(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
+        URL url = OUTPUT.toURI().toURL();
+        // Note that Range request header will be ignored making a connection to a
+        // file:// url so we read the whole file every time
+        assertEquals(NUM_SIMPLE_ROWS, index.search(queryBounds).url(url).count().get().intValue());
     }
 
     private static Index<String> createSimpleIndex() throws IOException, FileNotFoundException {
