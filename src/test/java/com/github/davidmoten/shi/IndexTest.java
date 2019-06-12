@@ -269,6 +269,8 @@ public class IndexTest {
                 .bits(bits) //
                 .dimensions(dimensions) //
                 .numIndexEntries(approximateNumIndexEntries) //
+                .sortMaxFilesPerMerge(10000) //
+                .sortMaxItemsPerFile(100000) //
                 .createIndex();
     }
 

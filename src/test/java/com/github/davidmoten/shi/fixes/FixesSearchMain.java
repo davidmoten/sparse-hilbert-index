@@ -101,12 +101,14 @@ public class FixesSearchMain {
 
         t = System.currentTimeMillis();
         // reread index
-        index = Index.read(new DataInputStream(getIndexInputStream(locationIdx)), ser, point);
-        System.out.println("read index in " + (System.currentTimeMillis() - t) + "ms");
-        t = System.currentTimeMillis();
-        long records = index.search(bounds).maxRanges(0).url(location).count().get();
-        System.out.println(records + " found in " + (System.currentTimeMillis() - t)
-                + "ms using search over https (s3), index already loaded");
+        try (DataInputStream in = new DataInputStream(getIndexInputStream(locationIdx))) {
+            index = Index.serializer(ser).pointMapper(point).read(in);
+            System.out.println("read index in " + (System.currentTimeMillis() - t) + "ms");
+            t = System.currentTimeMillis();
+            long records = index.search(bounds).maxRanges(0).url(location).count().get();
+            System.out.println(records + " found in " + (System.currentTimeMillis() - t)
+                    + "ms using search over https (s3), index already loaded");
+        }
 
         // runHistoricalSearches(index, minTime, u);
     }
