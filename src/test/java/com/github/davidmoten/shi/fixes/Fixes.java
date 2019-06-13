@@ -28,4 +28,10 @@ class Fixes {
     private static double t2 = t1 + TimeUnit.MINUTES.toMillis(30);
     final static Bounds sydney = Bounds.create(new double[] { -33.68, 150.86, t1 },
             new double[] { -34.06, 151.34, t2 });
+    // brisbane region
+    // double[] a = new double[] { -24.9, 150, t1 };
+    // double[] b = new double[] { -29.5, 158, t2 };
+    final static Bounds brisbane = Bounds.create(new double[] { -24.9, 150, t1 },
+            new double[] { -29.5, 158, t2 });
+
 }
