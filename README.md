@@ -21,9 +21,6 @@ Add this maven dependency to your pom.xml:
 </dependency>
 
 ```
-
-## Algorithm
-
 ## Example
 
 Suppose we have a 400MB binary input file with 11.4m ship position fixed-size records (35 bytes each) around Australia for one day and lat, long and time are in those records (stored as float, float, long). I'm going to use a hilbert curve with 10 bits per dimension and 3 dimensions to make a hilbert curve index for this file, store the sorted file and its index and test the speed that I can do spatio-temporal queries on this data.
@@ -123,10 +120,15 @@ This library uses streaming apis to ensure efficiency and to close resources aut
 
 Streaming is useful so that for instance when reading a chunk from the source file as soon as the calculated hilbert index for a read record is greater than the max hilbert index searched for we stop reading and close the InputStream. It also enables user defined cancellation by being able to use `results.filter(x -> likeable(x)).first()` for example to cancel reading as soon as a record is found that matches a criterion.
 
-## Why would I use this library?
-That's a good question! Especially as AWS offer Athena on CSV files (and other formats) in S3 buckets that can can do a full scan of a 2GB file in 1.5 seconds! 
+## Algorithm
+Here is some more implementation detail for this library:
 
-The *sparse-hilbert-index* approach may appeal when you consider the costs of running many many indexed searches across 100s of 2GB files in parallel. Athena costs are low ($US5/TB data scanned for queries). In some cases the consequent power consumption from doing a lot of full scan searches may also be ethically challenging. I think it's hard to compete with Athena on big file search but there may be some edge cases that favour *sparse-hilbert-index*! 
+The hilbert curve index is calculated using the java library [hilbert-curve](https://github.com/davidmoten/hilbert-curve). This library can calculate 3 million indexes a second so I've chosen to not store the hilbert index with the associate record but instead calculate it on-demand.
+
+## Why would I use this library?
+That's a good question! Especially as AWS offer Athena on CSV files (and other formats) in S3 buckets that can can do a full scan of a 2GB CSV file in 1.5 seconds! 
+
+The *sparse-hilbert-index* approach may appeal when you consider the costs of running many many indexed searches across a lot of data. Athena costs are low ($US5/TB data scanned for queries) but may become significant at some scale. In some cases the consequent power consumption from doing a lot of full scan searches may also be ethically challenging. I think it's hard to compete with Athena on big file search but there may be some edge cases that favour *sparse-hilbert-index*! 
 
 To add fuel to the fire, Athena supports the Parquet format which can be indexed such that every page has min-max statistics. If you sort the data on the field you want to query (in our case we would add a calculated hilbert index column) then Athena can do indexed lookups itself (untested). Athena still has to look at the statistics for every page (1Mb by default) so it's not quite as efficient theoretically as *sparse-hilbert-index* that knows exactly what pages to search. This is clearly a topic for further investigation!
 
