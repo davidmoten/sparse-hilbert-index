@@ -10,7 +10,7 @@ import java.io.IOException;
 
 import com.github.davidmoten.shi.Index;
 
-public class FixesCreateSpatioTemporalIndexMain {
+public class FixesBinaryCreateMain {
 
     public static void main(String[] args) throws IOException {
 

@@ -9,7 +9,7 @@ import org.apache.commons.csv.CSVRecord;
 import com.github.davidmoten.shi.Bounds;
 import com.github.davidmoten.shi.Index;
 
-public class FixesSearchCsvMain {
+public class FixesCsvSearchMain {
 
     public static void main(String[] args) {
         Index<CSVRecord> index = Index //

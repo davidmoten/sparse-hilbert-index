@@ -15,7 +15,7 @@ import java.nio.ByteBuffer;
 import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.shi.Index;
 
-public class FixesCreateCsvMain {
+public class FixesCsvCreateMain {
 
     public static void main(String[] args) throws IOException {
         try (PrintStream out = new PrintStream(
