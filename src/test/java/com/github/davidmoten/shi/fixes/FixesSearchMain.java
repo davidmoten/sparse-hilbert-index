@@ -39,6 +39,8 @@ public class FixesSearchMain {
         // sydney region
         double[] a = new double[] { -33.68, 150.86, t1 };
         double[] b = new double[] { -34.06, 151.34, t2 };
+        Bounds sydney = Bounds.create(new double[] { -33.68, 150.86, t1 },
+                new double[] { -34.06, 151.34, t2 });
         // queryBounds=Bounds [mins=[-34.06, 150.86, 1.557948058E12], maxes=[-33.68,
         // 151.34, 1.557951658E12]]
         // 1667 found in 59ms using local file search

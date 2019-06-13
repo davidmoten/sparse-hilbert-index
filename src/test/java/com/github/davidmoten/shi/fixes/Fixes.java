@@ -2,9 +2,11 @@ package com.github.davidmoten.shi.fixes;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import com.github.davidmoten.bigsorter.Serializer;
+import com.github.davidmoten.shi.Bounds;
 
 class Fixes {
     final static File input = new File(
@@ -21,4 +23,9 @@ class Fixes {
         long time = bb.getLong();
         return new double[] { lat, lon, time };
     };
+    private static double minTime = 1.557868858E12;
+    private static double t1 = minTime + TimeUnit.HOURS.toMillis(12);
+    private static double t2 = t1 + TimeUnit.MINUTES.toMillis(30);
+    final static Bounds sydney = Bounds.create(new double[] { -33.68, 150.86, t1 },
+            new double[] { -34.06, 151.34, t2 });
 }
