@@ -11,7 +11,16 @@ Java library to create and search random access files (including in S3) using th
 **Status**: *in development*
 
 ## Getting started
-TODO
+Add this maven dependency to your pom.xml:
+
+```xml
+<dependency>
+  <groupId>com.github.davidmoten</groupId>
+  <artifactId>sparse-hilbert-curve</artifactId>
+  <version>VERSION_HERE</version>
+</dependency>
+
+```
 
 ## Algorithm
 
