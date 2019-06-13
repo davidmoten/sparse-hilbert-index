@@ -51,8 +51,9 @@ public final class Index<T> {
     private final Serializer<? extends T> serializer;
     private final Function<? super T, double[]> pointMapper;
 
-    Index(TreeMap<Integer, Long> indexPositions, double[] mins, double[] maxes, int bits, long count,
-            Serializer<? extends T> serializer, Function<? super T, double[]> pointMapper) {
+    Index(TreeMap<Integer, Long> indexPositions, double[] mins, double[] maxes, int bits,
+            long count, Serializer<? extends T> serializer,
+            Function<? super T, double[]> pointMapper) {
         this.indexPositions = indexPositions;
         this.mins = mins;
         this.maxes = maxes;
@@ -127,7 +128,8 @@ public final class Index<T> {
         }
 
         public Index<T> read(File file) {
-            try (DataInputStream in = new DataInputStream(new BufferedInputStream(new FileInputStream(file)))) {
+            try (DataInputStream in = new DataInputStream(
+                    new BufferedInputStream(new FileInputStream(file)))) {
                 return read(in);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
@@ -190,8 +192,7 @@ public final class Index<T> {
          * depend on where the chunking falls so can vary by a few from the desired
          * value.
          * 
-         * @param numIndexEntries
-         *            approximate number of index entries
+         * @param numIndexEntries approximate number of index entries
          * @return builder
          */
         public Builder6<T> numIndexEntries(int numIndexEntries) {
@@ -208,15 +209,16 @@ public final class Index<T> {
             b.sortMaxItemsPerFile = sortMaxItemsPerFile;
             return this;
         }
-        
+
         public Index<T> createIndex(File file) {
             return createIndex().write(file);
         }
 
         public Index<T> createIndex() {
             try {
-                return Index.createIndex(b.input, b.serializer, b.pointMapper, b.output, b.bits, b.dimensions,
-                        b.numIndexEntriesApproximate, b.sortMaxFilesPerMerge, b.sortMaxItemsPerFile);
+                return Index.createIndex(b.input, b.serializer, b.pointMapper, b.output, b.bits,
+                        b.dimensions, b.numIndexEntriesApproximate, b.sortMaxFilesPerMerge,
+                        b.sortMaxItemsPerFile);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -232,8 +234,7 @@ public final class Index<T> {
      * Fits the desired ranges to the effective querying ranges according to the
      * known index positions.
      * 
-     * @param ranges
-     *            list of ranges in ascending order
+     * @param ranges list of ranges in ascending order
      * @return querying ranges based on known index positions
      */
     public List<PositionRange> positionRanges(Iterable<Range> ranges) {
@@ -241,10 +242,12 @@ public final class Index<T> {
     }
 
     @VisibleForTesting
-    static List<PositionRange> positionRanges(TreeMap<Integer, Long> indexPositions, Iterable<Range> ranges) {
+    static List<PositionRange> positionRanges(TreeMap<Integer, Long> indexPositions,
+            Iterable<Range> ranges) {
         LinkedList<PositionRange> list = new LinkedList<>();
         for (Range range : ranges) {
-            if (range.low() <= indexPositions.lastKey() && range.high() >= indexPositions.firstKey()) {
+            if (range.low() <= indexPositions.lastKey()
+                    && range.high() >= indexPositions.firstKey()) {
                 Long startPosition = value(indexPositions.floorEntry((int) range.low()));
                 if (startPosition == null) {
                     startPosition = indexPositions.firstEntry().getValue();
@@ -302,7 +305,8 @@ public final class Index<T> {
             if (mins[i] == maxes[i]) {
                 x[i] = 0;
             } else {
-                x[i] = Math.round(((Math.min(d[i], maxes[i]) - mins[i]) / (maxes[i] - mins[i])) * hc.maxOrdinate());
+                x[i] = Math.round(((Math.min(d[i], maxes[i]) - mins[i]) / (maxes[i] - mins[i]))
+                        * hc.maxOrdinate());
             }
         }
         return x;
@@ -341,7 +345,8 @@ public final class Index<T> {
     }
 
     public Index<T> write(File idx) {
-        try (DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(idx)))) {
+        try (DataOutputStream dos = new DataOutputStream(
+                new BufferedOutputStream(new FileOutputStream(idx)))) {
             write(dos);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -372,7 +377,7 @@ public final class Index<T> {
                 dos.writeInt(entry.getKey());
                 long pos = entry.getValue();
                 checkIndexPosition(pos);
-                
+
                 dos.writeInt(entry.getValue().intValue());
             }
         } catch (IOException e) {
@@ -388,20 +393,24 @@ public final class Index<T> {
         }
     }
 
-    private static BiFunction<Long, Optional<Long>, InputStream> rafInputStreamFactory(RandomAccessFile raf) {
+    private static BiFunction<Long, Optional<Long>, InputStream> rafInputStreamFactory(
+            RandomAccessFile raf) {
         return (first, last) -> {
             raf.seek(first);
-            return new LimitingInputStream(new BufferedInputStream(Channels.newInputStream(raf.getChannel())),
+            return new LimitingInputStream(
+                    new BufferedInputStream(Channels.newInputStream(raf.getChannel())),
                     last.orElse(Long.MAX_VALUE) - first);
         };
     }
 
-    public StreamIterable<T> search(Bounds queryBounds, RandomAccessFile raf, PositionRange pr) throws IOException {
+    public StreamIterable<T> search(Bounds queryBounds, RandomAccessFile raf, PositionRange pr)
+            throws IOException {
         return search(queryBounds, rafInputStreamFactory(raf), pr);
     }
 
-    public StreamIterable<T> search(Bounds queryBounds, BiFunction<Long, Optional<Long>, InputStream> factory,
-            PositionRange pr) throws IOException {
+    public StreamIterable<T> search(Bounds queryBounds,
+            BiFunction<Long, Optional<Long>, InputStream> factory, PositionRange pr)
+            throws IOException {
         InputStream[] in = new InputStream[1];
         final Reader<? extends T> r;
         try {
@@ -427,7 +436,61 @@ public final class Index<T> {
                 // else keep reading till EOF or next record found within queryBounds
             }
         }) //
-                .takeUntil(rec -> hc.index(ordinates(pointMapper.apply(rec))) > pr.maxHilbertIndex()) //
+                .takeUntil(
+                        rec -> hc.index(ordinates(pointMapper.apply(rec))) > pr.maxHilbertIndex()) //
+                .filter(t -> queryBounds.contains(pointMapper.apply(t))) //
+                .doOnDispose(() -> {
+                    closeSilently(r);
+                    closeSilently(in[0]);
+                });
+    }
+
+    public static final class WithCounts<T> {
+        private final T value;
+        private final long recordsRead;
+        private final long bytesRead;
+        private final long recordsFound;
+
+        WithCounts(T value, long recordsRead, long bytesRead, long recordsFound) {
+            this.value = value;
+            this.recordsRead = recordsRead;
+            this.bytesRead = bytesRead;
+            this.recordsFound = recordsFound;
+        }
+
+    }
+
+    public StreamIterable<WithCounts<T>> searchWithStats(Bounds queryBounds,
+            BiFunction<Long, Optional<Long>, InputStream> factory, PositionRange pr)
+            throws IOException {
+        InputStream[] in = new InputStream[1];
+        final Reader<? extends T> r;
+        try {
+            Optional<Long> ceiling = pr.ceilingPosition() == Long.MAX_VALUE ? Optional.empty()
+                    : Optional.of(pr.ceilingPosition());
+            in[0] = factory.apply(pr.floorPosition(), ceiling);
+            r = serializer.createReader(in[0]);
+        } catch (Throwable t) {
+            closeSilently(in[0]);
+            return Stream.error(t);
+        }
+        Counts counts = new Counts();
+        return Stream.<T>generate(emitter -> {
+            T t;
+            while (true) {
+                t = r.read();
+                if (t == null) {
+                    emitter.onComplete();
+                    break;
+                } else {
+                    emitter.onNext(t);
+                    break;
+                }
+                // else keep reading till EOF or next record found within queryBounds
+            }
+        }) //
+                .takeUntil(
+                        rec -> hc.index(ordinates(pointMapper.apply(rec))) > pr.maxHilbertIndex()) //
                 .filter(t -> queryBounds.contains(pointMapper.apply(t))) //
                 .doOnDispose(() -> {
                     closeSilently(r);
@@ -484,7 +547,8 @@ public final class Index<T> {
             return inputStreamFactory(rafInputStreamFactory(raf));
         }
 
-        public Stream<T> inputStreamFactory(BiFunction<Long, Optional<Long>, InputStream> inputStreamFactory) {
+        public Stream<T> inputStreamFactory(
+                BiFunction<Long, Optional<Long>, InputStream> inputStreamFactory) {
             return search(bounds, inputStreamFactory, maxRanges);
         }
 
@@ -502,7 +566,8 @@ public final class Index<T> {
 
     }
 
-    private Stream<T> search(Bounds queryBounds, BiFunction<Long, Optional<Long>, InputStream> factory, int maxRanges) {
+    private Stream<T> search(Bounds queryBounds,
+            BiFunction<Long, Optional<Long>, InputStream> factory, int maxRanges) {
         long[] a = ordinates(queryBounds.mins());
         long[] b = ordinates(queryBounds.maxes());
         Ranges ranges = hc.query(a, b, maxRanges);
@@ -536,7 +601,8 @@ public final class Index<T> {
             int sortMaxItemsPerFile) //
             throws IOException {
 
-        Preconditions.checkArgument(bits * dimensions <= 31, "bits * dimensions must be at most 31");
+        Preconditions.checkArgument(bits * dimensions <= 31,
+                "bits * dimensions must be at most 31");
 
         // scan once to get the mins, maxes, count
         final double[] mins = new double[dimensions];
@@ -585,13 +651,15 @@ public final class Index<T> {
                 .sort();
 
         long chunk = Math.max(1, count / numIndexEntriesApproximate);
-        TreeMap<Integer, Long> indexPositions = createIndexPositions(serializer, point, output, mins, maxes, hc, chunk);
+        TreeMap<Integer, Long> indexPositions = createIndexPositions(serializer, point, output,
+                mins, maxes, hc, chunk);
         return new Index<T>(indexPositions, mins, maxes, bits, count, serializer, point);
     }
 
     private static <T> TreeMap<Integer, Long> createIndexPositions(Serializer<T> serializer,
-            Function<? super T, double[]> point, File output, final double[] mins, final double[] maxes,
-            SmallHilbertCurve hc, long chunk) throws IOException, FileNotFoundException {
+            Function<? super T, double[]> point, File output, final double[] mins,
+            final double[] maxes, SmallHilbertCurve hc, long chunk)
+            throws IOException, FileNotFoundException {
         TreeMap<Integer, Long> indexPositions = new TreeMap<>();
         try (//
                 InputStream in = Util.bufferedInput(output); //
@@ -628,10 +696,12 @@ public final class Index<T> {
         return indexPositions;
     }
 
-    private static int hilbertIndex(SmallHilbertCurve hc, double[] point, double[] mins, double[] maxes) {
+    private static int hilbertIndex(SmallHilbertCurve hc, double[] point, double[] mins,
+            double[] maxes) {
         long[] ordinates = new long[point.length];
         for (int i = 0; i < ordinates.length; i++) {
-            ordinates[i] = Math.round((point[i] - mins[i]) / (maxes[i] - mins[i]) * hc.maxOrdinate());
+            ordinates[i] = Math
+                    .round((point[i] - mins[i]) / (maxes[i] - mins[i]) * hc.maxOrdinate());
         }
         // can do this because bits * dimensions <= 31
         return (int) hc.index(ordinates);
@@ -639,8 +709,8 @@ public final class Index<T> {
 
     @Override
     public String toString() {
-        return "Index [mins=" + Arrays.toString(mins) + ", maxes=" + Arrays.toString(maxes) + ", numEntries="
-                + indexPositions.size() + "]";
+        return "Index [mins=" + Arrays.toString(mins) + ", maxes=" + Arrays.toString(maxes)
+                + ", numEntries=" + indexPositions.size() + "]";
     }
 
 }
