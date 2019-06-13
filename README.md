@@ -110,3 +110,13 @@ The default index size is 10k entries which produces a file of about 80K.
 In short if your search window is reasonably limited in time and space (so that you are not returning some large proportion of the total dataset) then performance is good (326ms for the Sydney area search would provide a good user experience in a UI for example). Interestingly I found that if one dimension is unconstrained (like time) then search performance is still good. When two dimensions are unconstrained (searching a large geographic area for a small time window) then search performance is more on a par with a full file scan.
 
 ## Streaming
+This library uses streaming apis to ensure efficiency and to close resources automatically. `java.util.stream.Stream` objects are single use only and do not implement the concept of disposal so a synchronous-only reusable stream library with disposal semantics called [kool](https://github.com/davidmoten/kool) is used.
+
+Streaming is useful so that for instance when reading a chunk from the source file as soon as the calculated hilbert index for a read record is greater than the max hilbert index searched for we stop reading and close the InputStream. It also enables user defined cancellation by being able to use `results.filter(x -> likeable(x)).first()` for example to cancel reading as soon as a record is found that matches a criterion.
+
+## Why would I use this library?
+That's a good question! Especially as AWS offer Athena on CSV files (and other formats) in S3 buckets that can can do a full scan of a 2GB file in 1.5 seconds! 
+
+The *sparse-hilbert-index* approach may appeal when you consider the costs of running many many indexed searches across 100s of 2GB files in parallel. Athena costs are low ($US5/TB data scanned for queries). In some cases the consequent power consumption from doing a lot of full scan searches may also be ethically challenging. I think it's hard to compete with Athena onbig file search but there may be some edge cases that favour *sparse-hilbert-index*! 
+
+To add fuel to the fire, Athena supports the Parquet format which can be indexed such that every page has min-max statistics. If you sort the data on the field you want to query (in our case we would add a calculated hilbert index column) then Athena can do indexed lookups itself (untested). This is clearly a topic for further investigation!
