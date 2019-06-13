@@ -39,10 +39,12 @@ import org.junit.Test;
 import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.bigsorter.Serializer;
 import com.github.davidmoten.guavamini.Lists;
+import com.github.davidmoten.shi.Index.WithStats;
 import com.github.davidmoten.shi.fixes.Record;
 
 public class IndexTest {
 
+    private static final Bounds SIMPLE_BOUNDS_WHOLE_DOMAIN = Bounds.create(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
     private static final Serializer<String> SIMPLE_SERIALIZER = Serializer.linesUtf8();
     private static final Function<String, double[]> SIMPLE_POINT_MAPPER = line -> Arrays //
             .stream(line.split(",")) //
@@ -140,6 +142,13 @@ public class IndexTest {
         assertTrue(SIMPLE_SERIALIZER == index.serializer());
         assertTrue(SIMPLE_POINT_MAPPER == index.pointMapper());
     }
+    
+    @Test
+    public void testSimpleSearchWithStats() throws FileNotFoundException, IOException {
+        Index<String> index = createSimpleIndex();
+        List<WithStats<String>> list = index.search(SIMPLE_BOUNDS_WHOLE_DOMAIN).withStats().file(OUTPUT).toList().get();
+        System.out.println(list);
+    }
 
     @Test
     public void testSimple() throws IOException {
@@ -216,7 +225,7 @@ public class IndexTest {
     @Test
     public void testSimpleSearchWholeDomain() throws FileNotFoundException, IOException {
         Index<String> index = createSimpleIndex();
-        Bounds queryBounds = Bounds.create(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
+        Bounds queryBounds = SIMPLE_BOUNDS_WHOLE_DOMAIN;
         assertEquals(NUM_SIMPLE_ROWS, index.search(queryBounds).file(OUTPUT).count().get().intValue());
         File idx2 = new File("target/idx2");
         index.write(idx2);
@@ -273,7 +282,7 @@ public class IndexTest {
     @Test
     public void searchSimpleUsingFileUrl() throws FileNotFoundException, IOException {
         Index<String> index = createSimpleIndex();
-        Bounds queryBounds = Bounds.create(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
+        Bounds queryBounds = SIMPLE_BOUNDS_WHOLE_DOMAIN;
         URL url = OUTPUT.toURI().toURL();
         // Note that Range request header will be ignored making a connection to a
         // file:// url so we read the whole file every time
