@@ -415,14 +415,16 @@ public final class Index<T> {
         private final long bytesRead;
         private final long recordsFound;
         private final long timeToFirstByte;
+        private final long chunksRead;
 
-        WithStats(T value, long recordsRead, long recordsFound, long bytesRead, long timeToFirstByte) {
+        WithStats(T value, long recordsRead, long recordsFound, long bytesRead, long timeToFirstByte, long chunksRead) {
 
             this.value = value;
             this.recordsRead = recordsRead;
             this.recordsFound = recordsFound;
             this.bytesRead = bytesRead;
             this.timeToFirstByte = timeToFirstByte;
+            this.chunksRead = chunksRead;
         }
 
         public T value() {
@@ -445,6 +447,10 @@ public final class Index<T> {
             return timeToFirstByte;
         }
 
+        public long chunksRead() {
+            return chunksRead;
+        }
+
         @Override
         public String toString() {
             StringBuilder b = new StringBuilder();
@@ -458,6 +464,8 @@ public final class Index<T> {
             b.append(recordsFound);
             b.append(", timeToFirstByte=");
             b.append(timeToFirstByte);
+            b.append(", chunksRead=");
+            b.append(chunksRead);
             b.append("]");
             return b.toString();
         }
@@ -470,7 +478,6 @@ public final class Index<T> {
         long recordsFound;
         long positionRanges;
         long totalTimeToFirstByte;
-        boolean readFirstByte = false;
     }
 
     public StreamIterable<WithStats<T>> searchWithStats(Bounds queryBounds,
@@ -491,7 +498,7 @@ public final class Index<T> {
                     counts.totalTimeToFirstByte += in[0].timeToFirstByte();
                 }) //
                 .map(x -> new WithStats<T>(x, counts.recordsRead, counts.recordsFound, in[0].count(),
-                        in[0].timeToFirstByte()));
+                        in[0].timeToFirstByte(), counts.positionRanges));
     }
 
     private Stream<T> getValues(Bounds queryBounds, BiFunction<Long, Optional<Long>, InputStream> factory,

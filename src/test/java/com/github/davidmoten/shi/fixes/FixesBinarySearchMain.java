@@ -25,6 +25,7 @@ import javax.net.ssl.HttpsURLConnection;
 import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.shi.Bounds;
 import com.github.davidmoten.shi.Index;
+import com.github.davidmoten.shi.Index.WithStats;
 
 public class FixesBinarySearchMain {
 
@@ -98,8 +99,8 @@ public class FixesBinarySearchMain {
             System.out.println("read index in " + (System.currentTimeMillis() - t) + "ms");
         }
         t = System.currentTimeMillis();
-        long records = index.search(bounds).maxRanges(0).url(location).count().get();
-        System.out.println(records + " found in " + (System.currentTimeMillis() - t)
+        WithStats<byte[]> last = index.search(bounds).maxRanges(0).withStats().url(location).last().get().get();
+        System.out.println(last + " found in " + (System.currentTimeMillis() - t)
                 + "ms using search over https (s3), index already loaded");
 
         // runHistoricalSearches(index, minTime, u);
