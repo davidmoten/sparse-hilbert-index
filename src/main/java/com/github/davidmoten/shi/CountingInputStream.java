@@ -7,15 +7,16 @@ final class CountingInputStream extends InputStream {
 
     private final InputStream in;
     private long count;
+    private long startTime;
     private long ttfb;
 
-    CountingInputStream(InputStream in) {
+    CountingInputStream(InputStream in, long startTime) {
         this.in = in;
+        this.startTime = startTime;
     }
 
     @Override
     public int read() throws IOException {
-        preRead();
         int v = in.read();
         postRead();
         if (v != -1) {
@@ -24,23 +25,8 @@ final class CountingInputStream extends InputStream {
         return v;
     }
 
-    private void preRead() {
-        if (ttfb == -1) {
-            ttfb = -System.currentTimeMillis();
-        }
-    }
-
-    private void postRead() {
-        if (ttfb < 0) {
-            ttfb += System.currentTimeMillis();
-        } else {
-            ttfb = 0;
-        }
-    }
-
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        preRead();
         int n = in.read(b, off, len);
         postRead();
         if (n != -1) {
@@ -49,12 +35,21 @@ final class CountingInputStream extends InputStream {
         return n;
     }
 
+    private void postRead() {
+        if (startTime != -1) {
+            ttfb = System.currentTimeMillis() - startTime;
+            startTime = -1;
+        }
+    }
+
     long count() {
         return count;
     }
 
-    long timeToFirstByte() {
-        return ttfb;
+    long readTimeToFirstByteAndSetToZero() {
+        long v = ttfb;
+        ttfb = 0;
+        return v;
     }
 
 }

@@ -435,6 +435,10 @@ public final class Index<T> {
             return recordsRead;
         }
 
+        public double hitRatio() {
+            return (double) recordsFound / recordsRead;
+        }
+
         public long bytesRead() {
             return bytesRead;
         }
@@ -445,6 +449,10 @@ public final class Index<T> {
 
         public long timeToFirstByteMs() {
             return timeToFirstByte;
+        }
+
+        public double timeToFirstByteMsAverage() {
+            return (double) timeToFirstByte / chunksRead;
         }
 
         public long chunksRead() {
@@ -458,12 +466,16 @@ public final class Index<T> {
             b.append(value);
             b.append(", recordsRead=");
             b.append(recordsRead);
-            b.append(", bytesRead=");
-            b.append(bytesRead);
             b.append(", recordsFound=");
             b.append(recordsFound);
+            b.append(", bytesRead=");
+            b.append(bytesRead);
+            b.append(", hitRatio=");
+            b.append(hitRatio());
             b.append(", timeToFirstByte=");
             b.append(timeToFirstByte);
+            b.append(", timeToFirstByteAverage=");
+            b.append(timeToFirstByteMsAverage());
             b.append(", chunksRead=");
             b.append(chunksRead);
             b.append("]");
@@ -485,7 +497,8 @@ public final class Index<T> {
         counts.positionRanges++;
         CountingInputStream[] in = new CountingInputStream[1];
         BiFunction<Long, Optional<Long>, InputStream> factory2 = (x, y) -> {
-            CountingInputStream is = new CountingInputStream(factory.apply(x, y));
+            long startTime = System.currentTimeMillis();
+            CountingInputStream is = new CountingInputStream(factory.apply(x, y), startTime);
             in[0] = is;
             return is;
         };
@@ -495,10 +508,10 @@ public final class Index<T> {
                 .filter(t -> queryBounds.contains(pointMapper.apply(t))) //
                 .doOnNext(x -> {
                     counts.recordsFound++;
-                    counts.totalTimeToFirstByte += in[0].timeToFirstByte();
+                    counts.totalTimeToFirstByte += in[0].readTimeToFirstByteAndSetToZero();
                 }) //
                 .map(x -> new WithStats<T>(x, counts.recordsRead, counts.recordsFound, in[0].count(),
-                        in[0].timeToFirstByte(), counts.positionRanges));
+                        counts.totalTimeToFirstByte, counts.positionRanges));
     }
 
     private Stream<T> getValues(Bounds queryBounds, BiFunction<Long, Optional<Long>, InputStream> factory,
