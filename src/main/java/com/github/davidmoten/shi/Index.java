@@ -134,6 +134,14 @@ public final class Index<T> {
                 throw new UncheckedIOException(e);
             }
         }
+
+        public Index<T> read(URL url) {
+            try (DataInputStream in = new DataInputStream(new BufferedInputStream(url.openStream()))) {
+                return read(in);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
     }
 
     public static final class Builder3<T> {

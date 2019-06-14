@@ -30,8 +30,6 @@ import com.github.davidmoten.shi.Index.WithStats;
 public class FixesBinarySearchMain {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        Index<byte[]> index = Index.serializer(ser).pointMapper(point).read(idx);
-        System.out.println(index);
         Bounds bounds = Fixes.sydney;
         // queryBounds=Bounds [mins=[-34.06, 150.86, 1.557948058E12], maxes=[-33.68,
         // 151.34, 1.557951658E12]]
@@ -75,14 +73,23 @@ public class FixesBinarySearchMain {
         // double[] b = new double[] { -50, 179, maxTime };
         System.out.println("queryBounds=" + bounds);
 
-        long t = System.currentTimeMillis();
-        long count = index.search(bounds).maxRanges(100).file(output).count().get();
-        System.out.println(count + " found in " + (System.currentTimeMillis() - t) + "ms using local file search");
+        long t;
+        Index<byte[]> index;
+        if (false) {
+            t = System.currentTimeMillis();
+            index = Index.serializer(ser).pointMapper(point).read(idx);
+            System.out.println(index);
+            long count = index.search(bounds).maxRanges(100).file(output).count().get();
+            System.out.println(count + " found in " + (System.currentTimeMillis() - t) + "ms using local file search");
 
-        t = System.currentTimeMillis();
-        long c = searchRaw(bounds);
-        System.out.println(c + " found in " + (System.currentTimeMillis() - t) + "ms using local file scan");
+            t = System.currentTimeMillis();
+            long c = searchRaw(bounds);
+            System.out.println(c + " found in " + (System.currentTimeMillis() - t) + "ms using local file scan");
 
+        }
+        //////////////////
+        // read from s3
+        //////////////////
         String location = new String(
                 Base64.getDecoder().decode(
                         "aHR0cHM6Ly9tb3Rlbi1maXhlcy5zMy1hcC1zb3V0aGVhc3QtMi5hbWF6b25hd3MuY29tL291dHB1dC1zb3J0ZWQK"),
