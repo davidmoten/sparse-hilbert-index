@@ -44,7 +44,8 @@ import com.github.davidmoten.shi.fixes.Record;
 
 public class IndexTest {
 
-    private static final Bounds SIMPLE_BOUNDS_WHOLE_DOMAIN = Bounds.create(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
+    private static final Bounds SIMPLE_BOUNDS_WHOLE_DOMAIN = Bounds.create(new double[] { 3, 1, 50 },
+            new double[] { 11, 8, 650 });
     private static final Serializer<String> SIMPLE_SERIALIZER = Serializer.linesUtf8();
     private static final Function<String, double[]> SIMPLE_POINT_MAPPER = line -> Arrays //
             .stream(line.split(",")) //
@@ -142,11 +143,16 @@ public class IndexTest {
         assertTrue(SIMPLE_SERIALIZER == index.serializer());
         assertTrue(SIMPLE_POINT_MAPPER == index.pointMapper());
     }
-    
+
     @Test
     public void testSimpleSearchWithStats() throws FileNotFoundException, IOException {
         Index<String> index = createSimpleIndex();
-        List<WithStats<String>> list = index.search(SIMPLE_BOUNDS_WHOLE_DOMAIN).withStats().file(OUTPUT).toList().get();
+        List<WithStats<String>> list = index //
+                .search(SIMPLE_BOUNDS_WHOLE_DOMAIN) //
+                .withStats() //
+                .file(OUTPUT) //
+                .toList() //
+                .get();
         System.out.println(list);
     }
 

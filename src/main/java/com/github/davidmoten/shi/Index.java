@@ -450,17 +450,24 @@ public final class Index<T> {
         long recordsRead;
         long bytesRead;
         long recordsFound;
+        long positionRanges;
     }
 
     public StreamIterable<WithStats<T>> searchWithStats(Bounds queryBounds,
-            BiFunction<Long, Optional<Long>, InputStream> factory, PositionRange pr) throws IOException {
-        Counts counts = new Counts();
-        return getValues(queryBounds, factory, pr) //
+            BiFunction<Long, Optional<Long>, InputStream> factory, PositionRange pr, Counts counts) throws IOException {
+        counts.positionRanges++;
+        CountingInputStream[] in = new CountingInputStream[1];
+        BiFunction<Long, Optional<Long>, InputStream> factory2 = (x, y) -> {
+            CountingInputStream is = new CountingInputStream(factory.apply(x, y));
+            in[0] = is;
+            return is;
+        };
+        return getValues(queryBounds, factory2, pr) //
                 .doOnNext(x -> counts.recordsRead++) //
                 .takeUntil(rec -> hc.index(ordinates(pointMapper.apply(rec))) > pr.maxHilbertIndex()) //
                 .filter(t -> queryBounds.contains(pointMapper.apply(t))) //
                 .doOnNext(x -> counts.recordsFound++) //
-                .map(x -> new WithStats<T>(x, counts.recordsRead, counts.recordsFound, counts.bytesRead));
+                .map(x -> new WithStats<T>(x, counts.recordsRead, counts.recordsFound, in[0].count()));
     }
 
     private Stream<T> getValues(Bounds queryBounds, BiFunction<Long, Optional<Long>, InputStream> factory,
@@ -626,8 +633,9 @@ public final class Index<T> {
         long[] a = ordinates(queryBounds.mins());
         long[] b = ordinates(queryBounds.maxes());
         Ranges ranges = hc.query(a, b, maxRanges);
+        Counts counts = new Counts();
         return Stream.from(positionRanges(ranges)) //
-                .flatMap(pr -> searchWithStats(queryBounds, inputStreamFactory, pr));
+                .flatMap(pr -> searchWithStats(queryBounds, inputStreamFactory, pr, counts));
     }
 
     private static BiFunction<Long, Optional<Long>, InputStream> inputStreamForRange(URL u) {
