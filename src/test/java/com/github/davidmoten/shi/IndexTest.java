@@ -153,7 +153,8 @@ public class IndexTest {
                 .file(OUTPUT) //
                 .toList() //
                 .get();
-        System.out.println(list);
+        list.forEach(System.out::println);
+        assertEquals(3, list.size());
     }
 
     @Test
