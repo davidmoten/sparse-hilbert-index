@@ -17,6 +17,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.Channels;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -416,8 +417,10 @@ public final class Index<T> {
         private final long recordsFound;
         private final long timeToFirstByte;
         private final long chunksRead;
+        private final long elapsedTime;
 
-        WithStats(T value, long recordsRead, long recordsFound, long bytesRead, long timeToFirstByte, long chunksRead) {
+        WithStats(T value, long recordsRead, long recordsFound, long bytesRead, long timeToFirstByte, long chunksRead,
+                long elapsedTime) {
 
             this.value = value;
             this.recordsRead = recordsRead;
@@ -425,6 +428,7 @@ public final class Index<T> {
             this.bytesRead = bytesRead;
             this.timeToFirstByte = timeToFirstByte;
             this.chunksRead = chunksRead;
+            this.elapsedTime = elapsedTime;
         }
 
         public T value() {
@@ -461,21 +465,23 @@ public final class Index<T> {
 
         @Override
         public String toString() {
+            DecimalFormat df = new DecimalFormat("0.0000");
             StringBuilder b = new StringBuilder();
-            b.append("WithStats [value=");
-            b.append(value);
-            b.append(", recordsRead=");
-            b.append(recordsRead);
+            b.append("WithStats [");
+            b.append("elapsedMs=");
+            b.append(elapsedTime);
             b.append(", recordsFound=");
             b.append(recordsFound);
+            b.append(", recordsRead=");
+            b.append(recordsRead);
+            b.append(", hitRatio=");
+            b.append(df.format(hitRatio()));
             b.append(", bytesRead=");
             b.append(bytesRead);
-            b.append(", hitRatio=");
-            b.append(hitRatio());
-            b.append(", timeToFirstByte=");
+            b.append(", timeToFirstByteMsTotal=");
             b.append(timeToFirstByte);
-            b.append(", timeToFirstByteAverage=");
-            b.append(timeToFirstByteMsAverage());
+            b.append(", timeToFirstByteMsAverage=");
+            b.append(df.format(timeToFirstByteMsAverage()));
             b.append(", chunksRead=");
             b.append(chunksRead);
             b.append("]");
@@ -485,14 +491,20 @@ public final class Index<T> {
     }
 
     static final class Counts {
+        final long startTime;
         long recordsRead;
         long bytesRead;
         long recordsFound;
         long positionRanges;
         long totalTimeToFirstByte;
+
+        Counts() {
+            this.startTime = System.currentTimeMillis();
+        }
     }
 
-    public StreamIterable<WithStats<T>> searchWithStats(Bounds queryBounds,
+    @VisibleForTesting
+    StreamIterable<WithStats<T>> searchWithStats(Bounds queryBounds,
             BiFunction<Long, Optional<Long>, InputStream> factory, PositionRange pr, Counts counts) throws IOException {
         counts.positionRanges++;
         CountingInputStream[] in = new CountingInputStream[1];
@@ -511,7 +523,8 @@ public final class Index<T> {
                     counts.totalTimeToFirstByte += in[0].readTimeToFirstByteAndSetToZero();
                 }) //
                 .map(x -> new WithStats<T>(x, counts.recordsRead, counts.recordsFound, in[0].count(),
-                        counts.totalTimeToFirstByte, counts.positionRanges));
+                        counts.totalTimeToFirstByte, counts.positionRanges,
+                        System.currentTimeMillis() - counts.startTime));
     }
 
     private Stream<T> getValues(Bounds queryBounds, BiFunction<Long, Optional<Long>, InputStream> factory,
