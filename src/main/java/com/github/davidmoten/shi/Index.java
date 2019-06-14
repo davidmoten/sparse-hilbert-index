@@ -414,13 +414,15 @@ public final class Index<T> {
         private final long recordsRead;
         private final long bytesRead;
         private final long recordsFound;
+        private final long timeToFirstByte;
 
-        WithStats(T value, long recordsRead, long recordsFound, long bytesRead) {
+        WithStats(T value, long recordsRead, long recordsFound, long bytesRead, long timeToFirstByte) {
 
             this.value = value;
             this.recordsRead = recordsRead;
             this.recordsFound = recordsFound;
             this.bytesRead = bytesRead;
+            this.timeToFirstByte = timeToFirstByte;
         }
 
         public T value() {
@@ -439,11 +441,27 @@ public final class Index<T> {
             return recordsFound;
         }
 
+        public long timeToFirstByteMs() {
+            return timeToFirstByte;
+        }
+
         @Override
         public String toString() {
-            return "WithStats [value=" + value + ", recordsRead=" + recordsRead + ", bytesRead=" + bytesRead
-                    + ", recordsFound=" + recordsFound + "]";
+            StringBuilder b = new StringBuilder();
+            b.append("WithStats [value=");
+            b.append(value);
+            b.append(", recordsRead=");
+            b.append(recordsRead);
+            b.append(", bytesRead=");
+            b.append(bytesRead);
+            b.append(", recordsFound=");
+            b.append(recordsFound);
+            b.append(", timeToFirstByte=");
+            b.append(timeToFirstByte);
+            b.append("]");
+            return b.toString();
         }
+
     }
 
     static final class Counts {
@@ -451,6 +469,8 @@ public final class Index<T> {
         long bytesRead;
         long recordsFound;
         long positionRanges;
+        long totalTimeToFirstByte;
+        boolean readFirstByte = false;
     }
 
     public StreamIterable<WithStats<T>> searchWithStats(Bounds queryBounds,
@@ -466,8 +486,12 @@ public final class Index<T> {
                 .doOnNext(x -> counts.recordsRead++) //
                 .takeUntil(rec -> hc.index(ordinates(pointMapper.apply(rec))) > pr.maxHilbertIndex()) //
                 .filter(t -> queryBounds.contains(pointMapper.apply(t))) //
-                .doOnNext(x -> counts.recordsFound++) //
-                .map(x -> new WithStats<T>(x, counts.recordsRead, counts.recordsFound, in[0].count()));
+                .doOnNext(x -> {
+                    counts.recordsFound++;
+                    counts.totalTimeToFirstByte += in[0].timeToFirstByte();
+                }) //
+                .map(x -> new WithStats<T>(x, counts.recordsRead, counts.recordsFound, in[0].count(),
+                        in[0].timeToFirstByte()));
     }
 
     private Stream<T> getValues(Bounds queryBounds, BiFunction<Long, Optional<Long>, InputStream> factory,
