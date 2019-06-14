@@ -1,6 +1,5 @@
 package com.github.davidmoten.shi.fixes;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Base64;
@@ -9,7 +8,7 @@ import org.apache.commons.csv.CSVRecord;
 
 import com.github.davidmoten.shi.Bounds;
 import com.github.davidmoten.shi.Index;
-import com.github.davidmoten.shi.Index.WithStats;
+import com.github.davidmoten.shi.WithStats;
 
 public class FixesCsvSearchMain {
 

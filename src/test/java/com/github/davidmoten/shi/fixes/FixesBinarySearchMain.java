@@ -25,7 +25,7 @@ import javax.net.ssl.HttpsURLConnection;
 import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.shi.Bounds;
 import com.github.davidmoten.shi.Index;
-import com.github.davidmoten.shi.Index.WithStats;
+import com.github.davidmoten.shi.WithStats;
 
 public class FixesBinarySearchMain {
 

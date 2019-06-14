@@ -39,7 +39,6 @@ import org.junit.Test;
 import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.bigsorter.Serializer;
 import com.github.davidmoten.guavamini.Lists;
-import com.github.davidmoten.shi.Index.WithStats;
 import com.github.davidmoten.shi.fixes.Record;
 
 public class IndexTest {
