@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -153,11 +154,37 @@ public class IndexTest {
         List<WithStats<String>> list = index //
                 .search(SIMPLE_BOUNDS_WHOLE_DOMAIN) //
                 .withStats() //
+                .maxRanges(0) //
                 .file(OUTPUT) //
                 .toList() //
                 .get();
         list.forEach(System.out::println);
         assertEquals(4, list.size());
+    }
+
+    @Test
+    public void testSimpleSearchWithStatsUsingUrl() throws FileNotFoundException, IOException {
+        Index<String> index = createSimpleIndex();
+        List<WithStats<String>> list = index //
+                .search(SIMPLE_BOUNDS_WHOLE_DOMAIN) //
+                .withStats() //
+                .maxRanges(0) //
+                .url(OUTPUT.toURI().toURL().toString()) //
+                .toList() //
+                .get();
+        list.forEach(System.out::println);
+        assertEquals(4, list.size());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testSimpleSearchWithStatsUsingBadUrlThrows()
+            throws FileNotFoundException, IOException {
+        Index<String> index = createSimpleIndex();
+        index //
+                .search(SIMPLE_BOUNDS_WHOLE_DOMAIN) //
+                .withStats() //
+                .maxRanges(0) //
+                .url("abc://def");
     }
 
     @Test
@@ -216,6 +243,14 @@ public class IndexTest {
     }
 
     @Test(expected = UncheckedIOException.class)
+    public void testIndexReadUrl() throws MalformedURLException {
+        Index //
+                .serializer(SIMPLE_SERIALIZER) //
+                .pointMapper(SIMPLE_POINT_MAPPER) //
+                .read(new File("target/doesnotexist").toURI().toURL());
+    }
+
+    @Test(expected = UncheckedIOException.class)
     public void testIndexCreationFileDoesNotExist() {
         Index //
                 .serializer(SIMPLE_SERIALIZER) //
@@ -244,6 +279,10 @@ public class IndexTest {
                 .read(idx2);
         assertEquals(NUM_SIMPLE_ROWS,
                 index2.search(queryBounds).file(OUTPUT).count().get().intValue());
+        Index<String> index3 = Index.serializer(SIMPLE_SERIALIZER).pointMapper(SIMPLE_POINT_MAPPER)
+                .read(idx2.toURI().toURL());
+        assertEquals(NUM_SIMPLE_ROWS,
+                index3.search(queryBounds).file(OUTPUT).count().get().intValue());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -506,7 +545,7 @@ public class IndexTest {
         File input = new File(
                 "src/test/resources/2019-05-15.binary-fixes-with-mmsi.sampled.every.400");
         int approximateNumIndexEntries = 100;
-        return Index //
+        Index<byte[]> index = Index //
                 .serializer(SERIALIZER) //
                 .pointMapper(POINT_FN) //
                 .input(input) //
@@ -516,7 +555,9 @@ public class IndexTest {
                 .numIndexEntries(approximateNumIndexEntries) //
                 .sortMaxFilesPerMerge(10000) //
                 .sortMaxItemsPerFile(100000) //
-                .createIndex();
+                .createIndex("target/created-index");
+        assertTrue(new File("target/created-index").exists());
+        return index;
     }
 
     private void checkIndex(Index<?> index) {

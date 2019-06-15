@@ -17,7 +17,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.Channels;
-import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -218,6 +217,10 @@ public final class Index<T> {
         public Builder6<T> sortMaxItemsPerFile(int sortMaxItemsPerFile) {
             b.sortMaxItemsPerFile = sortMaxItemsPerFile;
             return this;
+        }
+
+        public Index<T> createIndex(String filename) {
+            return createIndex(new File(filename));
         }
 
         public Index<T> createIndex(File file) {
@@ -537,8 +540,8 @@ public final class Index<T> {
             this.bounds = bounds;
         }
 
-        public SearchBuilder2 withStats() {
-            return new SearchBuilder2(this);
+        public SearchBuilderWithStats withStats() {
+            return new SearchBuilderWithStats(this);
         }
 
         public SearchBuilder maxRanges(int maxRanges) {
@@ -547,11 +550,7 @@ public final class Index<T> {
         }
 
         public Stream<T> file(File file) {
-            try {
-                return file(new RandomAccessFile(file, "r"));
-            } catch (FileNotFoundException e) {
-                throw new UncheckedIOException(e);
-            }
+            return file(createRaf(file));
         }
 
         public Stream<T> file(RandomAccessFile raf) {
@@ -577,25 +576,21 @@ public final class Index<T> {
 
     }
 
-    public final class SearchBuilder2 {
+    public final class SearchBuilderWithStats {
 
         private final Index<T>.SearchBuilder b;
 
-        SearchBuilder2(Index<T>.SearchBuilder b) {
+        SearchBuilderWithStats(Index<T>.SearchBuilder b) {
             this.b = b;
         }
 
-        public SearchBuilder2 maxRanges(int maxRanges) {
+        public SearchBuilderWithStats maxRanges(int maxRanges) {
             b.maxRanges = maxRanges;
             return this;
         }
 
         public Stream<WithStats<T>> file(File file) {
-            try {
-                return file(new RandomAccessFile(file, "r"));
-            } catch (FileNotFoundException e) {
-                throw new UncheckedIOException(e);
-            }
+            return file(createRaf(file));
         }
 
         public Stream<WithStats<T>> file(RandomAccessFile raf) {
@@ -619,6 +614,14 @@ public final class Index<T> {
             return inputStreamFactory(inputStreamForRange(url));
         }
 
+    }
+
+    private static RandomAccessFile createRaf(File f) {
+        try {
+            return new RandomAccessFile(f, "r");
+        } catch (FileNotFoundException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private Stream<T> search(Bounds queryBounds,
