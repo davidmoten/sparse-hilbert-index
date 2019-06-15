@@ -1,6 +1,7 @@
 package com.github.davidmoten.shi;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -18,6 +19,12 @@ public class WithStatsTest {
         assertEquals(456, (int) w.timeToFirstByteMs());
         assertEquals(76, (int) w.timeToFirstByteMsAverage());
         assertEquals(6, (int) w.chunksRead());
+    }
+
+    @Test
+    public void testHasValueWhenEmpty() {
+        WithStats<Integer> w = new WithStats<>(null, 100, 200, 123, 456, 6, 890);
+        assertFalse(w.hasValue());
     }
 
 }
