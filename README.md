@@ -7,6 +7,7 @@ Java library to create and search random access files (including in S3) using th
 * enables random access search of sorted input file using index file
 * S3 supports `Range` request header so can do random access
 * streaming search api for efficiency
+* supports 2 or more numeric dimensions of any range
 
 **Status**: *in development*
 
@@ -124,6 +125,7 @@ Streaming is useful so that for instance when reading a chunk from the source fi
 Here is some more implementation detail for this library:
 
 The hilbert curve index is calculated using the java library [hilbert-curve](https://github.com/davidmoten/hilbert-curve). This library can calculate 3 million indexes a second so I've chosen to not store the hilbert index with the associate record but instead calculate it on-demand.
+
 
 ## Why would I use this library?
 That's a good question! Especially as AWS offer Athena on CSV files (and other formats) in S3 buckets that can can do a full scan of a 2GB CSV file in 1.5 seconds! 
