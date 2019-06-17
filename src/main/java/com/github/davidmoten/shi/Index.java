@@ -451,13 +451,13 @@ public final class Index<T> {
             throws IOException {
         counts.positionRanges++;
         CountingInputStream[] in = new CountingInputStream[1];
-        BiFunction<Long, Optional<Long>, InputStream> factory2 = (x, y) -> {
+        BiFunction<Long, Optional<Long>, InputStream> factoryWithCount = (x, y) -> {
             long startTime = System.currentTimeMillis();
             CountingInputStream is = new CountingInputStream(factory.apply(x, y), startTime);
             in[0] = is;
             return is;
         };
-        return getValues(queryBounds, factory2, pr) //
+        return getValues(queryBounds, factoryWithCount, pr) //
                 .doOnNext(x -> counts.recordsRead++) //
                 .takeUntil(
                         rec -> hc.index(ordinates(pointMapper.apply(rec))) > pr.maxHilbertIndex()) //
