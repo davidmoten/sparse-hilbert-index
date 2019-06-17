@@ -9,7 +9,7 @@ The Hilbert Curve is generally favoured for multi-dimensional range queries over
 
 This library doesn't present any revolutionary ideas but it does offer revolutionary **ease-of-use** to create and search the Hilbert Curve index.
 
-Querying spatio-temporal data is potentially a terrific application for a Hilbert index but this library supports any number of dimensions and is not opionated about the real life significance of the individual dimensions though it will work better for querying if the ordinates vary (lots of fixed values means more data needs to be scanned in searches).
+Querying spatio-temporal data is potentially a terrific application for a Hilbert index. this library supports any number of dimensions and is not opionated about the real life significance of the individual dimensions though it will work better for querying if the ordinates vary (lots of fixed values means more data needs to be scanned in searches).
 
 Critical to the creation of this library were these libraries by the same author:
 
@@ -178,9 +178,11 @@ Streaming is useful so that for instance when reading a chunk from the source fi
 ## Algorithm
 Here is some more implementation detail for this library:
 
-The hilbert curve index is calculated using the java library [hilbert-curve](https://github.com/davidmoten/hilbert-curve). This library can calculate 3 million indexes a second so I've chosen to not store the hilbert index with the associate record but instead calculate it on-demand.
+1. Scan the input data to obtain the range of values used in each dimension. Each dimensions range will be used to map each dimension on to the range of values used by an ordinate of the hilbert curve (0..2<sup>bits</sup>-1).
 
-TODO
+2. Sort the data based on the hilbert index of each point mapped from each record.  Note that the hilbert index is calculated using the java library [hilbert-curve](https://github.com/davidmoten/hilbert-curve). This library can calculate 3 million indexes a second so we don't store the hilbert index with the associate record but instead calculate it on-demand.
+
+3. Create a sparse index (a binary file) for the sorted data file.
 
 ## Why would I use this library?
 That's a good question! Especially as AWS offer Athena on CSV files (and other formats) in S3 buckets that can can do a full scan of a 2GB CSV file in 1.5 seconds! 
