@@ -1,9 +1,20 @@
 # sparse-hilbert-index
 Java library to create and search random access files (including in S3) using the space-filling hilbert index (sparse). More sensationally described as *Turn Amazon S3 into a spatio-temporal database!*.
 
-The Hilbert Curve is generally favoured for multi-dimensional range queries over the Z-Order Curve for instance because of its superior clustering properties. This library doesn't present any revolutionary ideas but it does offer revolutionary **ease-of-use** to create and search the Hilbert Curve index.
+Range queries are straightforward with a B/B+ tree with a single dimension. Range queries across 2 spatial dimensions are normally handled by R-tree data structures. Range queries across 3 or more dimensions are usually implemented by mapping the space to a single dimensional space-filling curve and then making use of B/B+ tree indexes.
+
+Space filling curves include the Hilbert curve, Z-Order curve, Peano curve and many others.
+
+The Hilbert Curve is generally favoured for multi-dimensional range queries over the Z-Order Curve for instance because of its superior clustering properties (the Hilbert index offers efficiencies for clustered data). 
+
+This library doesn't present any revolutionary ideas but it does offer revolutionary **ease-of-use** to create and search the Hilbert Curve index.
 
 Querying spatio-temporal data is potentially a terrific application for a Hilbert index but this library supports any number of dimensions and is not opionated about the real life significance of the individual dimensions though it will work better for querying if the ordinates vary (lots of fixed values means more data needs to be scanned in searches).
+
+Critical to the creation of this library were these libraries by the same author:
+
+* [big-sorter](https://github.com/davidmoten/big-sorter)
+* [hilbert-curve](https://github.com/davidmoten/hilbert-curve)
 
 **Features**
 * sorts input file based on hilbert index (sorts arbitrarily large files using [big-sorter](https://github.com/davidmoten/big-sorter))
