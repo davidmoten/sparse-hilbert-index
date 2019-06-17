@@ -26,7 +26,7 @@ Add this maven dependency to your pom.xml:
 </dependency>
 
 ```
-## Example
+## Example (binary)
 
 Suppose we have a 400MB binary input file with 11.4m ship position fixed-size records (35 bytes each) around Australia for one day and lat, long and time are in those records (stored as float, float, long). I'm going to use a hilbert curve with 10 bits per dimension and 3 dimensions to make a hilbert curve index for this file, store the sorted file and its index and test the speed that I can do spatio-temporal queries on this data.
 
@@ -128,6 +128,36 @@ The default index size is 10k entries which produces a file of about 80K.
 | Tasmania     | 6      | 60562      | 3245 |
 
 In short if your search window is reasonably limited in time and space (so that you are not returning some large proportion of the total dataset) then performance is good (326ms for the Sydney area search would provide a good user experience in a UI for example). Interestingly I found that if one dimension is unconstrained (like time) then search performance is still good. When two dimensions are unconstrained (searching a large geographic area for a small time window) then search performance is more on a par with a full file scan.
+
+## Example (CSV)
+Here's an example with CSV (making use of the *csv-commons* dependency):
+
+```java
+Serializer<CSVRecord> serializer = Serializer.csv( 
+  CSVFormat.DEFAULT
+   .withFirstRecordAsHeader()
+   .withRecordSeparator("\n"),
+  StandardCharsets.UTF_8);
+
+Function<CSVRecord, double[]> pointMapper = rec -> {
+        // random access means the csv reader doesn't
+        // read the header so we have to use index positions
+        double lat = Double.parseDouble(rec.get(1));
+        double lon = Double.parseDouble(rec.get(2));
+        double time = Long.parseLong(rec.get(3));
+        return new double[] { lat, lon, time };
+    };
+    
+Index
+  .serializer(serializer)
+  .pointMapper(pointMapper)
+  .input(new File("input.csv"))
+  .output(new File("sorted.csv"))
+  .bits(10)
+  .dimensions(3)
+  .numIndexEntries(10000)
+  .createIndex(new File("sorted.csv.idx"));
+```
 
 ## Streaming
 This library uses streaming apis to ensure efficiency and to close resources automatically. `java.util.stream.Stream` objects are single use only and do not implement the concept of disposal so a synchronous-only reusable stream library with disposal semantics called [kool](https://github.com/davidmoten/kool) is used.
