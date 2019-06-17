@@ -130,7 +130,7 @@ The default index size is 10k entries which produces a file of about 80K.
 In short if your search window is reasonably limited in time and space (so that you are not returning some large proportion of the total dataset) then performance is good (326ms for the Sydney area search would provide a good user experience in a UI for example). Interestingly I found that if one dimension is unconstrained (like time) then search performance is still good. When two dimensions are unconstrained (searching a large geographic area for a small time window) then search performance is more on a par with a full file scan.
 
 ## Example (CSV)
-Here's an example with CSV (making use of the *csv-commons* dependency):
+Here's an example with CSV (making use of the [*csv-commons*](https://github.com/apache/commons-csv) dependency):
 
 ```java
 Serializer<CSVRecord> serializer = Serializer.csv( 
