@@ -1,5 +1,5 @@
 # sparse-hilbert-index
-Java library to create and search random access files (including in S3) using the space-filling hilbert index (sparse). More sensationally described as *Turn Amazon S3 into a spatio-temporal database!*.
+Java library to create and search random access files (including in S3) using the space-filling hilbert index (sparse). More sensationally described as **Turn Amazon S3 into a spatio-temporal database!**.
 
 Range queries are straightforward with a B/B+ tree with a single dimension. Range queries across 2 spatial dimensions are normally handled by R-tree data structures. Range queries across 3 or more dimensions are usually implemented by mapping the space to a single dimensional space-filling curve and then making use of B/B+ tree indexes.
 
