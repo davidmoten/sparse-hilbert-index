@@ -30,10 +30,15 @@ Add this maven dependency to your pom.xml:
 
 Suppose we have a 400MB binary input file with 11.4m ship position fixed-size records (35 bytes each) around Australia for one day and lat, long and time are in those records (stored as float, float, long). I'm going to use a hilbert curve with 10 bits per dimension and 3 dimensions to make a hilbert curve index for this file, store the sorted file and its index and test the speed that I can do spatio-temporal queries on this data.
 
-### Step 1: Prepare the sorted file and the index for deployment to S3
-
+### Step 1: Define your serialization method
+In our case we are reading fixed size byte array records so we can use one of the built-in `Serializer`s:
 ```java
 Serializer<byte[]> serializer = Serializer.fixedSizeRecord(35);
+```
+### Step 2: Define how the spatio-temporal point is determined for each record
+So given a 35 byte array we calculate the lat, long and time fields as below:
+
+```java
 Function<byte[], double[]> pointMapper = b -> {
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.position(4);
@@ -42,6 +47,10 @@ Function<byte[], double[]> pointMapper = b -> {
         long time = bb.getLong();
         return new double[] { lat, lon, time };
     };
+```
+### Step 3: Prepare the sorted file and the index for deployment to S3
+
+```java
 File input = ...
 File output = ...
 File idx = ...
@@ -73,10 +82,10 @@ Output:
 2019-06-11 22:04:22.3+1000 merging 2 files
 2019-06-11 22:04:30.3+1000 sort of 11665226 records completed in 152.635s
 ```
-### Step 2: Upload the sorted data and the index file 
+### Step 4: Upload the sorted data and the index file 
 Righto, now you have the `output` and `idx` files that you can deploy to an S3 bucket (or a local filesystem if you want). For convenience you might use a public S3 bucket to test some non-sensitive data without authentication.
 
-### Step 3: Search the remote data file using the index
+### Step 5: Search the remote data file using the index
 Let's do a search on the data and for demonstration purposes we'll reread the Index from the idx file.
 
 ```java
