@@ -169,6 +169,7 @@ Here is some more implementation detail for this library:
 
 The hilbert curve index is calculated using the java library [hilbert-curve](https://github.com/davidmoten/hilbert-curve). This library can calculate 3 million indexes a second so I've chosen to not store the hilbert index with the associate record but instead calculate it on-demand.
 
+TODO
 
 ## Why would I use this library?
 That's a good question! Especially as AWS offer Athena on CSV files (and other formats) in S3 buckets that can can do a full scan of a 2GB CSV file in 1.5 seconds! 
