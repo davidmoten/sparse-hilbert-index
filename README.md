@@ -1,6 +1,8 @@
 # sparse-hilbert-index
 Java library to create and search random access files (including in S3) using the space-filling hilbert index (sparse). More sensationally described as *Turn Amazon S3 into a spatio-temporal database!*.
 
+The Hilbert Curve is used for multi-dimensional range queries particulary because of its superior clustering properties relative to the Z-Order Curve. This library doesn't present any revolutionary ideas but it does offer revolutionary ease-of-use to create and search the Hilbert Curve index.
+
 **Features**
 * sorts input file based on hilbert index (sorts arbitrarily large files using [big-sorter](https://github.com/davidmoten/big-sorter))
 * creates sparse hilbert index in separate file
