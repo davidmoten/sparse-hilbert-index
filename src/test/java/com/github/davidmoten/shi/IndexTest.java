@@ -44,8 +44,8 @@ import com.github.davidmoten.shi.fixes.Record;
 
 public class IndexTest {
 
-    private static final Bounds SIMPLE_BOUNDS_WHOLE_DOMAIN = Bounds
-            .create(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
+    private static final Bounds SIMPLE_BOUNDS_WHOLE_DOMAIN = Bounds.create(new double[] { 3, 1, 50 },
+            new double[] { 11, 8, 650 });
     private static final Serializer<String> SIMPLE_SERIALIZER = Serializer.linesUtf8();
     private static final Function<String, double[]> SIMPLE_POINT_MAPPER = line -> Arrays //
             .stream(line.split(",")) //
@@ -65,10 +65,9 @@ public class IndexTest {
         TreeMap<Integer, Long> map = new TreeMap<>();
         map.put(237, 0L);
         map.put(472177237, 4082820L);
-        Index<String> index = new Index<String>(map,
-                new double[] { -85.14174, -115.24912, 1557868858000L },
-                new double[] { 47.630283, 179.99948, 1557964800000L }, 10, 2,
-                Serializer.linesUtf8(), x -> new double[] { 0, 0, 0 });
+        Index<String> index = new Index<String>(map, new double[] { -85.14174, -115.24912, 1557868858000L },
+                new double[] { 47.630283, 179.99948, 1557964800000L }, 10, 2, Serializer.linesUtf8(),
+                x -> new double[] { 0, 0, 0 });
         long[] o = index.ordinates(-84.23007, -115.24912, 1557964123000L);
         assertEquals(153391853, index.hilbertCurve().index(o));
     }
@@ -87,8 +86,7 @@ public class IndexTest {
         TreeMap<Integer, Long> map = new TreeMap<>();
         map.put(1, 0L);
         map.put(8, 5L);
-        List<PositionRange> ranges = Index.positionRanges(map,
-                Collections.singletonList(Range.create(10, 12)));
+        List<PositionRange> ranges = Index.positionRanges(map, Collections.singletonList(Range.create(10, 12)));
         assertTrue(ranges.isEmpty());
     }
 
@@ -97,8 +95,7 @@ public class IndexTest {
         TreeMap<Integer, Long> map = new TreeMap<>();
         map.put(1, 0L);
         map.put(8, 5L);
-        List<PositionRange> ranges = Index.positionRanges(map,
-                Collections.singletonList(Range.create(-3, -1)));
+        List<PositionRange> ranges = Index.positionRanges(map, Collections.singletonList(Range.create(-3, -1)));
         assertTrue(ranges.isEmpty());
     }
 
@@ -109,8 +106,7 @@ public class IndexTest {
         map.put(8, 5L);
         map.put(16, 10L);
         map.put(20, 16L);
-        List<PositionRange> ranges = Index.positionRanges(map,
-                Collections.singletonList(Range.create(5, 9)));
+        List<PositionRange> ranges = Index.positionRanges(map, Collections.singletonList(Range.create(5, 9)));
         System.out.println(ranges);
         assertEquals(1, ranges.size());
         PositionRange pr = ranges.get(0);
@@ -169,6 +165,7 @@ public class IndexTest {
                 .search(SIMPLE_BOUNDS_WHOLE_DOMAIN) //
                 .withStats() //
                 .maxRanges(0) //
+                .rangesBufferSize(0) //
                 .url(OUTPUT.toURI().toURL().toString()) //
                 .toList() //
                 .get();
@@ -177,8 +174,7 @@ public class IndexTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void testSimpleSearchWithStatsUsingBadUrlThrows()
-            throws FileNotFoundException, IOException {
+    public void testSimpleSearchWithStatsUsingBadUrlThrows() throws FileNotFoundException, IOException {
         Index<String> index = createSimpleIndex();
         index //
                 .search(SIMPLE_BOUNDS_WHOLE_DOMAIN) //
@@ -271,18 +267,14 @@ public class IndexTest {
     public void testSimpleSearchWholeDomain() throws FileNotFoundException, IOException {
         Index<String> index = createSimpleIndex();
         Bounds queryBounds = SIMPLE_BOUNDS_WHOLE_DOMAIN;
-        assertEquals(NUM_SIMPLE_ROWS,
-                index.search(queryBounds).file(OUTPUT).count().get().intValue());
+        assertEquals(NUM_SIMPLE_ROWS, index.search(queryBounds).file(OUTPUT).count().get().intValue());
         File idx2 = new File("target/idx2");
         index.write(idx2);
-        Index<String> index2 = Index.serializer(SIMPLE_SERIALIZER).pointMapper(SIMPLE_POINT_MAPPER)
-                .read(idx2);
-        assertEquals(NUM_SIMPLE_ROWS,
-                index2.search(queryBounds).file(OUTPUT).count().get().intValue());
+        Index<String> index2 = Index.serializer(SIMPLE_SERIALIZER).pointMapper(SIMPLE_POINT_MAPPER).read(idx2);
+        assertEquals(NUM_SIMPLE_ROWS, index2.search(queryBounds).file(OUTPUT).count().get().intValue());
         Index<String> index3 = Index.serializer(SIMPLE_SERIALIZER).pointMapper(SIMPLE_POINT_MAPPER)
                 .read(idx2.toURI().toURL());
-        assertEquals(NUM_SIMPLE_ROWS,
-                index3.search(queryBounds).file(OUTPUT).count().get().intValue());
+        assertEquals(NUM_SIMPLE_ROWS, index3.search(queryBounds).file(OUTPUT).count().get().intValue());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -327,8 +319,14 @@ public class IndexTest {
                 .numIndexEntries(approxNumIndexEntries) //
                 .createIndex();
         System.out.println(idx);
-        assertEquals(3, idx.search(new double[] { 9, 1, 100 }, new double[] { 11, 3, 400 })
-                .maxRanges(0).file(OUTPUT).count().get().intValue());
+        assertEquals(3, idx //
+                .search(new double[] { 9, 1, 100 }, new double[] { 11, 3, 400 }) //
+                .maxRanges(0) //
+                .rangesBufferSize(0) //
+                .file(OUTPUT) //
+                .count() //
+                .get() //
+                .intValue());
     }
 
     @Test
@@ -338,8 +336,7 @@ public class IndexTest {
         URL url = OUTPUT.toURI().toURL();
         // Note that Range request header will be ignored making a connection to a
         // file:// url so we read the whole file every time
-        assertEquals(NUM_SIMPLE_ROWS,
-                index.search(queryBounds).url(url.toString()).count().get().intValue());
+        assertEquals(NUM_SIMPLE_ROWS, index.search(queryBounds).url(url.toString()).count().get().intValue());
     }
 
     private static Index<String> createSimpleIndex() throws IOException, FileNotFoundException {
@@ -426,8 +423,7 @@ public class IndexTest {
     public void testTooManyBits() {
         int bits = 64;
         int dimensions = 3;
-        File input = new File(
-                "src/test/resources/2019-05-15.binary-fixes-with-mmsi.sampled.every.400");
+        File input = new File("src/test/resources/2019-05-15.binary-fixes-with-mmsi.sampled.every.400");
         int approximateNumIndexEntries = 100;
         Index //
                 .serializer(SERIALIZER) //
@@ -542,8 +538,7 @@ public class IndexTest {
     private static Index<byte[]> createIndex() throws IOException {
         int bits = 10;
         int dimensions = 3;
-        File input = new File(
-                "src/test/resources/2019-05-15.binary-fixes-with-mmsi.sampled.every.400");
+        File input = new File("src/test/resources/2019-05-15.binary-fixes-with-mmsi.sampled.every.400");
         int approximateNumIndexEntries = 100;
         Index<byte[]> index = Index //
                 .serializer(SERIALIZER) //
@@ -562,10 +557,9 @@ public class IndexTest {
 
     private void checkIndex(Index<?> index) {
         assertEquals(29163, index.count());
-        assertArrayEquals(new double[] { -54.669193267822266, 19.543855667114258, 1.557869714E12 },
-                index.mins(), 0.00001);
-        assertArrayEquals(new double[] { 45.95529556274414, 179.8942413330078, 1.5579648E12 },
-                index.maxes(), 0.00001);
+        assertArrayEquals(new double[] { -54.669193267822266, 19.543855667114258, 1.557869714E12 }, index.mins(),
+                0.00001);
+        assertArrayEquals(new double[] { 45.95529556274414, 179.8942413330078, 1.5579648E12 }, index.maxes(), 0.00001);
         assertEquals(102, index.numEntries());
     }
 
