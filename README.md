@@ -1,4 +1,8 @@
 # sparse-hilbert-index
+<a href="https://travis-ci.org/davidmoten/sparse-hilbert-curve"><img src="https://travis-ci.org/davidmoten/sparse-hilbert-curve.svg"/></a><br/>
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/sparse-hilbert-curve/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/sparse-hilbert-curve)<br/>
+[![codecov](https://codecov.io/gh/davidmoten/sparse-hilbert-curve/branch/master/graph/badge.svg)](https://codecov.io/gh/davidmoten/sparse-hilbert-curve)<br/>
+
 Java library to create and search random access files (including in S3) using the space-filling hilbert index (sparse). More sensationally described as **Turn Amazon S3 into a spatio-temporal database!**.
 
 <img align="right" src="src/docs/david-hilbert.png"/>
@@ -16,7 +20,7 @@ Querying spatio-temporal data is potentially a terrific application for a Hilber
 Critical to the creation of this library were these libraries by the same author:
 
 * [big-sorter](https://github.com/davidmoten/big-sorter)
-* [hilbert-curve](https://github.com/davidmoten/hilbert-curve)
+* [hilbert-curve](https://github.com/davidmoten/sparse-hilbert-curve)
 
 **Features**
 * sorts input file based on hilbert index (sorts arbitrarily large files using [big-sorter](https://github.com/davidmoten/big-sorter))
@@ -182,7 +186,7 @@ Here is some more implementation detail for this library:
 
 1. Scan the input data to obtain the range of values used in each dimension. Each dimensions range will be used to map each dimension on to the range of values used by an ordinate of the hilbert curve (0..2<sup>bits</sup>-1).
 
-2. Sort the data based on the hilbert index of each point mapped from each record.  Note that the hilbert index is calculated using the java library [hilbert-curve](https://github.com/davidmoten/hilbert-curve). This library can calculate 3 million indexes a second so we don't store the hilbert index with the associate record but instead calculate it on-demand.
+2. Sort the data based on the hilbert index of each point mapped from each record.  Note that the hilbert index is calculated using the java library [hilbert-curve](https://github.com/davidmoten/sparse-hilbert-curve). This library can calculate 3 million indexes a second so we don't store the hilbert index with the associate record but instead calculate it on-demand.
 
 3. Create a sparse index (a binary file) for the sorted data file.
 
