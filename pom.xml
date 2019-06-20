@@ -23,17 +23,16 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <jmh.version>1.21</jmh.version>
 
-        <cobertura.version>2.7</cobertura.version>
-        <checkstyle.version>2.16</checkstyle.version>
+        <checkstyle.version>3.0.0</checkstyle.version>
         <findbugs.version>2.5.4</findbugs.version>
-        <javadoc.version>2.10.3</javadoc.version>
-        <pmd.version>3.5</pmd.version>
+        <javadoc.version>3.1.0</javadoc.version>
+        <pmd.version>3.10.0</pmd.version>
         <jdepend.version>2.0</jdepend.version>
         <javancss.version>2.1</javancss.version>
-        <project.info.version>2.4</project.info.version>
+        <project.info.version>3.0.0</project.info.version>
         <jxr.version>2.5</jxr.version>
         <taglist.version>2.4</taglist.version>
-        <m3.site.version>3.4</m3.site.version>
+        <m3.site.version>3.7.1</m3.site.version>
         <changelog.version>2.2</changelog.version>
         <coverage.reports.dir>${project.build.directory}/target/coverage-reports</coverage.reports.dir>
 
@@ -150,7 +149,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.3</version>
+                <version>0.8.4</version>
                 <executions>
                     <execution>
                         <goals>
@@ -223,9 +222,16 @@
                 <version>${jdepend.version}</version>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>javancss-maven-plugin</artifactId>
-                <version>${javancss.version}</version>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <!-- select non-aggregate reports -->
+                            <report>report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
