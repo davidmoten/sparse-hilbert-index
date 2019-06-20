@@ -40,7 +40,7 @@ Add this maven dependency to your pom.xml:
 ```xml
 <dependency>
   <groupId>com.github.davidmoten</groupId>
-  <artifactId>sparse-hilbert-curve</artifactId>
+  <artifactId>sparse-hilbert-index</artifactId>
   <version>VERSION_HERE</version>
 </dependency>
 
@@ -188,7 +188,7 @@ Here is some more implementation detail for this library. The steps for index cr
 
 1. Scan the input data to obtain the range of values used in each dimension. Each dimensions range will be used to map each dimension on to the range of values used by an ordinate of the hilbert curve (0..2<sup>bits</sup>-1).
 
-2. Sort the data based on the hilbert index of each point mapped from each record.  Note that the hilbert index is calculated using the java library [hilbert-curve](https://github.com/davidmoten/sparse-hilbert-curve). This library can calculate 3 million indexes a second so we don't store the hilbert index with the associate record but instead calculate it on-demand.
+2. Sort the data based on the hilbert index of each point mapped from each record.  Note that the hilbert index is calculated using the java library [hilbert-curve](https://github.com/davidmoten/hilbert-curve). This library can calculate 3 million indexes a second so we don't store the hilbert index with the associate record but instead calculate it on-demand.
 
 3. Create a sparse index (a binary file) for the sorted data file. This is essentially a map of index value to file position.
 
