@@ -1,7 +1,7 @@
 # sparse-hilbert-index
-<a href="https://travis-ci.org/davidmoten/sparse-hilbert-curve"><img src="https://travis-ci.org/davidmoten/sparse-hilbert-curve.svg"/></a><br/>
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/sparse-hilbert-curve/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/sparse-hilbert-curve)<br/>
-[![codecov](https://codecov.io/gh/davidmoten/sparse-hilbert-curve/branch/master/graph/badge.svg)](https://codecov.io/gh/davidmoten/sparse-hilbert-curve)<br/>
+<a href="https://travis-ci.org/davidmoten/sparse-hilbert-index"><img src="https://travis-ci.org/davidmoten/sparse-hilbert-index.svg"/></a><br/>
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/sparse-hilbert-index/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/sparse-hilbert-index)<br/>
+[![codecov](https://codecov.io/gh/davidmoten/sparse-hilbert-index/branch/master/graph/badge.svg)](https://codecov.io/gh/davidmoten/sparse-hilbert-index)<br/>
 
 Java library to create and search random access files (including in S3) using the space-filling hilbert index (sparse). More sensationally described as **Turn Amazon S3 into a spatio-temporal database!**
 
