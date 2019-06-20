@@ -183,14 +183,14 @@ This library uses streaming apis to ensure efficiency and to close resources aut
 
 Streaming is useful so that for instance when reading a chunk from the source file as soon as the calculated hilbert index for a read record is greater than the max hilbert index searched for we stop reading and close the InputStream. It also enables user defined cancellation by being able to use `results.filter(x -> likeable(x)).first()` for example to cancel reading as soon as a record is found that matches a criterion.
 
-## Algorithm
-Here is some more implementation detail for this library:
+## Index Creation Algorithm
+Here is some more implementation detail for this library. The steps for index creation are:
 
 1. Scan the input data to obtain the range of values used in each dimension. Each dimensions range will be used to map each dimension on to the range of values used by an ordinate of the hilbert curve (0..2<sup>bits</sup>-1).
 
 2. Sort the data based on the hilbert index of each point mapped from each record.  Note that the hilbert index is calculated using the java library [hilbert-curve](https://github.com/davidmoten/sparse-hilbert-curve). This library can calculate 3 million indexes a second so we don't store the hilbert index with the associate record but instead calculate it on-demand.
 
-3. Create a sparse index (a binary file) for the sorted data file.
+3. Create a sparse index (a binary file) for the sorted data file. This is essentially a map of index value to file position.
 
 ## Why would I use this library?
 That's a good question! Especially as AWS offer Athena on CSV files (and other formats) in S3 buckets that can can do a full scan of a 2GB CSV file in 1.5 seconds! 
