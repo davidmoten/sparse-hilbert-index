@@ -151,6 +151,21 @@ In short if your search window is reasonably limited in time and space (so that 
 ## Example (CSV)
 Here's an example with CSV (making use of the [*csv-commons*](https://github.com/apache/commons-csv) dependency):
 
+input.csv:
+```
+mmsi,lat,lon,time,speedKnots,cog,heading
+503000103,-21.680462,115.009315,1557878400000,0.0,107.1,0.0
+416025000,-20.384771,116.56052,1557878398000,0.1,93.2,99.0
+503553900,-18.043123,146.46686,1557878399000,8.4,343.2,360.0
+353596000,-20.58172,117.1837,1557878400000,0.0,85.1,42.0
+503782000,-12.728507,141.8945,1557878399000,7.8,167.6,169.0
+352286000,-23.227888,151.62619,1557878400000,10.8,19.6,24.0
+477002600,-16.499132,120.16245,1557878398000,9.7,200.7,198.0
+503380000,-16.79381,145.81314,1557878399000,10.3,336.8,336.0
+503000125,-37.894844,147.97308,1557878399000,1.1,274.8,341.0
+...
+```
+Index creation:
 ```java
 Serializer<CSVRecord> serializer = Serializer.csv( 
   CSVFormat.DEFAULT
@@ -176,6 +191,13 @@ Index
   .dimensions(3)
   .numIndexEntries(10000)
   .createIndex(new File("sorted.csv.idx"));
+```
+Search:
+```java
+long count = index
+  .search(new double[] {-19, 110, 1557878400000}, new double[] {-21, 116, 1557878399000})
+  .file(new File("sorted.csv"))
+  .count();
 ```
 
 ## Streaming
