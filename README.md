@@ -205,6 +205,13 @@ This library uses streaming apis to ensure efficiency and to close resources aut
 
 Streaming is useful so that for instance when reading a chunk from the source file as soon as the calculated hilbert index for a read record is greater than the max hilbert index searched for we stop reading and close the InputStream. It also enables user defined cancellation by being able to use `results.filter(x -> likeable(x)).first()` for example to cancel reading as soon as a record is found that matches a criterion.
 
+## Display search statistics
+Use the `.withStats()` search builder method to display various metrics about your search:
+
+```java
+
+```
+
 ## Index Creation Algorithm
 Here is some more implementation detail for this library. The steps for index creation are:
 

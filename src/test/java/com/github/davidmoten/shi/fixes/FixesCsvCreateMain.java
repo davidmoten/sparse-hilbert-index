@@ -20,7 +20,7 @@ public class FixesCsvCreateMain {
     public static void main(String[] args) throws IOException {
         try (PrintStream out = new PrintStream(
                 new BufferedOutputStream(new FileOutputStream("target/input.csv")))) {
-            out.format("mmsi,lat,lon,time,speedKnots,cog,heading\n");
+            out.format("mmsi,lat,lon,time,latencySeconds,navStatus,rateOfTurn,speedKnots,cog,heading\n");
             Reader<byte[]> r = ser
                     .createReader(new BufferedInputStream(new FileInputStream(input)));
             while (true) {
@@ -33,12 +33,16 @@ public class FixesCsvCreateMain {
                     float lat = bb.getFloat();
                     float lon = bb.getFloat();
                     long time = bb.getLong();
-                    bb.position(bb.position() + 8);
+                    int latencySeconds = bb.getInt();
+                    bb.position(bb.position() + 2);
+                    int navStatus=bb.get();
+                    int rateOfTurn = bb.get();;
                     float speedKnots = bb.getShort() / 10.0f;
                     float cog = bb.getShort() / 10.0f;
                     float heading = bb.getShort() / 10.0f;
-                    out.format("%s,%s,%s,%s,%s,%s,%s\n", mmsi, lat, lon, time, speedKnots, cog,
-                            heading);
+                    char cls = bb.get() == 0? 'A':'B';
+                    out.format("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", mmsi, lat, lon, time, latencySeconds, navStatus, rateOfTurn, speedKnots, cog,
+                            heading, cls);
                 }
             }
         }
