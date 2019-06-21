@@ -436,11 +436,6 @@ public class IndexTest {
                 .createIndex();
     }
 
-    @Test(expected = RuntimeException.class)
-    public void testCheckPosiiont() {
-        Index.checkIndexPosition(Integer.MAX_VALUE + 1L);
-    }
-
     @Test(expected = IllegalArgumentException.class)
     public void testOrdinatesLength() throws FileNotFoundException, IOException {
         Index<String> index = createSimpleIndex();

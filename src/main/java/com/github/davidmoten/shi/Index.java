@@ -344,12 +344,18 @@ public final class Index<T> {
             }
             long count = dis.readLong();
             int numEntries = dis.readInt();
-            dis.readInt();
+            boolean useLongPositions = dis.readInt() == 1;
+
             TreeMap<Integer, Long> indexPositions = new TreeMap<Integer, Long>();
             for (int i = 0; i < numEntries; i++) {
                 int index = dis.readInt();
-                int pos = dis.readInt();
-                indexPositions.put(index, (long) pos);
+                final long pos;
+                if (useLongPositions) {
+                    pos = dis.readLong();
+                } else {
+                    pos = (long) dis.readInt();
+                }
+                indexPositions.put(index, pos);
             }
             return new Index<T>(indexPositions, mins, maxes, bits, count, serializer, point);
         } catch (IOException e) {
@@ -382,28 +388,26 @@ public final class Index<T> {
             // num index entries
             dos.writeInt(indexPositions.size());
 
+            boolean useLongPositions = Stream.from(indexPositions.values())
+                    .findFirst(x -> x > Integer.MAX_VALUE).get().isPresent();
+
             // write 0 for int position
             // write 1 for long position
-            dos.writeInt(0);
+            dos.writeInt(useLongPositions ? 1 : 0);
 
             for (Entry<Integer, Long> entry : indexPositions.entrySet()) {
                 dos.writeInt(entry.getKey());
                 long pos = entry.getValue();
-                checkIndexPosition(pos);
-
-                dos.writeInt(entry.getValue().intValue());
+                if (useLongPositions) {
+                    dos.writeLong(pos);
+                } else {
+                    dos.writeInt((int) pos);
+                }
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
         return this;
-    }
-
-    @VisibleForTesting
-    static void checkIndexPosition(long pos) {
-        if (pos > Integer.MAX_VALUE) {
-            throw new RuntimeException("file size too big for integer positions in index entries");
-        }
     }
 
     private static BiFunction<Long, Optional<Long>, InputStream> rafInputStreamFactory(
