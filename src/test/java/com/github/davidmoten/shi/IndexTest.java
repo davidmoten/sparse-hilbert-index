@@ -378,8 +378,8 @@ public class IndexTest {
                 .builder() //
                 .serializer(SIMPLE_SERIALIZER) //
                 .pointMapper(SIMPLE_POINT_MAPPER) //
-                .input(input) //
-                .output(OUTPUT) //
+                .input(input.getAbsolutePath()) // get coverage of string param
+                .output(OUTPUT.getAbsolutePath()) // get coverage of string param
                 .bits(bits) //
                 .dimensions(dimensions) //
                 .numIndexEntries(approxNumIndexEntries) //
@@ -502,7 +502,7 @@ public class IndexTest {
         Index<String> idx = createSimpleIndex();
         idx //
                 .search(new double[3], new double[3]) //
-                .file(new File("target/doesnotexist")) //
+                .file("target/doesnotexist") //
                 .count().get();
     }
 

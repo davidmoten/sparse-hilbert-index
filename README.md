@@ -185,18 +185,18 @@ Function<CSVRecord, double[]> pointMapper = rec -> {
 Index
   .serializer(serializer)
   .pointMapper(pointMapper)
-  .input(new File("input.csv"))
-  .output(new File("sorted.csv"))
+  .input("input.csv")
+  .output("sorted.csv")
   .bits(10)
   .dimensions(3)
   .numIndexEntries(10000)
-  .createIndex(new File("sorted.csv.idx"));
+  .createIndex("sorted.csv.idx");
 ```
 Search:
 ```java
 long count = index
   .search(new double[] {-19, 110, 1557878400000}, new double[] {-21, 116, 1557878399000})
-  .file(new File("sorted.csv"))
+  .file("sorted.csv")
   .count();
 ```
 

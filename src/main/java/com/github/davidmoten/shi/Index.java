@@ -123,6 +123,10 @@ public final class Index<T> {
             return new Builder3<T>(b);
         }
 
+        public Builder3<T> input(String filename) {
+            return input(new File(filename));
+        }
+
         public Index<T> read(DataInputStream in) {
             return Index.read(in, b.serializer, b.pointMapper);
         }
@@ -156,6 +160,10 @@ public final class Index<T> {
         public Builder4<T> output(File output) {
             b.output = output;
             return new Builder4<T>(b);
+        }
+
+        public Builder4<T> output(String output) {
+            return output(new File(output));
         }
     }
 
@@ -561,6 +569,10 @@ public final class Index<T> {
 
         public Stream<T> file(File file) {
             return file(createRaf(file));
+        }
+
+        public Stream<T> file(String filename) {
+            return file(new File(filename));
         }
 
         public Stream<T> file(RandomAccessFile raf) {
