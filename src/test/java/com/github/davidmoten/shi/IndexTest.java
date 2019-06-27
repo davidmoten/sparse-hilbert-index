@@ -33,7 +33,6 @@ import java.util.function.Function;
 import org.davidmoten.hilbert.Range;
 import org.davidmoten.hilbert.Ranges;
 import org.davidmoten.hilbert.SmallHilbertCurve;
-import org.davidmoten.kool.Stream;
 import org.davidmoten.kool.exceptions.UncheckedException;
 import org.junit.Test;
 
@@ -41,6 +40,8 @@ import com.github.davidmoten.bigsorter.Reader;
 import com.github.davidmoten.bigsorter.Serializer;
 import com.github.davidmoten.guavamini.Lists;
 import com.github.davidmoten.shi.fixes.Record;
+
+import io.reactivex.Flowable;
 
 public class IndexTest {
 
@@ -174,7 +175,7 @@ public class IndexTest {
                 .maxRanges(0) //
                 .file(OUTPUT) //
                 .toList() //
-                .get();
+                .blockingGet();
         list.forEach(System.out::println);
         assertEquals(4, list.size());
     }
@@ -189,7 +190,7 @@ public class IndexTest {
                 .rangesBufferSize(0) //
                 .url(OUTPUT.toURI().toURL().toString()) //
                 .toList() //
-                .get();
+                .blockingGet();
         list.forEach(System.out::println);
         assertEquals(4, list.size());
     }
@@ -290,17 +291,17 @@ public class IndexTest {
         Index<String> index = createSimpleIndex();
         Bounds queryBounds = SIMPLE_BOUNDS_WHOLE_DOMAIN;
         assertEquals(NUM_SIMPLE_ROWS,
-                index.search(queryBounds).file(OUTPUT).count().get().intValue());
+                index.search(queryBounds).file(OUTPUT).count().blockingGet().intValue());
         File idx2 = new File("target/idx2");
         index.write(idx2);
         Index<String> index2 = Index.serializer(SIMPLE_SERIALIZER).pointMapper(SIMPLE_POINT_MAPPER)
                 .read(idx2);
         assertEquals(NUM_SIMPLE_ROWS,
-                index2.search(queryBounds).file(OUTPUT).count().get().intValue());
+                index2.search(queryBounds).file(OUTPUT).count().blockingGet().intValue());
         Index<String> index3 = Index.serializer(SIMPLE_SERIALIZER).pointMapper(SIMPLE_POINT_MAPPER)
                 .read(idx2.toURI().toURL());
         assertEquals(NUM_SIMPLE_ROWS,
-                index3.search(queryBounds).file(OUTPUT).count().get().intValue());
+                index3.search(queryBounds).file(OUTPUT).count().blockingGet().intValue());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -351,7 +352,7 @@ public class IndexTest {
                 .rangesBufferSize(0) //
                 .file(OUTPUT) //
                 .count() //
-                .get() //
+                .blockingGet() //
                 .intValue());
     }
 
@@ -363,7 +364,7 @@ public class IndexTest {
         // Note that Range request header will be ignored making a connection to a
         // file:// url so we read the whole file every time
         assertEquals(NUM_SIMPLE_ROWS,
-                index.search(queryBounds).url(url.toString()).count().get().intValue());
+                index.search(queryBounds).url(url.toString()).count().blockingGet().intValue());
     }
 
     private static Index<String> createSimpleIndex() throws IOException, FileNotFoundException {
@@ -487,14 +488,14 @@ public class IndexTest {
         assertEquals("bytes=3", Index.getRangeHeaderValue(3L, Optional.empty()));
     }
 
-    @Test(expected = UncheckedException.class)
+    @Test(expected = RuntimeException.class)
     public void testInputStreamFactoryThrows() throws FileNotFoundException, IOException {
         Index<String> idx = createSimpleIndex();
         idx //
                 .search(new double[3], new double[3]) //
                 .inputStreamFactory((x, y) -> {
                     throw new IOException("boo");
-                }).count().get();
+                }).count().blockingGet();
     }
 
     @Test(expected = UncheckedIOException.class)
@@ -503,7 +504,7 @@ public class IndexTest {
         idx //
                 .search(new double[3], new double[3]) //
                 .file("target/doesnotexist") //
-                .count().get();
+                .count().blockingGet();
     }
 
     @Test(expected = RuntimeException.class)
@@ -512,7 +513,7 @@ public class IndexTest {
         idx //
                 .search(new double[3], new double[3]) //
                 .url("hithere") //
-                .count().get();
+                .count().blockingGet();
     }
 
     @Test(expected = UncheckedIOException.class)
@@ -548,12 +549,12 @@ public class IndexTest {
         Ranges ranges = ind.hilbertCurve().query(o1, o2);
         List<PositionRange> positionRanges = ind.positionRanges(ranges);
         try (RandomAccessFile raf = new RandomAccessFile(OUTPUT, "r")) {
-            List<Record> list = Stream //
-                    .from(positionRanges) //
+            List<Record> list = Flowable //
+                    .fromIterable(positionRanges) //
                     .flatMap(pr -> ind.search(sb, raf, pr)) //
                     .map(b -> Record.read(b)) //
                     .toList() //
-                    .get();
+                    .blockingGet();
             assertEquals(expectedFound, list.size());
         }
     }

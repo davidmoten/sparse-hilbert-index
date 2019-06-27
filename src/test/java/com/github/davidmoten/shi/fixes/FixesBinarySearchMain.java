@@ -79,7 +79,7 @@ public class FixesBinarySearchMain {
             t = System.currentTimeMillis();
             index = Index.serializer(ser).pointMapper(point).read(idx);
             System.out.println(index);
-            long count = index.search(bounds).maxRanges(100).file(output).count().get();
+            long count = index.search(bounds).maxRanges(100).file(output).count().blockingGet();
             System.out.println(count + " found in " + (System.currentTimeMillis() - t) + "ms using local file search");
 
             t = System.currentTimeMillis();
@@ -106,7 +106,7 @@ public class FixesBinarySearchMain {
             System.out.println("read index in " + (System.currentTimeMillis() - t) + "ms");
         }
         t = System.currentTimeMillis();
-        WithStats<byte[]> last = index.search(bounds).maxRanges(0).withStats().url(location).last().get().get();
+        WithStats<byte[]> last = index.search(bounds).maxRanges(0).withStats().url(location).lastOrError().blockingGet();
         System.out.println(last + " found in " + (System.currentTimeMillis() - t)
                 + "ms using search over https (s3), index already loaded");
 
@@ -134,7 +134,7 @@ public class FixesBinarySearchMain {
                     bounds = Bounds.create(new double[] { lat1, lon1, minTime },
                             new double[] { lat2, lon2, minTime + hours });
                     t = System.currentTimeMillis();
-                    records = index.search(bounds).url(u).count().get();
+                    records = index.search(bounds).url(u).count().blockingGet();
                     System.out.println(records + " found in " + (System.currentTimeMillis() - t)
                             + "ms using search over https (s3), index already loaded");
 
@@ -149,7 +149,7 @@ public class FixesBinarySearchMain {
                     bounds = Bounds.create(new double[] { lat1, lon1, minTime },
                             new double[] { lat2, lon2, minTime + hours });
                     t = System.currentTimeMillis();
-                    records = index.search(bounds).url(u).count().get();
+                    records = index.search(bounds).url(u).count().blockingGet();
                     System.out.println(records + " found in " + (System.currentTimeMillis() - t)
                             + "ms using search over https (s3), index already loaded");
                 }
