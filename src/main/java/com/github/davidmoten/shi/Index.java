@@ -690,13 +690,28 @@ public final class Index<T> {
             return this;
         }
 
+        public SearchBuilderWithStats concurrency(int concurrency) {
+            b.concurrency(concurrency);
+            return this;
+        }
+
+        public SearchBuilderWithStatsAdvanced advanced() {
+            return new SearchBuilderWithStatsAdvanced(b);
+        }
+
         public Flowable<WithStats<T>> file(File file) {
             return Flowable.defer(() -> inputStreamFactory(rafInputStreamFactory(file)));
         }
 
         public Flowable<WithStats<T>> inputStreamFactory(
                 BiFunction<Long, Optional<Long>, InputStream> inputStreamFactory) {
-            return searchWithStats(b.bounds, inputStreamFactory, b.maxRanges, b.rangesBufferSize);
+            if (b.concurrency == 1) {
+                return searchWithStats(b.bounds, inputStreamFactory, b.maxRanges, b.rangesBufferSize);
+            } else {
+                return advanced() //
+                        .inputStreamFactory(inputStreamFactory) //
+                        .flatMap(x -> x.subscribeOn(Schedulers.io()), b.concurrency);
+            }
         }
 
         public Flowable<WithStats<T>> url(String url) {
@@ -708,6 +723,55 @@ public final class Index<T> {
         }
 
         public Flowable<WithStats<T>> url(URL url) {
+            return inputStreamFactory(inputStreamForRange(url));
+        }
+
+    }
+
+    public final class SearchBuilderWithStatsAdvanced {
+
+        private final Index<T>.SearchBuilder b;
+
+        SearchBuilderWithStatsAdvanced(SearchBuilder b) {
+            this.b = b;
+        }
+
+        public SearchBuilderWithStats withStats() {
+            return new SearchBuilderWithStats(b);
+        }
+
+        public SearchBuilderWithStatsAdvanced maxRanges(int maxRanges) {
+            b.maxRanges = maxRanges;
+            return this;
+        }
+
+        public SearchBuilderWithStatsAdvanced rangesBufferSize(int rangeBufferSize) {
+            b.rangesBufferSize = rangeBufferSize;
+            return this;
+        }
+
+        public Flowable<Flowable<WithStats<T>>> file(File file) {
+            return Flowable.defer(() -> inputStreamFactory(rafInputStreamFactory(file)));
+        }
+
+        public Flowable<Flowable<WithStats<T>>> file(String filename) {
+            return file(new File(filename));
+        }
+
+        public Flowable<Flowable<WithStats<T>>> inputStreamFactory(
+                BiFunction<Long, Optional<Long>, InputStream> inputStreamFactory) {
+            return searchWithStatsAdvanced(b.bounds, inputStreamFactory, b.maxRanges, b.rangesBufferSize);
+        }
+
+        public Flowable<Flowable<WithStats<T>>> url(String url) {
+            try {
+                return url(new URL(url));
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public Flowable<Flowable<WithStats<T>>> url(URL url) {
             return inputStreamFactory(inputStreamForRange(url));
         }
 
@@ -741,6 +805,18 @@ public final class Index<T> {
             Ranges ranges = hc.query(a, b, maxRanges, rangesBufferSize);
             return Flowable.fromIterable(positionRanges(ranges)) //
                     .map(pr -> search(queryBounds, inputStreamFactory, pr));
+        });
+    }
+
+    private Flowable<Flowable<WithStats<T>>> searchWithStatsAdvanced(Bounds queryBounds,
+            BiFunction<Long, Optional<Long>, InputStream> inputStreamFactory, int maxRanges, int rangesBufferSize) {
+        return Flowable.defer(() -> {
+            long[] a = ordinates(queryBounds.mins());
+            long[] b = ordinates(queryBounds.maxes());
+            Ranges ranges = hc.query(a, b, maxRanges, rangesBufferSize);
+            Counts counts = new Counts();
+            return Flowable.fromIterable(positionRanges(ranges)) //
+                    .map(pr -> searchWithStats(queryBounds, inputStreamFactory, pr, counts));
         });
     }
 
