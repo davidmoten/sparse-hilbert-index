@@ -15,7 +15,7 @@ Space filling curves include the Hilbert curve, Z-Order curve, Peano curve and m
 
 The Hilbert Curve is generally favoured for multi-dimensional range queries over the Z-Order Curve for instance because of its superior clustering properties (the Hilbert index offers efficiencies for clustered data). 
 
-This library offers revolutionary **ease-of-use** to create and concurrently search the Hilbert Curve index via random access storage (like flat files or AWS S3 or Azure Blob Storage).
+This library offers revolutionary **ease-of-use** to create and concurrently search with a Hilbert Curve index via random access storage (like flat files or AWS S3 or Azure Blob Storage).
 
 Querying spatio-temporal data is potentially a terrific application for a Hilbert index. this library supports any number of dimensions and is not opionated about the real life significance of the individual dimensions though it will work better for querying if the ordinates vary (lots of fixed values means more data needs to be scanned in searches).
 
