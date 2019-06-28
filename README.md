@@ -200,7 +200,7 @@ long count = index
   .count();
 ```
 ## Concurrency
-A concurrency level of 8 appears optimal with a single S3 object, i.e up to 8 chunks at a time will be requested from a single S3 object.
+A concurrency level of 8 appears optimal with a single S3 object, i.e up to 8 chunks at a time will be requested from a single S3 object. Of course you should test with your own data to find the best concurrency level.
 
 <img src="src/docs/chart.jpg"/>
 
