@@ -118,7 +118,7 @@ Index<byte[]> index =
 // corners of the query box for an hour in the Sydney region
 double[] a = new double[] { -33.68, 150.86, t1 };
 double[] b = new double[] { -34.06, 151.34, t2 };
-long count = index.search(a, b).concurrency(8).url(url).count().get();
+long count = index.search(a, b).concurrency(8).url(url).count().blockingGet();
 ```
 
 The default index size is 10k entries which produces a file of about 80K.
@@ -245,6 +245,6 @@ That's a good question! Especially as AWS offer Athena on CSV files (and other f
 
 The *sparse-hilbert-index* approach may appeal when you consider the costs of running many many indexed searches across a lot of data. Athena costs are low ($US5/TB data scanned for queries) but may become significant at some scale. In some cases the consequent power consumption from doing a lot of full scan searches may also be ethically challenging. I think it's hard to compete with Athena on big file search but there may be some edge cases that favour *sparse-hilbert-index*! 
 
-To add fuel to the fire, Athena supports the Parquet format which can be indexed such that every page has min-max statistics. If you sort the data on the field you want to query (in our case we would add a calculated hilbert index column) then Athena can do indexed lookups itself (untested). Athena still has to look at the statistics for every page (1Mb by default) so it's not quite as efficient theoretically as *sparse-hilbert-index* that knows exactly what pages to search. This is clearly a topic for further investigation!
+To add fuel to the fire, Athena supports the Parquet format which can be indexed such that every page has min-max statistics. If you sort the data on the field you want to query (in our case we would add a calculated hilbert index column) then Athena can do indexed lookups itself (untested). Athena still has to look at the statistics for every page (1Mb by default) so it's not quite as efficient theoretically as *sparse-hilbert-index* that knows exactly what pages to search. **Note** that Athena does not yet support Parquet indexes at June 28 2019. 
 
 If you have a use case that favours *sparse-hilbert-index* in some way then let me know!
