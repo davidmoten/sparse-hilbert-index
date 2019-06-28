@@ -204,7 +204,7 @@ A concurrency level of 8 appears optimal with a single S3 object, i.e up to 8 ch
 
 <img src="src/docs/chart.jpg"/>
 
-Below are some elapsed times in ms for searches on a 2.4GB CSV file in S3. The numbers in brackets are the number of chunks to be read from. A chunk is the block of data pointed to by a single index entry.
+Below are some elapsed times in ms for searches on a 2.4GB CSV file in S3. A *chunk* is the data block pointed to by an index entry. For example, Brisbane data for the searched hour is spread across 26 chunks (which can be read concurrently). 
 
 | concurrency | Sydney | SydneyAllDay | Brisbane  | Queensland | Tasmania |
 |------------:|-------:|-------------:|---------:|-----------:|---------:|
