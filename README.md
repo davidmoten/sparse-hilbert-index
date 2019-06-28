@@ -118,7 +118,7 @@ Index<byte[]> index =
 // corners of the query box for an hour in the Sydney region
 double[] a = new double[] { -33.68, 150.86, t1 };
 double[] b = new double[] { -34.06, 151.34, t2 };
-long count = index.search(a, b).url(url).count().get();
+long count = index.search(a, b).concurrency(8).url(url).count().get();
 ```
 
 The default index size is 10k entries which produces a file of about 80K.
@@ -199,9 +199,26 @@ long count = index
   .file("sorted.csv")
   .count();
 ```
+## Concurrency
+A concurrency level of 8 appears optimal with a single S3 object, i.e up to 8 chunks at a time will be requested from a single S3 object.
 
+<img src="src/docs/chart.jpg"/>
+
+Here are some results of lookups on a 2.4GB CSV file in S3:
+```
+concurrent	Sydney	SydneyAllDay	Brisbane	Queensland	Tasmania
+1	130	5102	5823	26124	434
+2	221	2944	2960	12651	366
+4	189	1357	1545	6462	252
+8	178	1129	1026	4036	273
+12	230	560	983	3715	246
+16	163	463	785	3652	257
+32	184	477	767	3760	299
+64	167	325	820	3628	255
+128	204	334	820	3579	257
+```
 ## Streaming
-This library uses streaming apis to ensure efficiency and to close resources automatically. `java.util.stream.Stream` objects are single use only and do not implement the concept of disposal so a synchronous-only reusable stream library with disposal semantics called [kool](https://github.com/davidmoten/kool) is used.
+This library uses streaming apis ([RxJava](https://github.com/ReactiveX/RxJava) to ensure efficiency, close resources automatically, and to implement concurrency concisely and efficiently.
 
 Streaming is useful so that for instance when reading a chunk from the source file as soon as the calculated hilbert index for a read record is greater than the max hilbert index searched for we stop reading and close the InputStream. It also enables user defined cancellation by being able to use `results.filter(x -> likeable(x)).first()` for example to cancel reading as soon as a record is found that matches a criterion.
 

@@ -59,6 +59,10 @@ public final class WithStats<T> {
     public long chunksRead() {
         return chunksRead;
     }
+    
+    public long elapsedTimeMs() {
+        return elapsedTime;
+    }
 
     @Override
     public String toString() {
