@@ -206,8 +206,8 @@ A concurrency level of 8 appears optimal with a single S3 object, i.e up to 8 ch
 
 Here are some results of lookups on a 2.4GB CSV file in S3:
 
-| concurrent | Sydney | SydneyAllDay | Brisbane | Queensland | Tasmania |
-|------------|--------|--------------|----------|------------|----------|
+| concurrency | Sydney | SydneyAllDay | Brisbane | Queensland | Tasmania |
+|------------:|-------:|-------------:|---------:|-----------:|---------:|
 | 1          | 130    | 5102         | 5823     | 26124      | 434      |
 | 2          | 221    | 2944         | 2960     | 12651      | 366      |
 | 4          | 189    | 1357         | 1545     | 6462       | 252      |
