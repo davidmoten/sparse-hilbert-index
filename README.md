@@ -200,11 +200,13 @@ long count = index
   .count();
 ```
 ## Concurrency
-A concurrency level of 8 appears optimal with a single S3 object, i.e up to 8 chunks at a time will be requested from a single S3 object. Of course you should test with your own data to find the best concurrency level.
+A concurrency level of 8 appears optimal with a single S3 object from outside AWS for me, i.e up to 8 chunks at a time will be requested from a single S3 object. Of course you should test with your own data and internet connection to find the best concurrency level.
 
 <img src="src/docs/chart.jpg"/>
 
-Below are some elapsed times in ms for searches on a 2.4GB CSV file in S3. A *chunk* is the data block pointed to by an index entry. For example, Brisbane data for the searched hour is spread across 26 chunks (which can be read concurrently). 
+Below are some elapsed times in ms for searches on a 2.4GB CSV file in S3. A *chunk* is the data block pointed to by an index entry. For example, Brisbane data for the searched hour is spread across 26 chunks (which can be read concurrently).
+
+Query elapsed times (ms) from a 10Mbit connection outside of AWS: 
 
 | concurrency | Sydney | SydneyAllDay | Brisbane  | Queensland | Tasmania |
 |------------:|-------:|-------------:|---------:|-----------:|---------:|
@@ -218,6 +220,23 @@ Below are some elapsed times in ms for searches on a 2.4GB CSV file in S3. A *ch
 | 32         | 184    | 477          | 767      | 3760       | 299      |
 | 64         | 167    | 325          | 820      | 3628       | 255      |
 | 128        | 204    | 334          | 820      | 3579       | 257      |
+
+Query elapsed times (ms) from a t2.large instance in EC2:
+
+| concurrency | Sydney | SydneyAllDay | Brisbane  | Queensland | Tasmania |
+|------------:|-------:|-------------:|---------:|-----------:|---------:|
+| chunks     | 1      | 37           | 26       | 70         | 4        |
+| 1           | 142    | 2030         | 1665     | 6256 | 130 |
+| 2           | 117    | 976          | 1007     | 3394 | 106 |
+| 4           | 90     | 641          | 686      | 2664 | 79  |
+| 8           | 70     | 540          | 548      | 2622 | 73  |
+| 12          | 75     | 381          | 623      | 2774 | 83  |
+| 16          | 93     | 445          | 618      | 2672 | 73  |
+| 32          | 91     | 417          | 539      | 2719 | 77  |
+| 64          | 76     | 352          | 515      | 2607 | 80  |
+| 128         | 80     | 424          | 637      | 2605 | 96  |
+
+
 
 ## Streaming
 This library uses streaming apis ([RxJava 2](https://github.com/ReactiveX/RxJava)) to ensure efficiency, close resources automatically, and to implement concurrency concisely and efficiently.
