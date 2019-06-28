@@ -31,7 +31,7 @@ public class FixesCsvSearchMain {
                     "aHR0cHM6Ly9tb3Rlbi1maXhlcy5zMy1hcC1zb3V0aGVhc3QtMi5hbWF6b25hd3MuY29tLzIwMTkt"
                             + "MDUtMTUuY3N2Cg=="));
             t = System.currentTimeMillis();
-            WithStats<CSVRecord> last = index.search(b).withStats().url(location).lastOrError().blockingGet();
+            WithStats<CSVRecord> last = index.search(b).withStats().concurrency(10).url(location).lastOrError().blockingGet();
             System.out.println("found " + last + " in " + (System.currentTimeMillis() - t) + "ms");
         }
     }

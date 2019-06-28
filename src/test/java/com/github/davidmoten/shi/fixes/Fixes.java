@@ -24,7 +24,7 @@ class Fixes {
         return new double[] { lat, lon, time };
     };
     private static double minTime = 1.557868858E12;
-    private static double t1 = minTime + TimeUnit.HOURS.toMillis(12);
+    private static double t1 = minTime + TimeUnit.HOURS.toMillis(10);
     private static long durationMinutes = 30;
     private static double t2 = t1 + TimeUnit.MINUTES.toMillis(durationMinutes);
     final static Bounds sydney = Bounds.create(new double[] { -33.68, 150.86, t1 },
