@@ -40,6 +40,7 @@ import com.github.davidmoten.guavamini.Preconditions;
 import com.github.davidmoten.guavamini.annotations.VisibleForTesting;
 
 import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
 
 public final class Index<T> {
 
@@ -275,20 +276,24 @@ public final class Index<T> {
                     endPosition = Long.MAX_VALUE;
                 }
                 PositionRange p = new PositionRange(range.high(), startPosition, endPosition);
-                if (list.isEmpty()) {
-                    list.add(p);
-                } else {
-                    PositionRange last = list.getLast();
-                    if (p.floorPosition() <= last.ceilingPosition()) {
-                        list.pollLast();
-                        list.offer(last.join(p));
-                    } else {
-                        list.offer(p);
-                    }
-                }
+                append(list, p);
             }
         }
         return list;
+    }
+
+    private static void append(LinkedList<PositionRange> list, PositionRange p) {
+        if (list.isEmpty()) {
+            list.offer(p);
+        } else {
+            PositionRange last = list.getLast();
+            if (p.floorPosition() <= last.ceilingPosition()) {
+                list.pollLast();
+                list.offer(last.join(p));
+            } else {
+                list.offer(p);
+            }
+        }
     }
 
     private static <T, R> R value(Entry<T, R> entry) {
@@ -413,37 +418,51 @@ public final class Index<T> {
         return this;
     }
 
-    private static BiFunction<Long, Optional<Long>, InputStream> rafInputStreamFactory(RandomAccessFile raf) {
+    private static BiFunction<Long, Optional<Long>, InputStream> rafInputStreamFactory(File file) {
         return (first, last) -> {
+            RandomAccessFile raf = createRaf(file);
             raf.seek(first);
-            return new LimitingInputStream(new BufferedInputStream(Channels.newInputStream(raf.getChannel())),
-                    last.orElse(Long.MAX_VALUE) - first);
+            return new ClosingInputStream( //
+                    new LimitingInputStream( //
+                            new BufferedInputStream(Channels.newInputStream(raf.getChannel())),
+                            last.orElse(Long.MAX_VALUE) - first),
+                    () -> raf.close());
         };
     }
 
     @VisibleForTesting
-    Flowable<T> search(Bounds queryBounds, RandomAccessFile raf, PositionRange pr) throws IOException {
-        return search(queryBounds, rafInputStreamFactory(raf), pr);
+    Flowable<T> search(Bounds queryBounds, File file, PositionRange pr) throws IOException {
+        return search(queryBounds, rafInputStreamFactory(file), pr);
     }
 
     @VisibleForTesting
     Flowable<T> search(Bounds queryBounds, BiFunction<Long, Optional<Long>, InputStream> factory, PositionRange pr)
             throws IOException {
-        return getValues(factory, pr) //
-                .takeUntil(rec -> hc.index(ordinates(pointMapper.apply(rec))) > pr.maxHilbertIndex()) //
-                .filter(t -> queryBounds.contains(pointMapper.apply(t)));
+        return Flowable.defer(() -> {
+            return getValues(factory, pr) //
+                    .takeUntil(rec -> hc.index(ordinates(pointMapper.apply(rec))) > pr.maxHilbertIndex()) //
+                    .filter(t -> queryBounds.contains(pointMapper.apply(t)));
+        });
     }
 
     static final class Counts {
         final long startTime;
         long recordsRead;
-        long bytesRead;
         long recordsFound;
         long positionRanges;
         long totalTimeToFirstByte;
 
         Counts() {
             this.startTime = System.currentTimeMillis();
+        }
+
+        synchronized void incrementRecordsRead() {
+            recordsRead++;
+        }
+
+        synchronized void incrementRecordsFoundAndAddTTFB(long ttfb) {
+            recordsFound++;
+            totalTimeToFirstByte += ttfb;
         }
     }
 
@@ -459,52 +478,60 @@ public final class Index<T> {
             return is;
         };
         return getValues(factoryWithCount, pr) //
-                .doOnNext(x -> counts.recordsRead++) //
+                .doOnNext(x -> counts.incrementRecordsRead()) //
                 .takeUntil(rec -> hc.index(ordinates(pointMapper.apply(rec))) > pr.maxHilbertIndex()) //
                 .filter(t -> queryBounds.contains(pointMapper.apply(t))) //
-                .doOnNext(x -> {
-                    counts.recordsFound++;
-                    counts.totalTimeToFirstByte += in[0].readTimeToFirstByteAndSetToZero();
+                .doOnNext(x -> counts.incrementRecordsFoundAndAddTTFB(in[0].readTimeToFirstByteAndSetToZero())) //
+                .map(x -> {
+                    synchronized (counts) {
+                        return new WithStats<T>(x, counts.recordsRead, counts.recordsFound, in[0].count(),
+                                counts.totalTimeToFirstByte, counts.positionRanges,
+                                System.currentTimeMillis() - counts.startTime);
+                    }
                 }) //
-                .map(x -> new WithStats<T>(x, counts.recordsRead, counts.recordsFound, in[0].count(),
-                        counts.totalTimeToFirstByte, counts.positionRanges,
-                        System.currentTimeMillis() - counts.startTime)) //
-                .concatWith(Flowable.defer(() -> Flowable.just(new WithStats<T>(null, counts.recordsRead,
-                        counts.recordsFound, in[0].count(), counts.totalTimeToFirstByte, counts.positionRanges,
-                        System.currentTimeMillis() - counts.startTime))));
+                .concatWith(Flowable.defer(() -> {
+                    synchronized (counts) {
+                        return Flowable.just(new WithStats<T>(null, counts.recordsRead, counts.recordsFound,
+                                in[0].count(), counts.totalTimeToFirstByte, counts.positionRanges,
+                                System.currentTimeMillis() - counts.startTime));
+                    }
+                }));
     }
 
     private Flowable<T> getValues(BiFunction<Long, Optional<Long>, InputStream> factory, PositionRange pr) {
-        InputStream[] in = new InputStream[1];
-        final Reader<? extends T> r;
-        try {
-            Optional<Long> ceiling = pr.ceilingPosition() == Long.MAX_VALUE ? Optional.empty()
-                    : Optional.of(pr.ceilingPosition());
-            in[0] = factory.apply(pr.floorPosition(), ceiling);
-            r = serializer.createReader(in[0]);
-        } catch (Throwable t) {
-            closeSilently(in[0]);
-            return Flowable.error(t);
-        }
-        return Flowable.<T>generate( //
-                emitter -> {
-                    T t;
-                    while (true) {
-                        t = r.read();
-                        if (t == null) {
-                            emitter.onComplete();
-                            break;
-                        } else {
-                            emitter.onNext(t);
-                            break;
+        return Flowable.defer(() -> {
+            InputStream[] in = new InputStream[1];
+            final Reader<? extends T> r;
+            try {
+                Optional<Long> ceiling = pr.ceilingPosition() == Long.MAX_VALUE ? Optional.empty()
+                        : Optional.of(pr.ceilingPosition());
+                // TODO don't block
+                in[0] = factory.apply(pr.floorPosition(), ceiling);
+                r = serializer.createReader(in[0]);
+            } catch (Throwable t) {
+                closeSilently(in[0]);
+                return Flowable.error(t);
+            }
+            return Flowable.<T>generate( //
+                    emitter -> {
+                        T t;
+                        while (true) {
+                            t = r.read();
+                            if (t == null) {
+                                emitter.onComplete();
+                                break;
+                            } else {
+                                emitter.onNext(t);
+                                break;
+                            }
+                            // else keep reading till EOF or next record found within queryBounds
                         }
-                        // else keep reading till EOF or next record found within queryBounds
-                    }
-                }) //
-                .doOnCancel(() -> {
-                    closeSilently(r);
-                    closeSilently(in[0]);
-                });
+                    }) //
+                    .doOnCancel(() -> {
+                        closeSilently(r);
+                        closeSilently(in[0]);
+                    });
+        });
     }
 
     @VisibleForTesting
@@ -535,6 +562,7 @@ public final class Index<T> {
         private final Bounds bounds;
         private int maxRanges;
         private int rangesBufferSize;
+        private int concurrency = 1;
 
         SearchBuilder(Bounds bounds) {
             this.bounds = bounds;
@@ -542,6 +570,10 @@ public final class Index<T> {
 
         public SearchBuilderWithStats withStats() {
             return new SearchBuilderWithStats(this);
+        }
+
+        public SearchBuilderAdvanced advanced() {
+            return new SearchBuilderAdvanced(this);
         }
 
         public SearchBuilder maxRanges(int maxRanges) {
@@ -554,20 +586,28 @@ public final class Index<T> {
             return this;
         }
 
+        public SearchBuilder concurrency(int concurrency) {
+            Preconditions.checkArgument(concurrency > 0, "concurrency must be greater than zero");
+            this.concurrency = concurrency;
+            return this;
+        }
+
         public Flowable<T> file(File file) {
-            return file(createRaf(file));
+            return Flowable.defer(() -> inputStreamFactory(rafInputStreamFactory(file)));
         }
 
         public Flowable<T> file(String filename) {
             return file(new File(filename));
         }
 
-        public Flowable<T> file(RandomAccessFile raf) {
-            return inputStreamFactory(rafInputStreamFactory(raf));
-        }
-
         public Flowable<T> inputStreamFactory(BiFunction<Long, Optional<Long>, InputStream> inputStreamFactory) {
-            return search(bounds, inputStreamFactory, maxRanges, rangesBufferSize);
+            if (concurrency == 1) {
+                return search(bounds, inputStreamFactory, maxRanges, rangesBufferSize);
+            } else {
+                return advanced() //
+                        .inputStreamFactory(inputStreamFactory) //
+                        .flatMap(x -> x.subscribeOn(Schedulers.io()), concurrency);
+            }
         }
 
         public Flowable<T> url(String url) {
@@ -579,6 +619,54 @@ public final class Index<T> {
         }
 
         public Flowable<T> url(URL url) {
+            return inputStreamFactory(inputStreamForRange(url));
+        }
+    }
+
+    public final class SearchBuilderAdvanced {
+
+        private final Index<T>.SearchBuilder b;
+
+        SearchBuilderAdvanced(SearchBuilder b) {
+            this.b = b;
+        }
+
+        public SearchBuilderWithStats withStats() {
+            return new SearchBuilderWithStats(b);
+        }
+
+        public SearchBuilderAdvanced maxRanges(int maxRanges) {
+            b.maxRanges = maxRanges;
+            return this;
+        }
+
+        public SearchBuilderAdvanced rangesBufferSize(int rangeBufferSize) {
+            b.rangesBufferSize = rangeBufferSize;
+            return this;
+        }
+
+        public Flowable<Flowable<T>> file(File file) {
+            return Flowable.defer(() -> inputStreamFactory(rafInputStreamFactory(file)));
+        }
+
+        public Flowable<Flowable<T>> file(String filename) {
+            return file(new File(filename));
+        }
+
+        public Flowable<Flowable<T>> inputStreamFactory(
+                BiFunction<Long, Optional<Long>, InputStream> inputStreamFactory) {
+            return searchAdvanced(b.bounds, inputStreamFactory, b.maxRanges, b.rangesBufferSize);
+        }
+
+        public Flowable<Flowable<T>> url(String url) {
+            try {
+                return url(new URL(url));
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        public Flowable<Flowable<T>> url(URL url) {
             return inputStreamFactory(inputStreamForRange(url));
         }
 
@@ -603,11 +691,7 @@ public final class Index<T> {
         }
 
         public Flowable<WithStats<T>> file(File file) {
-            return file(createRaf(file));
-        }
-
-        public Flowable<WithStats<T>> file(RandomAccessFile raf) {
-            return inputStreamFactory(rafInputStreamFactory(raf));
+            return Flowable.defer(() -> inputStreamFactory(rafInputStreamFactory(file)));
         }
 
         public Flowable<WithStats<T>> inputStreamFactory(
@@ -639,21 +723,37 @@ public final class Index<T> {
 
     private Flowable<T> search(Bounds queryBounds, BiFunction<Long, Optional<Long>, InputStream> inputStreamFactory,
             int maxRanges, int rangesBufferSize) {
-        long[] a = ordinates(queryBounds.mins());
-        long[] b = ordinates(queryBounds.maxes());
-        Ranges ranges = hc.query(a, b, maxRanges, rangesBufferSize);
-        return Flowable.fromIterable(positionRanges(ranges)) //
-                .flatMap(pr -> search(queryBounds, inputStreamFactory, pr));
+        return Flowable.defer(() -> {
+            long[] a = ordinates(queryBounds.mins());
+            long[] b = ordinates(queryBounds.maxes());
+            Ranges ranges = hc.query(a, b, maxRanges, rangesBufferSize);
+            return Flowable.fromIterable(positionRanges(ranges)) //
+                    .flatMap(pr -> search(queryBounds, inputStreamFactory, pr));
+        });
+    }
+
+    private Flowable<Flowable<T>> searchAdvanced(Bounds queryBounds,
+            BiFunction<Long, Optional<Long>, InputStream> inputStreamFactory, int maxRanges, int rangesBufferSize) {
+        return Flowable.defer(() -> {
+            long[] a = ordinates(queryBounds.mins());
+            long[] b = ordinates(queryBounds.maxes());
+            // TODO make hc.query return a Flowable (lazy calculation)?
+            Ranges ranges = hc.query(a, b, maxRanges, rangesBufferSize);
+            return Flowable.fromIterable(positionRanges(ranges)) //
+                    .map(pr -> search(queryBounds, inputStreamFactory, pr));
+        });
     }
 
     private Flowable<WithStats<T>> searchWithStats(Bounds queryBounds,
             BiFunction<Long, Optional<Long>, InputStream> inputStreamFactory, int maxRanges, int rangesBufferSize) {
-        long[] a = ordinates(queryBounds.mins());
-        long[] b = ordinates(queryBounds.maxes());
-        Ranges ranges = hc.query(a, b, maxRanges, rangesBufferSize);
-        Counts counts = new Counts();
-        return Flowable.fromIterable(positionRanges(ranges)) //
-                .flatMap(pr -> searchWithStats(queryBounds, inputStreamFactory, pr, counts));
+        return Flowable.defer(() -> {
+            long[] a = ordinates(queryBounds.mins());
+            long[] b = ordinates(queryBounds.maxes());
+            Ranges ranges = hc.query(a, b, maxRanges, rangesBufferSize);
+            Counts counts = new Counts();
+            return Flowable.fromIterable(positionRanges(ranges)) //
+                    .flatMap(pr -> searchWithStats(queryBounds, inputStreamFactory, pr, counts));
+        });
     }
 
     private static BiFunction<Long, Optional<Long>, InputStream> inputStreamForRange(URL u) {
