@@ -220,7 +220,7 @@ Below are some elapsed times in ms for searches on a 2.4GB CSV file in S3. A *ch
 | 128        | 204    | 334          | 820      | 3579       | 257      |
 
 ## Streaming
-This library uses streaming apis ([RxJava](https://github.com/ReactiveX/RxJava) to ensure efficiency, close resources automatically, and to implement concurrency concisely and efficiently.
+This library uses streaming apis ([RxJava 2](https://github.com/ReactiveX/RxJava)) to ensure efficiency, close resources automatically, and to implement concurrency concisely and efficiently.
 
 Streaming is useful so that for instance when reading a chunk from the source file as soon as the calculated hilbert index for a read record is greater than the max hilbert index searched for we stop reading and close the InputStream. It also enables user defined cancellation by being able to use `results.filter(x -> likeable(x)).first()` for example to cancel reading as soon as a record is found that matches a criterion.
 
