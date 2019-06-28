@@ -205,18 +205,19 @@ A concurrency level of 8 appears optimal with a single S3 object, i.e up to 8 ch
 <img src="src/docs/chart.jpg"/>
 
 Here are some results of lookups on a 2.4GB CSV file in S3:
-```
-concurrent	Sydney	SydneyAllDay	Brisbane	Queensland	Tasmania
-1	130	5102	5823	26124	434
-2	221	2944	2960	12651	366
-4	189	1357	1545	6462	252
-8	178	1129	1026	4036	273
-12	230	560	983	3715	246
-16	163	463	785	3652	257
-32	184	477	767	3760	299
-64	167	325	820	3628	255
-128	204	334	820	3579	257
-```
+
+| concurrent | Sydney | SydneyAllDay | Brisbane | Queensland | Tasmania |
+|------------|--------|--------------|----------|------------|----------|
+| 1          | 130    | 5102         | 5823     | 26124      | 434      |
+| 2          | 221    | 2944         | 2960     | 12651      | 366      |
+| 4          | 189    | 1357         | 1545     | 6462       | 252      |
+| 8          | 178    | 1129         | 1026     | 4036       | 273      |
+| 12         | 230    | 560          | 983      | 3715       | 246      |
+| 16         | 163    | 463          | 785      | 3652       | 257      |
+| 32         | 184    | 477          | 767      | 3760       | 299      |
+| 64         | 167    | 325          | 820      | 3628       | 255      |
+| 128        | 204    | 334          | 820      | 3579       | 257      |
+
 ## Streaming
 This library uses streaming apis ([RxJava](https://github.com/ReactiveX/RxJava) to ensure efficiency, close resources automatically, and to implement concurrency concisely and efficiently.
 
