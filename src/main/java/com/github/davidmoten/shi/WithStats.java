@@ -70,7 +70,7 @@ public final class WithStats<T> {
         StringBuilder b = new StringBuilder();
         b.append("WithStats [");
         b.append("elapsedMs=");
-        b.append(elapsedTime);
+        b.append(elapsedTimeMs());
         b.append(", recordsFound=");
         b.append(recordsFound);
         b.append(", recordsRead=");
