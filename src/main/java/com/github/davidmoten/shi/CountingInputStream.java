@@ -43,7 +43,9 @@ final class CountingInputStream extends InputStream {
     }
 
     long count() {
-        return count;
+        long c = count;
+        count = 0;
+        return c;
     }
 
     long readTimeToFirstByteAndSetToZero() {

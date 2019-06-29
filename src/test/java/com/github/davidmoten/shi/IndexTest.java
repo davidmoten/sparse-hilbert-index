@@ -551,8 +551,24 @@ public class IndexTest {
     }
     
     @Test
-    public void testWithStatsAdvanced() {
-        
+    public void testWithStatsAdvanced() throws IOException {
+        Index<byte[]> index = createIndex();
+        Bounds bounds = createQueryBounds(Math.round(index.mins()[2]),
+                Math.round(index.maxes()[2]));
+        int expectedFound = countInside(bounds);
+        assertEquals(expectedFound + 1, //
+                index //
+                        .search(bounds) //
+                        .concurrency(1) //
+                        .withStats() //
+                        .advanced() //
+                        .maxRanges(1000) //
+                        .rangesBufferSize(1000) //
+                        .file(OUTPUT) //
+                        .flatMap(x -> x) //
+                        .count() //
+                        .blockingGet() //
+                        .intValue());
     }
 
     @Test
