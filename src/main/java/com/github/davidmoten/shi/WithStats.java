@@ -59,7 +59,7 @@ public final class WithStats<T> {
     public long chunksRead() {
         return chunksRead;
     }
-    
+
     public long elapsedTimeMs() {
         return elapsedTime;
     }
@@ -67,6 +67,7 @@ public final class WithStats<T> {
     @Override
     public String toString() {
         DecimalFormat df = new DecimalFormat("0.0000");
+        DecimalFormat df2 = new DecimalFormat("0.000");
         StringBuilder b = new StringBuilder();
         b.append("WithStats [");
         b.append("elapsedMs=");
@@ -78,7 +79,7 @@ public final class WithStats<T> {
         b.append(", hitRatio=");
         b.append(df.format(hitRatio()));
         b.append(", bytesRead=");
-        b.append(bytesRead);
+        b.append(df2.format(bytesRead / 1024.0 / 1024.0) + "m");
         b.append(", timeToFirstByteMsTotal=");
         b.append(timeToFirstByte);
         b.append(", timeToFirstByteMsAverage=");
