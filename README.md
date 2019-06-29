@@ -236,8 +236,6 @@ Query elapsed times (ms) from a t2.large instance in EC2:
 | 64          | 76     | 352          | 515      | 2607 | 80  |
 | 128         | 80     | 424          | 637      | 2605 | 96  |
 
-
-
 ## Streaming
 This library uses streaming apis ([RxJava 2](https://github.com/ReactiveX/RxJava)) to ensure efficiency, close resources automatically, and to implement concurrency concisely and efficiently.
 
