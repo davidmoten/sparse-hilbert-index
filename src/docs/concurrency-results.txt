@@ -71,3 +71,108 @@ WithStats [elapsedMs=3777, recordsFound=715927, recordsRead=797684, hitRatio=0.8
 WithStats [elapsedMs=191, recordsFound=4992, recordsRead=12330, hitRatio=0.4049, bytesRead=801645, timeToFirstByteMsTotal=87, timeToFirstByteMsAverage=21.7500, chunksRead=4]
 
 
+From EC2 t2.large:
+
+Bounds [mins=[-34.06, 150.86, 1.543308382E12], maxes=[-33.68, 151.34, 1.543311982E12]]
+WithStats [elapsedMs=147, recordsFound=2389, recordsRead=3347, hitRatio=0.7138, bytesRead=394629, timeToFirstByteMsTotal=22, timeToFirstByteMsAverage=22.0000, chunksRead=1]
+WithStats [elapsedMs=110, recordsFound=2389, recordsRead=3347, hitRatio=0.7138, bytesRead=390738, timeToFirstByteMsTotal=56, timeToFirstByteMsAverage=56.0000, chunksRead=1]
+WithStats [elapsedMs=64, recordsFound=2389, recordsRead=3347, hitRatio=0.7138, bytesRead=390738, timeToFirstByteMsTotal=39, timeToFirstByteMsAverage=39.0000, chunksRead=1]
+WithStats [elapsedMs=55, recordsFound=2389, recordsRead=3347, hitRatio=0.7138, bytesRead=390738, timeToFirstByteMsTotal=30, timeToFirstByteMsAverage=30.0000, chunksRead=1]
+WithStats [elapsedMs=53, recordsFound=2389, recordsRead=3347, hitRatio=0.7138, bytesRead=390738, timeToFirstByteMsTotal=30, timeToFirstByteMsAverage=30.0000, chunksRead=1]
+WithStats [elapsedMs=64, recordsFound=2389, recordsRead=3347, hitRatio=0.7138, bytesRead=390738, timeToFirstByteMsTotal=31, timeToFirstByteMsAverage=31.0000, chunksRead=1]
+WithStats [elapsedMs=57, recordsFound=2389, recordsRead=3347, hitRatio=0.7138, bytesRead=390738, timeToFirstByteMsTotal=26, timeToFirstByteMsAverage=26.0000, chunksRead=1]
+WithStats [elapsedMs=55, recordsFound=2389, recordsRead=3347, hitRatio=0.7138, bytesRead=390738, timeToFirstByteMsTotal=32, timeToFirstByteMsAverage=32.0000, chunksRead=1]
+WithStats [elapsedMs=59, recordsFound=2389, recordsRead=3347, hitRatio=0.7138, bytesRead=390738, timeToFirstByteMsTotal=35, timeToFirstByteMsAverage=35.0000, chunksRead=1]
+Bounds [mins=[-34.06, 150.86, 1.543265182E12], maxes=[-33.68, 151.34, 1.54335934E12]]
+WithStats [elapsedMs=1349, recordsFound=36940, recordsRead=67293, hitRatio=0.5489, bytesRead=102957, timeToFirstByteMsTotal=982, timeToFirstByteMsAverage=26.5405, chunksRead=37]
+WithStats [elapsedMs=757, recordsFound=36940, recordsRead=67293, hitRatio=0.5489, bytesRead=103802, timeToFirstByteMsTotal=976, timeToFirstByteMsAverage=26.3784, chunksRead=37]
+WithStats [elapsedMs=559, recordsFound=36940, recordsRead=67293, hitRatio=0.5489, bytesRead=102957, timeToFirstByteMsTotal=1252, timeToFirstByteMsAverage=33.8378, chunksRead=37]
+WithStats [elapsedMs=457, recordsFound=36940, recordsRead=67293, hitRatio=0.5489, bytesRead=852093, timeToFirstByteMsTotal=1859, timeToFirstByteMsAverage=50.2432, chunksRead=37]
+WithStats [elapsedMs=480, recordsFound=36940, recordsRead=67293, hitRatio=0.5489, bytesRead=433709, timeToFirstByteMsTotal=3017, timeToFirstByteMsAverage=81.5405, chunksRead=37]
+WithStats [elapsedMs=454, recordsFound=36940, recordsRead=67293, hitRatio=0.5489, bytesRead=852093, timeToFirstByteMsTotal=3504, timeToFirstByteMsAverage=94.7027, chunksRead=37]
+WithStats [elapsedMs=419, recordsFound=36940, recordsRead=67293, hitRatio=0.5489, bytesRead=852093, timeToFirstByteMsTotal=4979, timeToFirstByteMsAverage=134.5676, chunksRead=37]
+WithStats [elapsedMs=373, recordsFound=36940, recordsRead=67293, hitRatio=0.5489, bytesRead=852093, timeToFirstByteMsTotal=5434, timeToFirstByteMsAverage=146.8649, chunksRead=37]
+WithStats [elapsedMs=799, recordsFound=36940, recordsRead=67293, hitRatio=0.5489, bytesRead=390738, timeToFirstByteMsTotal=4550, timeToFirstByteMsAverage=122.9730, chunksRead=37]
+Bounds [mins=[-29.5, 150.0, 1.543308382E12], maxes=[-24.9, 158.0, 1.543311982E12]]
+WithStats [elapsedMs=1363, recordsFound=123858, recordsRead=159630, hitRatio=0.7759, bytesRead=59986, timeToFirstByteMsTotal=416, timeToFirstByteMsAverage=16.0000, chunksRead=26]
+WithStats [elapsedMs=778, recordsFound=123858, recordsRead=159630, hitRatio=0.7759, bytesRead=131018, timeToFirstByteMsTotal=448, timeToFirstByteMsAverage=17.2308, chunksRead=26]
+WithStats [elapsedMs=680, recordsFound=123858, recordsRead=159630, hitRatio=0.7759, bytesRead=59986, timeToFirstByteMsTotal=579, timeToFirstByteMsAverage=22.2692, chunksRead=26]
+WithStats [elapsedMs=565, recordsFound=123858, recordsRead=159630, hitRatio=0.7759, bytesRead=3176017, timeToFirstByteMsTotal=815, timeToFirstByteMsAverage=31.3462, chunksRead=26]
+WithStats [elapsedMs=600, recordsFound=123858, recordsRead=159630, hitRatio=0.7759, bytesRead=3176017, timeToFirstByteMsTotal=771, timeToFirstByteMsAverage=29.6538, chunksRead=26]
+WithStats [elapsedMs=597, recordsFound=123858, recordsRead=159630, hitRatio=0.7759, bytesRead=3177540, timeToFirstByteMsTotal=1868, timeToFirstByteMsAverage=71.8462, chunksRead=26]
+WithStats [elapsedMs=549, recordsFound=123858, recordsRead=159630, hitRatio=0.7759, bytesRead=3176017, timeToFirstByteMsTotal=2223, timeToFirstByteMsAverage=85.5000, chunksRead=26]
+WithStats [elapsedMs=527, recordsFound=123858, recordsRead=159630, hitRatio=0.7759, bytesRead=3175764, timeToFirstByteMsTotal=2680, timeToFirstByteMsAverage=103.0769, chunksRead=26]
+WithStats [elapsedMs=533, recordsFound=123858, recordsRead=159630, hitRatio=0.7759, bytesRead=3176017, timeToFirstByteMsTotal=2234, timeToFirstByteMsAverage=85.9231, chunksRead=26]
+Bounds [mins=[-29.0, 137.3, 1.543308382E12], maxes=[-9.481, 155.47, 1.543311982E12]]
+WithStats [elapsedMs=5428, recordsFound=715927, recordsRead=797684, hitRatio=0.8975, bytesRead=155181, timeToFirstByteMsTotal=1361, timeToFirstByteMsAverage=19.4429, chunksRead=70]
+WithStats [elapsedMs=3040, recordsFound=715927, recordsRead=797684, hitRatio=0.8975, bytesRead=155181, timeToFirstByteMsTotal=1447, timeToFirstByteMsAverage=20.6714, chunksRead=70]
+WithStats [elapsedMs=3021, recordsFound=715927, recordsRead=797684, hitRatio=0.8975, bytesRead=155181, timeToFirstByteMsTotal=2305, timeToFirstByteMsAverage=32.9286, chunksRead=70]
+WithStats [elapsedMs=2678, recordsFound=715927, recordsRead=797684, hitRatio=0.8975, bytesRead=15056427, timeToFirstByteMsTotal=2247, timeToFirstByteMsAverage=32.1000, chunksRead=70]
+WithStats [elapsedMs=2734, recordsFound=715927, recordsRead=797684, hitRatio=0.8975, bytesRead=15056427, timeToFirstByteMsTotal=2796, timeToFirstByteMsAverage=39.9429, chunksRead=70]
+WithStats [elapsedMs=2739, recordsFound=715927, recordsRead=797684, hitRatio=0.8975, bytesRead=15056427, timeToFirstByteMsTotal=3474, timeToFirstByteMsAverage=49.6286, chunksRead=70]
+WithStats [elapsedMs=2824, recordsFound=715927, recordsRead=797684, hitRatio=0.8975, bytesRead=15058795, timeToFirstByteMsTotal=10691, timeToFirstByteMsAverage=152.7286, chunksRead=70]
+WithStats [elapsedMs=2693, recordsFound=715927, recordsRead=797684, hitRatio=0.8975, bytesRead=15056427, timeToFirstByteMsTotal=12830, timeToFirstByteMsAverage=183.2857, chunksRead=70]
+WithStats [elapsedMs=2711, recordsFound=715927, recordsRead=797684, hitRatio=0.8975, bytesRead=15058795, timeToFirstByteMsTotal=23670, timeToFirstByteMsAverage=338.1429, chunksRead=70]
+Bounds [mins=[-44.0, 143.491, 1.543308382E12], maxes=[-39.389, 149.5, 1.543311982E12]]
+WithStats [elapsedMs=104, recordsFound=4992, recordsRead=12330, hitRatio=0.4049, bytesRead=245773, timeToFirstByteMsTotal=38, timeToFirstByteMsAverage=9.5000, chunksRead=4]
+WithStats [elapsedMs=64, recordsFound=4992, recordsRead=12330, hitRatio=0.4049, bytesRead=245773, timeToFirstByteMsTotal=41, timeToFirstByteMsAverage=10.2500, chunksRead=4]
+WithStats [elapsedMs=67, recordsFound=4992, recordsRead=12330, hitRatio=0.4049, bytesRead=799277, timeToFirstByteMsTotal=75, timeToFirstByteMsAverage=18.7500, chunksRead=4]
+WithStats [elapsedMs=66, recordsFound=4992, recordsRead=12330, hitRatio=0.4049, bytesRead=801645, timeToFirstByteMsTotal=74, timeToFirstByteMsAverage=18.5000, chunksRead=4]
+WithStats [elapsedMs=70, recordsFound=4992, recordsRead=12330, hitRatio=0.4049, bytesRead=243282, timeToFirstByteMsTotal=109, timeToFirstByteMsAverage=27.2500, chunksRead=4]
+WithStats [elapsedMs=52, recordsFound=4992, recordsRead=12330, hitRatio=0.4049, bytesRead=802490, timeToFirstByteMsTotal=62, timeToFirstByteMsAverage=15.5000, chunksRead=4]
+WithStats [elapsedMs=76, recordsFound=4992, recordsRead=12330, hitRatio=0.4049, bytesRead=802490, timeToFirstByteMsTotal=72, timeToFirstByteMsAverage=18.0000, chunksRead=4]
+WithStats [elapsedMs=59, recordsFound=4992, recordsRead=12330, hitRatio=0.4049, bytesRead=801645, timeToFirstByteMsTotal=65, timeToFirstByteMsAverage=16.2500, chunksRead=4]
+WithStats [elapsedMs=63, recordsFound=4992, recordsRead=12330, hitRatio=0.4049, bytesRead=802490, timeToFirstByteMsTotal=81, timeToFirstByteMsAverage=20.2500, chunksRead=4]
+
+
+
+Bounds [mins=[-34.06, 150.86, 1.543308382E12], maxes=[-33.68, 151.34, 1.543311982E12]]
+142
+117
+90
+70
+75
+93
+91
+76
+80
+Bounds [mins=[-34.06, 150.86, 1.543265182E12], maxes=[-33.68, 151.34, 1.54335934E12]]
+2030
+976
+641
+540
+381
+445
+417
+352
+424
+Bounds [mins=[-29.5, 150.0, 1.543308382E12], maxes=[-24.9, 158.0, 1.543311982E12]]
+1665
+1007
+686
+548
+623
+618
+539
+515
+637
+Bounds [mins=[-29.0, 137.3, 1.543308382E12], maxes=[-9.481, 155.47, 1.543311982E12]]
+6256
+3394
+2664
+2622
+2774
+2672
+2719
+2607
+2605
+Bounds [mins=[-44.0, 143.491, 1.543308382E12], maxes=[-39.389, 149.5, 1.543311982E12]]
+130
+106
+79
+73
+83
+73
+77
+80
+96
