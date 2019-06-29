@@ -170,6 +170,22 @@ public class IndexTest {
         List<WithStats<String>> list = index //
                 .search(SIMPLE_BOUNDS_WHOLE_DOMAIN) //
                 .withStats() //
+                .concurrency(1) //
+                .maxRanges(0) //
+                .file(OUTPUT) //
+                .toList() //
+                .blockingGet();
+        list.forEach(System.out::println);
+        assertEquals(4, list.size());
+    }
+    
+    @Test
+    public void testSimpleSearchWithStatsConcurrency2() throws FileNotFoundException, IOException {
+        Index<String> index = createSimpleIndex();
+        List<WithStats<String>> list = index //
+                .search(SIMPLE_BOUNDS_WHOLE_DOMAIN) //
+                .withStats() //
+                .concurrency(2) //
                 .maxRanges(0) //
                 .file(OUTPUT) //
                 .toList() //
@@ -532,6 +548,11 @@ public class IndexTest {
         Bounds bounds = createQueryBounds(Math.round(index.mins()[2]),
                 Math.round(index.maxes()[2]));
         index.search(bounds).concurrency(0);
+    }
+    
+    @Test
+    public void testWithStatsAdvanced() {
+        
     }
 
     @Test
