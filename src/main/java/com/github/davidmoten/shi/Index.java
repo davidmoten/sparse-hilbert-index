@@ -746,10 +746,6 @@ public final class Index<T> {
             this.b = b;
         }
 
-        public SearchBuilderWithStats withStats() {
-            return new SearchBuilderWithStats(b);
-        }
-
         public SearchBuilderWithStatsAdvanced maxRanges(int maxRanges) {
             b.maxRanges = maxRanges;
             return this;

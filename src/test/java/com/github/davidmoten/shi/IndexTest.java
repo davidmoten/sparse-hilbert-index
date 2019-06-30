@@ -178,7 +178,7 @@ public class IndexTest {
         list.forEach(System.out::println);
         assertEquals(4, list.size());
     }
-    
+
     @Test
     public void testSimpleSearchWithStatsConcurrency2() throws FileNotFoundException, IOException {
         Index<String> index = createSimpleIndex();
@@ -549,7 +549,7 @@ public class IndexTest {
                 Math.round(index.maxes()[2]));
         index.search(bounds).concurrency(0);
     }
-    
+
     @Test
     public void testWithStatsAdvanced() throws IOException {
         Index<byte[]> index = createIndex();
@@ -564,11 +564,49 @@ public class IndexTest {
                         .advanced() //
                         .maxRanges(1000) //
                         .rangesBufferSize(1000) //
-                        .file(OUTPUT) //
+                        .file(OUTPUT.getAbsolutePath()) //
                         .flatMap(x -> x) //
                         .count() //
                         .blockingGet() //
                         .intValue());
+    }
+
+    @Test
+    public void testWithStatsAdvancedWithUrl() throws IOException {
+        Index<byte[]> index = createIndex();
+        Bounds bounds = createQueryBounds(Math.round(index.mins()[2]),
+                Math.round(index.maxes()[2]));
+        // just check that at least one was found
+        // using the file url, the Range parameter is not honoured
+        assertTrue(index //
+                .search(bounds) //
+                .concurrency(1) //
+                .withStats() //
+                .advanced() //
+                .maxRanges(1000) //
+                .rangesBufferSize(1000) //
+                .url(OUTPUT.toURI().toURL().toString()) //
+                .flatMap(x -> x) //
+                .count() //
+                .blockingGet() //
+                .intValue() > 0);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void testWithStatsAdvancedWithBadUrl() throws IOException {
+        Index<byte[]> index = createIndex();
+        Bounds bounds = createQueryBounds(Math.round(index.mins()[2]),
+                Math.round(index.maxes()[2]));
+        // just check that at least one was found
+        // using the file url, the Range parameter is not honoured
+        index //
+                .search(bounds) //
+                .concurrency(1) //
+                .withStats() //
+                .advanced() //
+                .maxRanges(1000) //
+                .rangesBufferSize(1000) //
+                .url("zzzz@@");
     }
 
     @Test
