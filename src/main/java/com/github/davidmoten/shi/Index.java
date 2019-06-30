@@ -640,8 +640,8 @@ public final class Index<T> {
             this.b = b;
         }
 
-        public SearchBuilderWithStats withStats() {
-            return new SearchBuilderWithStats(b);
+        public SearchBuilderWithStatsAdvanced withStats() {
+            return new SearchBuilderWithStatsAdvanced(b);
         }
 
         public SearchBuilderAdvanced maxRanges(int maxRanges) {
