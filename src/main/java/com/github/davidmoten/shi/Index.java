@@ -619,6 +619,11 @@ public final class Index<T> {
             }
         }
 
+        /**
+         * Specify an HTTP url to use (server must support Range HTTP header)
+         * @param url address
+         * @return stream 
+         */
         public Flowable<T> url(String url) {
             try {
                 return url(new URL(url));
@@ -627,6 +632,11 @@ public final class Index<T> {
             }
         }
 
+        /**
+         * Specify an HTTP url to use (server must support Range HTTP header)
+         * @param url address
+         * @return stream
+         */
         public Flowable<T> url(URL url) {
             return inputStreamFactory(inputStreamForRange(url));
         }
@@ -667,6 +677,11 @@ public final class Index<T> {
             return searchAdvanced(b.bounds, inputStreamFactory, b.maxRanges, b.rangesBufferSize);
         }
 
+        /**
+         * Specify an HTTP url to use (server must support Range HTTP header)
+         * @param url address
+         * @return stream of streams
+         */
         public Flowable<Flowable<T>> url(String url) {
             try {
                 return url(new URL(url));
@@ -675,6 +690,11 @@ public final class Index<T> {
             }
         }
 
+        /**
+         * Specify an HTTP url to use (server must support Range HTTP header)
+         * @param url address
+         * @return stream of streams
+         */
         public Flowable<Flowable<T>> url(URL url) {
             return inputStreamFactory(inputStreamForRange(url));
         }

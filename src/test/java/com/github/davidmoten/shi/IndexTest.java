@@ -570,6 +570,68 @@ public class IndexTest {
                         .blockingGet() //
                         .intValue());
     }
+    
+    @Test
+    public void testAdvancedWithOptions() throws IOException {
+        Index<byte[]> index = createIndex();
+        Bounds bounds = createQueryBounds(Math.round(index.mins()[2]),
+                Math.round(index.maxes()[2]));
+        int expectedFound = countInside(bounds);
+        assertEquals(expectedFound, //
+                index //
+                        .search(bounds) //
+                        .concurrency(1) //
+                        .advanced() //
+                        .maxRanges(1000) //
+                        .rangesBufferSize(1000) //
+                        .file(OUTPUT.getAbsolutePath()) //
+                        .flatMap(x -> x) //
+                        .count() //
+                        .blockingGet() //
+                        .intValue());
+    }
+    
+    @Test
+    public void testAdvancedWithUrl() throws IOException {
+        Index<byte[]> index = createIndex();
+        Bounds bounds = createQueryBounds(Math.round(index.mins()[2]),
+                Math.round(index.maxes()[2]));
+        // just check that at least one was found
+        // using the file url, the Range parameter is not honoured
+        assertTrue(
+                index //
+                        .search(bounds) //
+                        .concurrency(1) //
+                        .advanced() //
+                        .maxRanges(1000) //
+                        .rangesBufferSize(1000) //
+                        .url(OUTPUT.toURI().toURL().toString()) //
+                        .flatMap(x -> x) //
+                        .count() //
+                        .blockingGet() //
+                        .intValue() > 0);
+    }
+    
+    @Test
+    public void testSearchAdvancedWithStats() throws IOException {
+        Index<byte[]> index = createIndex();
+        Bounds bounds = createQueryBounds(Math.round(index.mins()[2]),
+                Math.round(index.maxes()[2]));
+        int expectedFound = countInside(bounds);
+        assertEquals(expectedFound + 1, //
+                index //
+                        .search(bounds) //
+                        .concurrency(1) //
+                        .advanced() //
+                        .withStats() //
+                        .maxRanges(1000) //
+                        .rangesBufferSize(1000) //
+                        .file(OUTPUT.getAbsolutePath()) //
+                        .flatMap(x -> x) //
+                        .count() //
+                        .blockingGet() //
+                        .intValue());
+    }
 
     @Test
     public void testWithStatsAdvancedWithUrl() throws IOException {
