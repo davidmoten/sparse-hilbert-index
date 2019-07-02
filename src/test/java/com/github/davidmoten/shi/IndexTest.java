@@ -43,6 +43,7 @@ import io.reactivex.Flowable;
 
 public class IndexTest {
 
+    private static final String BAD_URL = "zzzz@@";
     private static final Bounds SIMPLE_BOUNDS_WHOLE_DOMAIN = Bounds
             .create(new double[] { 3, 1, 50 }, new double[] { 11, 8, 650 });
     private static final Serializer<String> SIMPLE_SERIALIZER = Serializer.linesUtf8();
@@ -655,6 +656,22 @@ public class IndexTest {
     }
 
     @Test(expected = RuntimeException.class)
+    public void testAdvancedWithBadUrl() throws IOException {
+        Index<byte[]> index = createIndex();
+        Bounds bounds = createQueryBounds(Math.round(index.mins()[2]),
+                Math.round(index.maxes()[2]));
+        // just check that at least one was found
+        // using the file url, the Range parameter is not honoured
+        index //
+                .search(bounds) //
+                .concurrency(1) //
+                .advanced() //
+                .maxRanges(1000) //
+                .rangesBufferSize(1000) //
+                .url(BAD_URL);
+    }
+    
+    @Test(expected = RuntimeException.class)
     public void testWithStatsAdvancedWithBadUrl() throws IOException {
         Index<byte[]> index = createIndex();
         Bounds bounds = createQueryBounds(Math.round(index.mins()[2]),
@@ -668,7 +685,7 @@ public class IndexTest {
                 .advanced() //
                 .maxRanges(1000) //
                 .rangesBufferSize(1000) //
-                .url("zzzz@@");
+                .url(BAD_URL);
     }
 
     @Test
