@@ -1,4 +1,4 @@
-package com.github.davidmoten.shi.fixes;
+package com.github.davidmoten.shi;
 
 import java.nio.ByteBuffer;
 
