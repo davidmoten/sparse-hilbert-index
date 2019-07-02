@@ -196,6 +196,7 @@ Search:
 ```java
 long count = index
   .search(new double[] {-19, 110, 1557878400000}, new double[] {-21, 116, 1557878399000})
+  .concurrency(4)
   .file("sorted.csv")
   .count();
 ```
@@ -235,6 +236,8 @@ Query elapsed times (ms) from a t2.large instance in EC2:
 | 32          | 91     | 417          | 539      | 2719 | 77  |
 | 64          | 76     | 352          | 515      | 2607 | 80  |
 | 128         | 80     | 424          | 637      | 2605 | 96  |
+
+Querying from within AWS (EC2) is faster. The optimal concurrency level seems to be about 4 for this dataset and index. Bear in mind that the instance type chosen has "low to moderate network bandwidth". Would be interesting to do the test on 5GB or 10GB network connections available with other instance types.
 
 ## Streaming
 This library uses streaming apis ([RxJava 2](https://github.com/ReactiveX/RxJava)) to ensure efficiency, close resources automatically, and to implement concurrency concisely and efficiently.
