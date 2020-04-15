@@ -22,7 +22,7 @@ Querying spatio-temporal data is potentially a terrific application for a Hilber
 Critical to the creation of this library were these libraries by the same author:
 
 * [big-sorter](https://github.com/davidmoten/big-sorter)
-* [hilbert-curve](https://github.com/davidmoten/sparse-hilbert-curve)
+* [hilbert-curve](https://github.com/davidmoten/hilbert-curve)
 
 **Features**
 * sorts input file based on hilbert index (sorts arbitrarily large files using [big-sorter](https://github.com/davidmoten/big-sorter))
