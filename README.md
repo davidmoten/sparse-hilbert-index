@@ -1,5 +1,5 @@
 # sparse-hilbert-index
-<a href="https://travis-ci.org/davidmoten/sparse-hilbert-index"><img src="https://travis-ci.org/davidmoten/sparse-hilbert-index.svg"/></a><br/>
+<a href="https://github.com/davidmoten/sparse-hilbert-index/actions/workflows/ci.yml"><img src="https://github.com/davidmoten/sparse-hilbert-index/actions/workflows/ci.yml/badge.svg"/></a><br/>
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/sparse-hilbert-index/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.github.davidmoten/sparse-hilbert-index)<br/>
 [![codecov](https://codecov.io/gh/davidmoten/sparse-hilbert-index/branch/master/graph/badge.svg)](https://codecov.io/gh/davidmoten/sparse-hilbert-index)<br/>
 
