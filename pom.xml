@@ -23,7 +23,7 @@
         <jmh.version>1.33</jmh.version>
 
         <checkstyle.version>3.1.1</checkstyle.version>
-        <javadoc.version>3.2.0</javadoc.version>
+        <javadoc.version>3.3.2</javadoc.version>
         <pmd.version>3.14.0</pmd.version>
         <project.info.version>3.1.1</project.info.version>
         <jxr.version>3.0.0</jxr.version>
@@ -116,7 +116,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
-            <version>1.7</version>
+            <version>1.9.0</version>
             <scope>test</scope>
         </dependency>
 
