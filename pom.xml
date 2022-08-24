@@ -22,7 +22,7 @@
         <rxjava.version>2.2.21</rxjava.version>
         <jmh.version>1.35</jmh.version>
 
-        <checkstyle.version>3.1.2</checkstyle.version>
+        <checkstyle.version>3.2.0</checkstyle.version>
         <javadoc.version>3.4.1</javadoc.version>
         <pmd.version>3.17.0</pmd.version>
         <project.info.version>3.1.1</project.info.version>
