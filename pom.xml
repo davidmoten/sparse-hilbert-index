@@ -78,7 +78,7 @@
         <dependency>
             <groupId>com.github.davidmoten</groupId>
             <artifactId>big-sorter</artifactId>
-            <version>0.1.21</version>
+            <version>0.1.22</version>
         </dependency>
 
         <dependency>
