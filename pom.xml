@@ -8,7 +8,7 @@
         <version>0.1</version>
     </parent>
     <artifactId>sparse-hilbert-index</artifactId>
-    <version>0.1.11-SNAPSHOT</version>
+    <version>0.1.11</version>
     <name>${project.artifactId}</name>
     <description>Creates and searches hilbert indexed sorted files</description>
     <packaging>jar</packaging>
@@ -70,7 +70,7 @@
         <connection>scm:git:https://github.com/davidmoten/sparse-hilbert-index.git</connection>
         <developerConnection>scm:git:https://github.com/davidmoten/sparse-hilbert-index.git</developerConnection>
         <url>scm:git:https://github.com:davidmoten/sparse-hilbert-index.git</url>
-        <tag>HEAD</tag>
+        <tag>0.1.11</tag>
     </scm>
 
     <dependencies>
