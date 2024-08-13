@@ -30,7 +30,7 @@
         <taglist.version>3.1.0</taglist.version>
         <m3.site.version>3.12.1</m3.site.version>
         <changelog.version>2.2</changelog.version>
-        <exec.version>3.4.0</exec.version>
+        <exec.version>3.4.1</exec.version>
     </properties>
 
     <licenses>
